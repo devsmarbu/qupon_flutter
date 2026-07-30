@@ -1,0 +1,256 @@
+{
+  "@@locale": "ar",
+  "appTitle": "كوبون",
+  "back": "رجوع",
+  "beautyAndSpa": "التجميل والسبا",
+  "offersAvailable": "{count} عرض متاح",
+  "@offersAvailable": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "locationDoha": "٨٧٤ شارع القوافل، (فندق أجنحة الضيافة) الدوحة",
+  "offerDescription": "ليلة واحدة لشخصين بالغين وطفلين في غرفة ديلوكس",
+  "viewDetails": "عرض التفاصيل",
+  "qarPrice": "{price} ر.ق",
+  "@qarPrice": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "timeLeft": "متبقي {days} يوم و {hours} ساعة و {minutes} دقيقة",
+  "@timeLeft": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      },
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "offerTitle": "أبو ظبي: ليلة واحدة لشخصين شاملة الإفطار...",
+  "drawerHome": "الرئيسية",
+  "drawerOffers": "عروضي",
+  "drawerCart": "سلة المشتريات",
+  "drawerProfile": "الملف الشخصي",
+  "drawerSettings": "الإعدادات",
+  "drawerLanguage": "اللغة",
+  "toggleLanguage": "English",
+  "continueShopping": "الاستمرار في التسوق",
+  "shoppingCartTitle": "عربة التسوق",
+  "cartEmptyTitle": "عربتك فارغة",
+  "cartEmptySubtitle": "تصفح الصفقات وأضف الكوبونات إلى عربتك.",
+  "browseDeals": "تصفح الصفقات",
+  "pastDealsTitle": "الصفقات السابقة",
+  "pastDealsSubtitle": "تصفح العروض منتهية الصلاحية واطلب كوبوناتك المفضلة للعودة.",
+  "pastDealsCount": "{count} صفقات سابقة",
+  "@pastDealsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "expired": "منتهي الصلاحية",
+  "requestCoupon": "اطلب الكوبون",
+  "orderSummary": "ملخص الطلب",
+  "subtotal": "المجموع الفرعي ({count})",
+  "@subtotal": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "totalSavings": "إجمالي التوفير",
+  "totalLabel": "الإجمالي",
+  "giftThisOrder": "إهداء هذا الطلب",
+  "giftSubtitle": "أرسل تفاصيل الكوبون لشخص آخر عبر الرسائل النصية القصيرة.",
+  "payVia": "الدفع عن طريق",
+  "stripe": "سترايب",
+  "wallet": "المحفظة",
+  "walletBalance": "الرصيد: {balance} ر.ق",
+  "@walletBalance": {
+    "placeholders": {
+      "balance": {
+        "type": "String"
+      }
+    }
+  },
+  "skipCash": "سكيب كاش",
+  "checkoutLabel": "الدفع",
+  "checkoutWithPrice": "الدفع · {price} ر.ق",
+  "@checkoutWithPrice": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "youSave": "وفرت {amount} ر.ق",
+  "@youSave": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "checkoutSuccessTitle": "تم تقديم الطلب بنجاح!",
+  "checkoutSuccessMessage": "تم إرسال تفاصيل الكوبون الخاص بك. شكراً لتسوقك مع كوبون!",
+  "goBackHome": "العودة للرئيسية",
+  "welcomeTitle": "مرحباً",
+  "welcomeSubtitle": "ابدأ باستخدام حسابك",
+  "createAccount": "إنشاء حساب",
+  "login": "تسجيل الدخول",
+  "byContinuing": "بالاستمرار، فإنك توافق على ",
+  "termsOfService": "شروط الخدمة",
+  "and": " و ",
+  "privacyPolicy": "سياسة الخصوصية",
+  "welcomeBack": "مرحباً بعودتك",
+  "emailLabel": "البريد الإلكتروني",
+  "emailHint": "yourname@domain.com",
+  "passwordLabel": "كلمة المرور",
+  "passwordHint": "........",
+  "forgotPassword": "نسيت كلمة المرور؟",
+  "dontHaveAccount": "ليس لديك حساب؟ ",
+  "signUp": "سجل الآن",
+  "orLoginWith": "أو سجل الدخول عبر",
+  "google": "جوجل",
+  "facebook": "فيسبوك",
+  "createAnAccount": "إنشاء حساب",
+  "fullNameLabel": "الاسم الكامل",
+  "fullNameHint": "جون دو",
+  "emailHintRegister": "john@example.com",
+  "passwordHintRegister": "........",
+  "phoneNumberLabel": "رقم الهاتف",
+  "phoneNumberHint": "٥٥٥٥ ٥٥٥٥",
+  "confirmPasswordLabel": "تأكيد كلمة المرور",
+  "confirmPasswordHint": "........",
+  "registerButton": "تسجيل",
+  "alreadyHaveAccount": "لديك حساب بالفعل؟ ",
+  "backToStorefront": "العودة إلى المتجر",
+  "errorEmailEmpty": "البريد الإلكتروني لا يمكن أن يكون فارغاً",
+  "errorInvalidEmail": "الرجاء إدخال بريد إلكتروني صحيح",
+  "errorPasswordEmpty": "كلمة المرور لا يمكن أن تكون فارغة",
+  "errorPasswordLength": "كلمة المرور يجب أن تكون 6 أحرف على الأقل",
+  "errorFullNameEmpty": "الاسم الكامل لا يمكن أن يكون فارغاً",
+  "errorPhoneEmpty": "رقم الهاتف لا يمكن أن يكون فارغاً",
+  "errorInvalidQatarPhone": "الرجاء إدخال رقم هاتف قطري صحيح مكون من 8 أرقام",
+  "errorInvalidPhoneWithCountryCode": "الرجاء إدخال رقم هاتف محمول صحيح مع رمز الدولة",
+  "errorPasswordsDoNotMatch": "كلمتا المرور غير متطابقتين",
+  "errorOtpEmpty": "رمز التحقق لا يمكن أن يكون فارغاً",
+  "errorOtpLength": "رمز التحقق يجب أن يكون مكوناً من 6 أرقام بالضبط",
+  "errorGoogleSignInNotConfigured": "تسجيل الدخول باستخدام جوجل غير مهيأ بعد.",
+  "errorFacebookSignInNotConfigured": "تسجيل الدخول باستخدام فيسبوك غير مهيأ بعد.",
+  "successRegistration": "تم التسجيل بنجاح! الرجاء التحقق من رقم الهاتف الخاص بك.",
+  "successOtpVerified": "تم التحقق من رمز التحقق بنجاح! الرجاء تسجيل الدخول.",
+  "successOtpResent": "تم إعادة إرسال رمز التحقق بنجاح!",
+  "successResetLinkSent": "تم إرسال رابط إعادة التعيين بنجاح!",
+  "errorFailedToRegister": "فشل التسجيل. أرجع الخادم الرمز {code}",
+  "@errorFailedToRegister": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "errorFailedToLogin": "فشل تسجيل الدخول. أرجع الخادم الرمز {code}",
+  "@errorFailedToLogin": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "errorFailedToVerifyOtp": "فشل التحقق من رمز التحقق. أرجع الخادم الرمز {code}",
+  "@errorFailedToVerifyOtp": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "errorFailedToResendOtp": "فشل إعادة إرسال رمز التحقق. أرجع الخادم الرمز {code}",
+  "@errorFailedToResendOtp": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "errorFailedToSendResetLink": "فشل إرسال رابط إعادة التعيين. أرجع الخادم الرمز {code}",
+  "@errorFailedToSendResetLink": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "errorUnknownNetwork": "حدث خطأ غير معروف في الشبكة",
+  "errorNetworkCategoryOffers": "خطأ في الشبكة أثناء جلب عروض الفئة",
+  "errorEmptyCategoryResponse": "استجابة فارغة من واجهة برمجة التطبيقات للفئة",
+  "errorEmptyHomeResponse": "استجابة فارغة من واجهة برمجة التطبيقات للرئيسية",
+  "successSignIn": "تم تسجيل الدخول بنجاح كـ {email}",
+  "@successSignIn": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardTitle": "لوحة التحكم الخاصة بي",
+  "dashboardSubtitle": "عرض {orders} طلبات · {coupons} كوبونات · {period}",
+  "@dashboardSubtitle": {
+    "placeholders": {
+      "orders": {
+        "type": "int"
+      },
+      "coupons": {
+        "type": "int"
+      },
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "searchHint": "البحث في الطلبات، الكوبونات...",
+  "filtersBtn": "تصفية",
+  "filterTitle": "فلتر",
+  "filterDateRange": "تصفية حسب النطاق الزمني",
+  "periodAllTime": "كل الوقت",
+  "periodToday": "اليوم",
+  "periodLast7Days": "آخر 7 أيام",
+  "periodLast30Days": "آخر 30 يوم",
+  "periodLast90Days": "آخر 90 يوم",
+  "periodThisMonth": "هذا الشهر",
+  "periodThisYear": "هذه السنة",
+  "customDateRange": "نطاق تاريخ مخصص",
+  "startDate": "تاريخ البدء",
+  "endDate": "تاريخ الانتهاء",
+  "filterStatus": "تصفية حسب الحالة",
+  "statusAll": "الكل",
+  "statusActive": "نشط",
+  "statusExpired": "منتهي الصلاحية",
+  "statusPending": "قيد الانتظار",
+  "filterVendor": "تصفية حسب البائع",
+  "selectVendor": "اختر البائع",
+  "applyFilters": "تطبيق الفلاتر",
+  "resetFilters": "إعادة ضبط الفلاتر",
+  "totalSpent": "إجمالي الإنفاق",
+  "couponsUsed": "الكوبونات المستخدمة",
+  "totalSaved": "إجمالي المدخرات",
+  "activeCoupons": "الكوبونات النشطة",
+  "myOrders": "طلباتي",
+  "seeAll": "عرض الكل",
+  "groceryStore": "متجر البقالة",
+  "couponRedeemed": "تم استخدام الكوبون",
+  "coffeeShop": "مقهى"
+}

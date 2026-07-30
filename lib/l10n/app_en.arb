@@ -1,0 +1,256 @@
+{
+  "@@locale": "en",
+  "appTitle": "Qupon",
+  "back": "Back",
+  "beautyAndSpa": "Beauty & Spa",
+  "offersAvailable": "{count} offers available",
+  "@offersAvailable": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "locationDoha": "874 St Al Qawafell Street, (Al Diyafa Suites Hotel) Doha",
+  "offerDescription": "ONE NIGHT FOR TWO ADULTS AND TWO CHILDREN IN DELUX",
+  "viewDetails": "View Details",
+  "qarPrice": "QAR {price}",
+  "@qarPrice": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "timeLeft": "{days}d {hours}h {minutes}m left",
+  "@timeLeft": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      },
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "offerTitle": "Abu Dhabi: 1 Night for Two with Breakfast...",
+  "drawerHome": "Home",
+  "drawerOffers": "My Offers",
+  "drawerCart": "Cart",
+  "drawerProfile": "Profile",
+  "drawerSettings": "Settings",
+  "drawerLanguage": "Language",
+  "toggleLanguage": "عربي",
+  "continueShopping": "Continue shopping",
+  "shoppingCartTitle": "Shopping Cart",
+  "cartEmptyTitle": "Your cart is empty",
+  "cartEmptySubtitle": "Browse deals and add coupons to your cart.",
+  "browseDeals": "Browse deals",
+  "pastDealsTitle": "Past Deals",
+  "pastDealsSubtitle": "Browse expired offers and request your favourite coupons to come back.",
+  "pastDealsCount": "{count} past deals",
+  "@pastDealsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "expired": "Expired",
+  "requestCoupon": "Request Coupon",
+  "orderSummary": "Order summary",
+  "subtotal": "Subtotal ({count})",
+  "@subtotal": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "totalSavings": "Total savings",
+  "totalLabel": "Total",
+  "giftThisOrder": "Gift this order",
+  "giftSubtitle": "Send the coupon details to someone else by SMS.",
+  "payVia": "Pay via",
+  "stripe": "Stripe",
+  "wallet": "Wallet",
+  "walletBalance": "Balance: QAR {balance}",
+  "@walletBalance": {
+    "placeholders": {
+      "balance": {
+        "type": "String"
+      }
+    }
+  },
+  "skipCash": "SkipCash",
+  "checkoutLabel": "Checkout",
+  "checkoutWithPrice": "Checkout · QAR {price}",
+  "@checkoutWithPrice": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "youSave": "You save QAR {amount}",
+  "@youSave": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "checkoutSuccessTitle": "Order Placed Successfully!",
+  "checkoutSuccessMessage": "Your coupon details have been sent. Thank you for shopping with Qupon!",
+  "goBackHome": "Go Back Home",
+  "welcomeTitle": "Welcome",
+  "welcomeSubtitle": "Get started with your account",
+  "createAccount": "Create Account",
+  "login": "Login",
+  "byContinuing": "By continuing you agree to our ",
+  "termsOfService": "Terms of Service",
+  "and": " and ",
+  "privacyPolicy": "Privacy Policy",
+  "welcomeBack": "Welcome Back",
+  "emailLabel": "Email",
+  "emailHint": "yourname@domain.com",
+  "passwordLabel": "Password",
+  "passwordHint": "........",
+  "forgotPassword": "Forgot Password?",
+  "dontHaveAccount": "Don't have an account? ",
+  "signUp": "Sign up",
+  "orLoginWith": "OR LOGIN WITH",
+  "google": "Google",
+  "facebook": "Facebook",
+  "createAnAccount": "Create an account",
+  "fullNameLabel": "Full Name",
+  "fullNameHint": "John Doe",
+  "emailHintRegister": "john@example.com",
+  "passwordHintRegister": "........",
+  "phoneNumberLabel": "Phone Number",
+  "phoneNumberHint": "5555 5555",
+  "confirmPasswordLabel": "Confirm Password",
+  "confirmPasswordHint": "........",
+  "registerButton": "Register",
+  "alreadyHaveAccount": "Already have an account? ",
+  "backToStorefront": "Back to storefront",
+  "errorEmailEmpty": "Email cannot be empty",
+  "errorInvalidEmail": "Please enter a valid email address",
+  "errorPasswordEmpty": "Password cannot be empty",
+  "errorPasswordLength": "Password must be at least 6 characters",
+  "errorFullNameEmpty": "Full name cannot be empty",
+  "errorPhoneEmpty": "Phone number cannot be empty",
+  "errorInvalidQatarPhone": "Please enter a valid 8-digit mobile number",
+  "errorInvalidPhoneWithCountryCode": "Please enter a valid mobile number with country code",
+  "errorPasswordsDoNotMatch": "Passwords do not match",
+  "errorOtpEmpty": "OTP code cannot be empty",
+  "errorOtpLength": "OTP code must be exactly 6 digits",
+  "errorGoogleSignInNotConfigured": "Google Sign-In is not configured yet.",
+  "errorFacebookSignInNotConfigured": "Facebook Sign-In is not configured yet.",
+  "successRegistration": "Registration successful! Please verify your phone number.",
+  "successOtpVerified": "OTP Verified successfully! Please Sign In.",
+  "successOtpResent": "OTP resent successfully!",
+  "successResetLinkSent": "Reset link sent successfully!",
+  "errorFailedToRegister": "Failed to register. Server returned code {code}",
+  "@errorFailedToRegister": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "errorFailedToLogin": "Failed to login. Server returned code {code}",
+  "@errorFailedToLogin": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "errorFailedToVerifyOtp": "Failed to verify OTP. Server returned code {code}",
+  "@errorFailedToVerifyOtp": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "errorFailedToResendOtp": "Failed to resend OTP. Server returned code {code}",
+  "@errorFailedToResendOtp": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "errorFailedToSendResetLink": "Failed to send reset link. Server returned code {code}",
+  "@errorFailedToSendResetLink": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "errorUnknownNetwork": "Unknown network error occurred",
+  "errorNetworkCategoryOffers": "Network error while fetching category offers",
+  "errorEmptyCategoryResponse": "Empty response from category API",
+  "errorEmptyHomeResponse": "Empty response from home API",
+  "successSignIn": "Successfully signed in as {email}",
+  "@successSignIn": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardTitle": "My Dashboard",
+  "dashboardSubtitle": "Showing {orders} orders · {coupons} coupons · {period}",
+  "@dashboardSubtitle": {
+    "placeholders": {
+      "orders": {
+        "type": "int"
+      },
+      "coupons": {
+        "type": "int"
+      },
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "searchHint": "Search orders, coupons...",
+  "filtersBtn": "Filters",
+  "filterTitle": "Filter",
+  "filterDateRange": "Filter by Date Range",
+  "periodAllTime": "All time",
+  "periodToday": "Today",
+  "periodLast7Days": "Last 7 days",
+  "periodLast30Days": "Last 30 days",
+  "periodLast90Days": "Last 90 days",
+  "periodThisMonth": "This month",
+  "periodThisYear": "This year",
+  "customDateRange": "Custom Date Range",
+  "startDate": "Start date",
+  "endDate": "End date",
+  "filterStatus": "Filter by Status",
+  "statusAll": "All",
+  "statusActive": "Active",
+  "statusExpired": "Expired",
+  "statusPending": "Pending",
+  "filterVendor": "Filter by Vendor",
+  "selectVendor": "Select Vendor",
+  "applyFilters": "Apply Filters",
+  "resetFilters": "Reset Filters",
+  "totalSpent": "Total Spent",
+  "couponsUsed": "Coupons Used",
+  "totalSaved": "Total Saved",
+  "activeCoupons": "Active Coupons",
+  "myOrders": "My Orders",
+  "seeAll": "See All",
+  "groceryStore": "Grocery Store",
+  "couponRedeemed": "Coupon Redeemed",
+  "coffeeShop": "Coffee Shop"
+}

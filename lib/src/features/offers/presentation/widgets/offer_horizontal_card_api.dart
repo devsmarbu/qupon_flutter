@@ -1,0 +1,307 @@
+import 'package:flutter/material.dart';
+import '../../../home/data/models/home_coupon.dart';
+import '../../data/models/offer.dart';
+import '../pages/product_detail_page.dart';
+import '../../../main/presentation/pages/main_page.dart';
+
+/// Horizontal card for the carousel-layout collection sections.
+/// Redesigned to exactly match the premium look in the screenshot.
+class OfferHorizontalCardApi extends StatelessWidget {
+  final HomeCoupon coupon;
+
+  const OfferHorizontalCardApi({super.key, required this.coupon});
+
+  String _getMockImageUrl(HomeCoupon coupon) {
+    final name = coupon.name.toLowerCase();
+    if (name.contains('headset') || name.contains('gadget') || name.contains('tech') || name.contains('wireless')) {
+      return 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&auto=format&fit=crop&q=80';
+    } else if (name.contains('accessory') || name.contains('sleeve') || name.contains('bag') || name.contains('laptop')) {
+      return 'https://images.unsplash.com/photo-1625766763788-95dcce9bf5ac?w=500&auto=format&fit=crop&q=80';
+    } else if (name.contains('meal') || name.contains('burger') || name.contains('food') || name.contains('family')) {
+      return 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=500&auto=format&fit=crop&q=80';
+    } else if (name.contains('clinic') || name.contains('polyclinic') || name.contains('aesthetic') || name.contains('health')) {
+      return 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=500&auto=format&fit=crop&q=80';
+    }
+    // Fallbacks based on category
+    final category = coupon.category.toLowerCase();
+    if (category.contains('elect')) {
+      return 'https://images.unsplash.com/photo-1588508065123-287b28e013da?w=500&auto=format&fit=crop&q=80';
+    } else if (category.contains('food') || category.contains('dine')) {
+      return 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&auto=format&fit=crop&q=80';
+    } else if (category.contains('sport') || category.contains('fit')) {
+      return 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&auto=format&fit=crop&q=80';
+    }
+    return 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&auto=format&fit=crop&q=80';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
+    final imageUrl = _getMockImageUrl(coupon);
+
+    return GestureDetector(
+      onTap: () async {
+        final offer = Offer(
+          id: coupon.id,
+          title: coupon.name,
+          category: coupon.category,
+          imageUrl: imageUrl,
+          daysLeft: coupon.daysLeft,
+          hoursLeft: coupon.hoursLeft,
+          minutesLeft: coupon.minutesLeft,
+          location: '123 Tech Avenue, Silicon Valley, CA 94025',
+          description: coupon.description,
+          price: coupon.price,
+          currency: 'QAR',
+        );
+        final viewCart = await Navigator.of(context).push<bool>(
+          MaterialPageRoute(
+            builder: (context) => ProductDetailPage(offer: offer),
+          ),
+        );
+        if (viewCart == true && context.mounted) {
+          final mainPageState = context.findAncestorStateOfType<MainPageState>();
+          if (mainPageState != null) {
+            mainPageState.setSelectedIndex(3); // Cart is index 3
+          }
+        }
+      },
+      child: Container(
+        width: 290,
+        margin: const EdgeInsets.only(right: 16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+          border: Border.all(color: const Color(0xFFF1F5F9), width: 1),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // ── Image with overlays ────────────────────────────────────────
+            Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(16),
+                    topRight: Radius.circular(16),
+                  ),
+                  child: Image.network(
+                    imageUrl,
+                    height: 140,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    loadingBuilder: (ctx, child, progress) {
+                      if (progress == null) return child;
+                      return Container(
+                        height: 140,
+                        color: const Color(0xFFF1F5F9),
+                        child: const Center(
+                          child: CircularProgressIndicator(
+                            color: Color(0xFFFF6B35),
+                            strokeWidth: 2,
+                          ),
+                        ),
+                      );
+                    },
+                    errorBuilder: (_, __, ___) => Container(
+                      height: 140,
+                      color: const Color(0xFFF1F5F9),
+                      child: const Center(
+                        child: Icon(
+                          Icons.image_not_supported_outlined,
+                          size: 40,
+                          color: Color(0xFF94A3B8),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                // Countdown badge (top-left)
+                Positioned(
+                  top: 10,
+                  left: 10,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE2FBE9),
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(
+                          color: const Color(0xFFA7F3D0), width: 0.5),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.access_time,
+                            size: 12, color: Color(0xFF047857)),
+                        const SizedBox(width: 4),
+                        Text(
+                          isArabic
+                              ? '${coupon.daysLeft} يوم متبقي'
+                              : '${coupon.daysLeft}d ${coupon.hoursLeft}h left',
+                          style: const TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF047857),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
+            // ── Details ────────────────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Vendor Name & Category Tag
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          coupon.vendor,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF0F172A),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF1F5F9),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          isArabic && coupon.category == 'Electronics' ? 'إلكترونيات' : coupon.category.toUpperCase(),
+                          style: const TextStyle(
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF475569),
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+
+                  // Card Title
+                  Text(
+                    coupon.name,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w900,
+                      color: Color(0xFF0F172A),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+
+                  // Location Row
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.location_on,
+                        size: 13,
+                        color: Color(0xFF94A3B8),
+                      ),
+                      const SizedBox(width: 2),
+                      Expanded(
+                        child: Text(
+                          isArabic ? '١٢٣ شارع التكنولوجيا، وادي السيليكون' : '123 Tech Avenue, Silicon Valley, CA',
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: Color(0xFF94A3B8),
+                            fontWeight: FontWeight.w500,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Price & Details CTA
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            isArabic ? 'سعر الصفقة' : 'DEAL PRICE',
+                            style: const TextStyle(
+                              fontSize: 9,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF94A3B8),
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                          const SizedBox(height: 1),
+                          Text(
+                            'QAR ${coupon.priceString}',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w900,
+                              color: Color(0xFFFF6B35),
+                            ),
+                          ),
+                        ],
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFF6B35),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              isArabic ? 'التفاصيل' : 'Details',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            Icon(
+                              isArabic ? Icons.arrow_back : Icons.arrow_forward,
+                              size: 12,
+                              color: Colors.white,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
