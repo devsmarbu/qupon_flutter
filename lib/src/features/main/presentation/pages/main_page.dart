@@ -192,6 +192,7 @@ class MainPageState extends State<MainPage> {
 
     return Scaffold(
       backgroundColor: Colors.white,
+      extendBody: true,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -243,18 +244,22 @@ class MainPageState extends State<MainPage> {
         ],
       ),
       body: _buildBody(_selectedIndex),
-      bottomNavigationBar: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (_selectedIndex == 3) // Cart is index 3 now
-            BlocBuilder<CartBloc, CartState>(
-              builder: (context, state) {
-                if (state.items.isEmpty) return const SizedBox.shrink();
-                return _buildStickyBottomBar(context, state);
-              },
-            ),
-          _buildBottomNavigationBar(context, isArabic),
-        ],
+      bottomNavigationBar: Material(
+        color: Colors.transparent,
+        elevation: 0,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (_selectedIndex == 3) // Cart is index 3 now
+              BlocBuilder<CartBloc, CartState>(
+                builder: (context, state) {
+                  if (state.items.isEmpty) return const SizedBox.shrink();
+                  return _buildStickyBottomBar(context, state);
+                },
+              ),
+            _buildBottomNavigationBar(context, isArabic),
+          ],
+        ),
       ),
     );
   }
@@ -262,62 +267,73 @@ class MainPageState extends State<MainPage> {
   Widget _buildBottomNavigationBar(BuildContext context, bool isArabic) {
     final l10n = AppLocalizations.of(context)!;
     return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
-          ),
-        ],
-        border: const Border(
-          top: BorderSide(color: Color(0xFFF1F5F9), width: 1),
-        ),
+      color: Colors.transparent,
+      padding: EdgeInsets.only(
+        left: 16,
+        right: 16,
+        bottom: MediaQuery.of(context).padding.bottom > 0
+            ? MediaQuery.of(context).padding.bottom + 8
+            : 16,
+        top: 8,
       ),
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: SafeArea(
-        top: false,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _buildTabItem(
-              context: context,
-              index: 0,
-              icon: Icons.home_outlined,
-              activeIcon: Icons.home,
-              label: l10n.drawerHome,
-            ),
-            _buildTabItem(
-              context: context,
-              index: 1,
-              icon: Icons.grid_view_outlined,
-              activeIcon: Icons.grid_view_rounded,
-              label: isArabic ? 'الفئات' : 'Categories',
-            ),
-            _buildTabItem(
-              context: context,
-              index: 2,
-              icon: Icons.local_offer_outlined,
-              activeIcon: Icons.local_offer,
-              label: l10n.pastDealsTitle,
-            ),
-            _buildTabItem(
-              context: context,
-              index: 3,
-              icon: Icons.shopping_cart_outlined,
-              activeIcon: Icons.shopping_cart,
-              label: l10n.drawerCart,
-              badgeCount: context.watch<CartBloc>().state.totalQuantity,
-            ),
-            _buildTabItem(
-              context: context,
-              index: 4,
-              icon: Icons.person_outline,
-              activeIcon: Icons.person,
-              label: isArabic ? 'الحساب' : 'Account',
+      child:
+      Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(35),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.2),
+              blurRadius: 20,
+              offset: const Offset(0, 4),
             ),
           ],
+        ),
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+        child: SafeArea(
+          top: false,
+          bottom: false,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildTabItem(
+                context: context,
+                index: 0,
+                icon: Icons.home_outlined,
+                activeIcon: Icons.home,
+                label: l10n.drawerHome,
+              ),
+              _buildTabItem(
+                context: context,
+                index: 1,
+                icon: Icons.grid_view_outlined,
+                activeIcon: Icons.grid_view_rounded,
+                label: isArabic ? 'الفئات' : 'Categories',
+              ),
+              _buildTabItem(
+                context: context,
+                index: 2,
+                icon: Icons.local_offer_outlined,
+                activeIcon: Icons.local_offer,
+                label: l10n.pastDealsTitle,
+              ),
+              _buildTabItem(
+                context: context,
+                index: 3,
+                icon: Icons.shopping_cart_outlined,
+                activeIcon: Icons.shopping_cart,
+                label: l10n.drawerCart,
+                badgeCount: context.watch<CartBloc>().state.totalQuantity,
+              ),
+              _buildTabItem(
+                context: context,
+                index: 4,
+                icon: Icons.person_outline,
+                activeIcon: Icons.person,
+                label: isArabic ? 'الحساب' : 'Account',
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -355,51 +371,50 @@ class MainPageState extends State<MainPage> {
         });
       },
       behavior: HitTestBehavior.opaque,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 60,
-            height: 32,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-              color: isSelected ? const Color(0xFFFFEFE9) : Colors.transparent,
-            ),
-            child: Center(
-              child: badgeCount > 0
-                  ? Badge(
-                      backgroundColor: const Color(0xFFFF6B35),
-                      label: Text(
-                        '$badgeCount',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 9,
-                          fontWeight: FontWeight.bold,
-                        ),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFFFFF2EC) : const Color(0x00FFF2EC),
+          borderRadius: BorderRadius.circular(28),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            badgeCount > 0
+                ? Badge(
+                    backgroundColor: const Color(0xFFFF6B35),
+                    label: Text(
+                      '$badgeCount',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 9,
+                        fontWeight: FontWeight.bold,
                       ),
-                      child: Icon(
-                        isSelected ? activeIcon : icon,
-                        color: color,
-                        size: 24,
-                      ),
-                    )
-                  : Icon(
+                    ),
+                    child: Icon(
                       isSelected ? activeIcon : icon,
                       color: color,
                       size: 24,
                     ),
+                  )
+                : Icon(
+                    isSelected ? activeIcon : icon,
+                    color: color,
+                    size: 24,
+                  ),
+            // const SizedBox(height: 4),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                color: color,
+              ),
             ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-              color: color,
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

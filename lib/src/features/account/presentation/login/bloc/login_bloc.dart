@@ -21,23 +21,23 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     final password = event.password.trim();
 
     if (email.isEmpty) {
-      emit(const LoginFailure(error: 'Email cannot be empty'));
+      emit(LoginFailure(error: 'Email cannot be empty'));
       return;
     }
 
     final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
     if (!emailRegex.hasMatch(email)) {
-      emit(const LoginFailure(error: 'Please enter a valid email address'));
+      emit(LoginFailure(error: 'Please enter a valid email address'));
       return;
     }
 
     if (password.isEmpty) {
-      emit(const LoginFailure(error: 'Password cannot be empty'));
+      emit(LoginFailure(error: 'Password cannot be empty'));
       return;
     }
 
     if (password.length < 6) {
-      emit(const LoginFailure(error: 'Password must be at least 6 characters'));
+      emit(LoginFailure(error: 'Password must be at least 6 characters'));
       return;
     }
 

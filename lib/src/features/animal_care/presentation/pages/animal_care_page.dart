@@ -56,7 +56,7 @@ class AnimalCarePage extends StatelessWidget {
             ),
 
             // ── Footer ────────────────────────────────────────────────────
-            const AppFooter(),
+            // const AppFooter(),
           ],
         ),
       ),

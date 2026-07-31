@@ -141,7 +141,7 @@ class PastDealsPage extends StatelessWidget {
             const SizedBox(height: 32),
 
             // ── Footer ────────────────────────────────────────────────────
-            const AppFooter(),
+            // const AppFooter(),
           ],
         ),
       ),

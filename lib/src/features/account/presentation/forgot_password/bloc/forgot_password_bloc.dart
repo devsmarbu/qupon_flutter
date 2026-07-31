@@ -21,7 +21,7 @@ class ForgotPasswordBloc extends Bloc<ForgotPasswordEvent, ForgotPasswordState> 
     final phone = event.phone.trim();
 
     if (phone.isEmpty) {
-      emit(const ForgotPasswordFailure(error: 'Phone number cannot be empty'));
+      emit(ForgotPasswordFailure(error: 'Phone number cannot be empty'));
       return;
     }
 
@@ -31,12 +31,12 @@ class ForgotPasswordBloc extends Bloc<ForgotPasswordEvent, ForgotPasswordState> 
       if (sanitizedPhone.length == 8) {
         formattedPhone = '+974$sanitizedPhone';
       } else {
-        emit(const ForgotPasswordFailure(error: 'Please enter a valid 8-digit mobile number'));
+        emit(ForgotPasswordFailure(error: 'Please enter a valid 8-digit mobile number'));
         return;
       }
     } else {
       if (sanitizedPhone.length < 11) {
-        emit(const ForgotPasswordFailure(error: 'Please enter a valid mobile number with country code'));
+        emit(ForgotPasswordFailure(error: 'Please enter a valid mobile number with country code'));
         return;
       }
     }

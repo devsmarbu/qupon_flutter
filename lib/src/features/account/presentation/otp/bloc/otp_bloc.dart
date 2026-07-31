@@ -24,12 +24,12 @@ class OtpBloc extends Bloc<OtpEvent, OtpState> {
     final otp = event.otp.trim();
 
     if (otp.isEmpty) {
-      emit(const OtpFailure(error: 'OTP code cannot be empty'));
+      emit(OtpFailure(error: 'OTP code cannot be empty'));
       return;
     }
 
     if (otp.length != 6) {
-      emit(const OtpFailure(error: 'OTP code must be exactly 6 digits'));
+      emit(OtpFailure(error: 'OTP code must be exactly 6 digits'));
       return;
     }
 

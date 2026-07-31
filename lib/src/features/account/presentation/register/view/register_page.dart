@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../../core/constants/app_colors.dart';
 import '../../../../../core/constants/app_strings.dart';
 import '../../../../../core/widgets/neubrutalist_button.dart';
+import '../../../../../core/widgets/custom_snack_bar.dart';
 import '../../../../../core/network/api_client.dart';
 import '../../../data/repositories/auth_repository.dart';
 import '../bloc/register_bloc.dart';
@@ -37,26 +38,6 @@ class _RegisterPageState extends State<RegisterPage> {
     super.dispose();
   }
 
-  void _showTopSnackBar(BuildContext context, String message, {bool isError = true}) {
-    ScaffoldMessenger.of(context).clearSnackBars();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          message,
-          style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-        ),
-        backgroundColor: isError ? Colors.red : Colors.green,
-        behavior: SnackBarBehavior.floating,
-        dismissDirection: DismissDirection.up,
-        margin: EdgeInsets.only(
-          bottom: MediaQuery.of(context).size.height - 100,
-          left: 20,
-          right: 20,
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return BlocProvider<RegisterBloc>(
@@ -85,7 +66,7 @@ class _RegisterPageState extends State<RegisterPage> {
             child: BlocConsumer<RegisterBloc, RegisterState>(
               listener: (context, state) {
                 if (state is RegisterSuccess) {
-                  _showTopSnackBar(
+                  CustomSnackBar.showTop(
                     context,
                     AppStrings.getLocalizedError(context, 'Registration successful! Please verify your phone number.'),
                     isError: false,
@@ -99,7 +80,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                   );
                 } else if (state is RegisterFailure) {
-                  _showTopSnackBar(context, AppStrings.getLocalizedError(context, state.error), isError: true);
+                  CustomSnackBar.showTop(context, AppStrings.getLocalizedError(context, state.error), isError: true);
                 }
               },
               builder: (context, state) {
@@ -140,36 +121,36 @@ class _RegisterPageState extends State<RegisterPage> {
                                 height: 22,
                               ),
                               onTap: () {
-                                _showTopSnackBar(
-                                  context,
-                                  AppStrings.getLocalizedError(context, 'Google Sign-In is not configured yet.'),
-                                  isError: true,
-                                );
-                              },
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: NeubrutalistButton(
-                              text: AppStrings.facebook(context),
-                              backgroundColor: AppColors.white,
-                              textColor: AppColors.black,
-                              shadowOffset: const Offset(-5, 5),
-                              leading: SvgPicture.asset(
-                                'assets/appIcons/ic_facebook.svg',
-                                width: 22,
-                                height: 22,
-                                colorFilter: const ColorFilter.mode(AppColors.facebookBlue, BlendMode.srcIn),
-                              ),
-                              onTap: () {
-                                _showTopSnackBar(
-                                  context,
-                                  AppStrings.getLocalizedError(context, 'Facebook Sign-In is not configured yet.'),
-                                  isError: true,
-                                );
-                              },
-                            ),
-                          ),
+                                CustomSnackBar.showTop(
+                                   context,
+                                   AppStrings.getLocalizedError(context, 'Google Sign-In is not configured yet.'),
+                                   isError: true,
+                                 );
+                               },
+                             ),
+                           ),
+                           const SizedBox(width: 16),
+                           Expanded(
+                             child: NeubrutalistButton(
+                               text: AppStrings.facebook(context),
+                               backgroundColor: AppColors.white,
+                               textColor: AppColors.black,
+                               shadowOffset: const Offset(-5, 5),
+                               leading: SvgPicture.asset(
+                                 'assets/appIcons/ic_facebook.svg',
+                                 width: 22,
+                                 height: 22,
+                                 colorFilter: const ColorFilter.mode(AppColors.facebookBlue, BlendMode.srcIn),
+                               ),
+                               onTap: () {
+                                 CustomSnackBar.showTop(
+                                   context,
+                                   AppStrings.getLocalizedError(context, 'Facebook Sign-In is not configured yet.'),
+                                   isError: true,
+                                 );
+                               },
+                             ),
+                           ),
                         ],
                       ),
                       const SizedBox(height: 36),

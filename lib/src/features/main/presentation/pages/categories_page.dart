@@ -174,7 +174,7 @@ class CategoriesPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 40),
-            const AppFooter(),
+            // const AppFooter(),
           ],
         ),
       ),

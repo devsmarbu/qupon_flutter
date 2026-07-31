@@ -133,7 +133,7 @@ class CartPage extends StatelessWidget {
                 const SizedBox(height: 48),
 
                 // ── Footer ────────────────────────────────────────────────────
-                const AppFooter(),
+                // const AppFooter(),
               ],
             ),
           );

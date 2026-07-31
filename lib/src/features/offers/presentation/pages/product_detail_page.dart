@@ -221,34 +221,35 @@ class ProductDetailView extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Divider
-                      Container(height: 1, color: const Color(0xFFE2E8F0)),
+                       Container(height: 1, color: const Color(0xFFE2E8F0)),
 
+                      SizedBox(height: 20),
                       // "Back to Listings" Row
-                      InkWell(
-                        onTap: () => Navigator.of(context).pop(),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                isArabic ? Icons.arrow_forward : Icons.arrow_back,
-                                size: 18,
-                                color: const Color(0xFF64748B),
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                _Localizations.get(context, 'backToListings'),
-                                style: const TextStyle(
-                                  color: Color(0xFF64748B),
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
+                      // InkWell(
+                      //   onTap: () => Navigator.of(context).pop(),
+                      //   child: Padding(
+                      //     padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+                      //     child: Row(
+                      //       mainAxisSize: MainAxisSize.min,
+                      //       children: [
+                      //         Icon(
+                      //           isArabic ? Icons.arrow_forward : Icons.arrow_back,
+                      //           size: 18,
+                      //           color: const Color(0xFF64748B),
+                      //         ),
+                      //         const SizedBox(width: 8),
+                      //         Text(
+                      //           _Localizations.get(context, 'backToListings'),
+                      //           style: const TextStyle(
+                      //             color: Color(0xFF64748B),
+                      //             fontSize: 15,
+                      //             fontWeight: FontWeight.bold,
+                      //           ),
+                      //         ),
+                      //       ],
+                      //     ),
+                      //   ),
+                      // ),
 
                       // Image Area Card with Center placeholder 'E' tilted, and overlay actions
                       Padding(
@@ -1039,7 +1040,7 @@ class ProductDetailView extends StatelessWidget {
                       const SizedBox(height: 48),
 
                       // App Footer
-                      AppFooter(),
+                      // AppFooter(),
 
                     ],
                   ),

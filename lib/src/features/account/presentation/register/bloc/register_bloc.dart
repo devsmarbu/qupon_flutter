@@ -24,39 +24,39 @@ class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
     final confirmPassword = event.confirmPassword.trim();
 
     if (name.isEmpty) {
-      emit(const RegisterFailure(error: 'Full name cannot be empty'));
+      emit(RegisterFailure(error: 'Full name cannot be empty'));
       return;
     }
 
     if (email.isEmpty) {
-      emit(const RegisterFailure(error: 'Email cannot be empty'));
+      emit(RegisterFailure(error: 'Email cannot be empty'));
       return;
     }
 
     // Basic email validation
     final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
     if (!emailRegex.hasMatch(email)) {
-      emit(const RegisterFailure(error: 'Please enter a valid email address'));
+      emit(RegisterFailure(error: 'Please enter a valid email address'));
       return;
     }
 
     if (phone.isEmpty) {
-      emit(const RegisterFailure(error: 'Phone number cannot be empty'));
+      emit(RegisterFailure(error: 'Phone number cannot be empty'));
       return;
     }
 
     if (password.isEmpty) {
-      emit(const RegisterFailure(error: 'Password cannot be empty'));
+      emit(RegisterFailure(error: 'Password cannot be empty'));
       return;
     }
 
     if (password.length < 6) {
-      emit(const RegisterFailure(error: 'Password must be at least 6 characters'));
+      emit(RegisterFailure(error: 'Password must be at least 6 characters'));
       return;
     }
 
     if (password != confirmPassword) {
-      emit(const RegisterFailure(error: 'Passwords do not match'));
+      emit(RegisterFailure(error: 'Passwords do not match'));
       return;
     }
 
@@ -67,12 +67,12 @@ class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
       if (sanitizedPhone.length == 8) {
         formattedPhone = '+974$sanitizedPhone';
       } else {
-        emit(const RegisterFailure(error: 'Please enter a valid 8-digit mobile number'));
+        emit(RegisterFailure(error: 'Please enter a valid 8-digit mobile number'));
         return;
       }
     } else {
       if (sanitizedPhone.length < 11) {
-        emit(const RegisterFailure(error: 'Please enter a valid mobile number with country code'));
+        emit(RegisterFailure(error: 'Please enter a valid mobile number with country code'));
         return;
       }
     }

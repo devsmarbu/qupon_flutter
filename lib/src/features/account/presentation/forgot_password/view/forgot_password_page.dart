@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../../core/constants/app_strings.dart';
 import '../../../../../core/network/api_client.dart';
+import '../../../../../core/widgets/custom_snack_bar.dart';
 import '../../../data/repositories/auth_repository.dart';
 import '../bloc/forgot_password_bloc.dart';
 import '../bloc/forgot_password_event.dart';
@@ -23,26 +24,6 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     super.dispose();
   }
 
-  void _showTopSnackBar(BuildContext context, String message, {bool isError = true}) {
-    ScaffoldMessenger.of(context).clearSnackBars();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          message,
-          style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-        ),
-        backgroundColor: isError ? Colors.red : Colors.green,
-        behavior: SnackBarBehavior.floating,
-        dismissDirection: DismissDirection.up,
-        margin: EdgeInsets.only(
-          bottom: MediaQuery.of(context).size.height - 100,
-          left: 20,
-          right: 20,
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return BlocProvider<ForgotPasswordBloc>(
@@ -57,13 +38,13 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
           child: BlocConsumer<ForgotPasswordBloc, ForgotPasswordState>(
             listener: (context, state) {
               if (state is ForgotPasswordSuccess) {
-                _showTopSnackBar(
+                CustomSnackBar.showTop(
                   context,
                   AppStrings.getLocalizedError(context, 'Reset link sent successfully!'),
                   isError: false,
                 );
               } else if (state is ForgotPasswordFailure) {
-                _showTopSnackBar(context, AppStrings.getLocalizedError(context, state.error), isError: true);
+                CustomSnackBar.showTop(context, AppStrings.getLocalizedError(context, state.error), isError: true);
               }
             },
             builder: (context, state) {
