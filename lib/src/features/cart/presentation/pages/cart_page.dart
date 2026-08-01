@@ -3,15 +3,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../l10n/app_localizations.dart';
 import '../../../localization/presentation/cubit/locale_cubit.dart';
-import '../../../main/presentation/widgets/app_footer.dart';
 import '../../../main/presentation/pages/main_page.dart';
-
 import '../bloc/cart_bloc.dart';
 import '../bloc/cart_state.dart';
 import '../bloc/cart_event.dart';
-import '../../data/models/cart_item.dart';
+import '../../data/models/api_cart_model.dart';
 
-class CartPage extends StatelessWidget {
+class CartPage extends StatefulWidget {
   final VoidCallback onNavigateHome;
 
   const CartPage({
@@ -20,12 +18,26 @@ class CartPage extends StatelessWidget {
   });
 
   @override
+  State<CartPage> createState() => _CartPageState();
+}
+
+class _CartPageState extends State<CartPage> {
+  final TextEditingController _phoneController = TextEditingController();
+
+  @override
+  void dispose() {
+    _phoneController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final localeCubit = context.watch<LocaleCubit>();
     final isArabic = localeCubit.state.languageCode == 'ar';
 
     return SafeArea(
+      bottom: false,
       child: BlocBuilder<CartBloc, CartState>(
         builder: (context, state) {
           final isEmpty = state.items.isEmpty;
@@ -36,37 +48,6 @@ class CartPage extends StatelessWidget {
               children: [
                 // ── Divider under AppBar ──────────────────────────────────────
                 Container(height: 1, color: const Color(0xFFE2E8F0)),
-
-                // ── Back Button "Continue shopping" ───────────────────────────
-                Padding(
-                  padding: const EdgeInsets.only(left: 16, right: 16, top: 16),
-                  child: InkWell(
-                    onTap: onNavigateHome,
-                    borderRadius: BorderRadius.circular(4),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            isArabic ? Icons.arrow_forward : Icons.arrow_back,
-                            size: 16,
-                            color: const Color(0xFF64748B),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            l10n.continueShopping,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: Color(0xFF64748B),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
 
                 // ── Page Title ───────────────────────────────────────────────
                 Padding(
@@ -114,6 +95,7 @@ class CartPage extends StatelessWidget {
                   ListView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
+                    padding: EdgeInsets.zero,
                     itemCount: state.items.length,
                     itemBuilder: (context, index) {
                       final item = state.items[index];
@@ -121,19 +103,11 @@ class CartPage extends StatelessWidget {
                     },
                   ),
 
-                  const SizedBox(height: 12),
-
-                  // ── Order Summary Card ───────────────────────────────────────
-                  _buildOrderSummaryCard(context, state, l10n, isArabic),
-
-                  // ── Payment Methods Card ──────────────────────────────────────
-                  _buildPaymentMethodsCard(context, state, l10n, isArabic),
+                  // ── Combined Order Summary Card ──────────────────────────────
+                  _buildCombinedOrderCard(context, state, l10n, isArabic),
                 ],
 
-                const SizedBox(height: 48),
-
-                // ── Footer ────────────────────────────────────────────────────
-                // const AppFooter(),
+                const SizedBox(height: 120),
               ],
             ),
           );
@@ -206,7 +180,7 @@ class CartPage extends StatelessWidget {
 
           // Orange "Browse deals" button
           ElevatedButton(
-            onPressed: onNavigateHome,
+            onPressed: widget.onNavigateHome,
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFFF6B35),
               foregroundColor: Colors.white,
@@ -229,12 +203,8 @@ class CartPage extends StatelessWidget {
     );
   }
 
-  Widget _buildCartItemCard(BuildContext context, CartItem item, AppLocalizations l10n, bool isArabic) {
-    // Electronics maps to ElectroWorld as vendor, otherwise default to offer.title
-    final vendorName = item.offer.category == 'Electronics' ? 'ElectroWorld' : item.offer.title;
-
-    // Get first letter of category as initial, default to '?'
-    final initialLetter = item.offer.category.isNotEmpty ? item.offer.category[0].toUpperCase() : '?';
+  Widget _buildCartItemCard(BuildContext context, ApiCartItem item, AppLocalizations l10n, bool isArabic) {
+    final initialLetter = item.name.isNotEmpty ? item.name[0].toUpperCase() : 'E';
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
@@ -257,7 +227,7 @@ class CartPage extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Premium Category Initial Avatar (Blue-grey tint) ───────────
+          // ── Category Initial Avatar (Blue-grey tint) ───────────────────
           Container(
             width: 72,
             height: 72,
@@ -283,9 +253,9 @@ class CartPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Offer Title + Selected Option
+                // Title
                 Text(
-                  '${item.offer.title} — ${item.option.name}',
+                  isArabic && item.nameAr.isNotEmpty ? item.nameAr : item.name,
                   style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
@@ -294,9 +264,9 @@ class CartPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
 
-                // Vendor Subtitle
+                // Vendor
                 Text(
-                  vendorName,
+                  item.vendor,
                   style: const TextStyle(
                     fontSize: 13,
                     color: Color(0xFF64748B),
@@ -304,11 +274,11 @@ class CartPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
 
-                // Prices row
+                // Price and Savings Row
                 Row(
                   children: [
                     Text(
-                      'QAR ${item.option.price.toStringAsFixed(0)}',
+                      'QAR ${item.payable.toStringAsFixed(0)}',
                       style: const TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w900,
@@ -317,7 +287,7 @@ class CartPage extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      'QAR ${item.option.originalPrice.toStringAsFixed(0)}',
+                      'QAR ${item.listPrice.toStringAsFixed(0)}',
                       style: const TextStyle(
                         fontSize: 13,
                         color: Color(0xFF94A3B8),
@@ -326,7 +296,7 @@ class CartPage extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      l10n.youSave((item.option.originalPrice - item.option.price).toStringAsFixed(0)),
+                      l10n.youSave((item.listPrice - item.payable).toStringAsFixed(0)),
                       style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
@@ -337,12 +307,12 @@ class CartPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
 
-                // Delete Button (Align bottom-left as requested)
+                // Delete Button (Align bottom-left)
                 Align(
                   alignment: isArabic ? Alignment.centerRight : Alignment.centerLeft,
                   child: InkWell(
                     onTap: () {
-                      context.read<CartBloc>().add(RemoveFromCart(item: item));
+                      context.read<CartBloc>().add(RemoveFromCart(key: item.key));
                     },
                     borderRadius: BorderRadius.circular(4),
                     child: const Padding(
@@ -363,7 +333,7 @@ class CartPage extends StatelessWidget {
     );
   }
 
-  Widget _buildOrderSummaryCard(BuildContext context, CartState state, AppLocalizations l10n, bool isArabic) {
+  Widget _buildCombinedOrderCard(BuildContext context, CartState state, AppLocalizations l10n, bool isArabic) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       padding: const EdgeInsets.all(20),
@@ -385,6 +355,7 @@ class CartPage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // ── Title "Order summary" ──
           Text(
             l10n.orderSummary,
             style: const TextStyle(
@@ -448,82 +419,147 @@ class CartPage extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          const Divider(color: Color(0xFFF1F5F9), height: 1),
-          const SizedBox(height: 16),
 
-          // Gift order option row
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+          // ── Gift card option inside border container ──
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: const Color(0xFFE2E8F0)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Toggle Row
+                Row(
                   children: [
-                    Text(
-                      l10n.giftThisOrder,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF0F172A),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l10n.giftThisOrder,
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF0F172A),
+                            ),
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            l10n.giftSubtitle,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Color(0xFF64748B),
+                              height: 1.4,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      l10n.giftSubtitle,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Color(0xFF64748B),
-                      ),
+                    Switch(
+                      value: state.isGift,
+                      onChanged: (val) {
+                        context.read<CartBloc>().add(ToggleGift(isGift: val));
+                      },
+                      activeColor: const Color(0xFFFF6B35),
                     ),
                   ],
                 ),
-              ),
-              Switch(
-                value: state.isGift,
-                onChanged: (val) {
-                  context.read<CartBloc>().add(ToggleGift(isGift: val));
-                },
-                activeColor: const Color(0xFFFF6B35),
-              ),
-            ],
+                // Phone number input — shown only when gift is enabled
+                AnimatedCrossFade(
+                  duration: const Duration(milliseconds: 250),
+                  crossFadeState: state.isGift
+                      ? CrossFadeState.showSecond
+                      : CrossFadeState.showFirst,
+                  firstChild: const SizedBox.shrink(),
+                  secondChild: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Recipient mobile number',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF0F172A),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      TextField(
+                        controller: _phoneController,
+                        keyboardType: TextInputType.phone,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          color: Color(0xFF0F172A),
+                        ),
+                        decoration: InputDecoration(
+                          hintText: '50123456',
+                          hintStyle: const TextStyle(
+                            color: Color(0xFF94A3B8),
+                            fontSize: 15,
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 14,
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: const BorderSide(
+                              color: Color(0xFFE2E8F0),
+                              width: 1.5,
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: const BorderSide(
+                              color: Color(0xFFFF6B35),
+                              width: 1.5,
+                            ),
+                          ),
+                          filled: true,
+                          fillColor: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      const Text(
+                        'We will text the coupon code(s) to this number after payment.',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF64748B),
+                          height: 1.4,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      const Text(
+                        'Qatar mobile number, 8 digits (e.g. 50123456 or +974 50123456).',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF64748B),
+                          height: 1.4,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
-        ],
-      ),
-    );
-  }
+          const SizedBox(height: 24),
 
-  Widget _buildPaymentMethodsCard(BuildContext context, CartState state, AppLocalizations l10n, bool isArabic) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: const Color(0xFFE2E8F0),
-          width: 1.2,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+          // ── Pay via section ──
           Text(
             l10n.payVia,
             style: const TextStyle(
-              fontSize: 18,
+              fontSize: 16,
               fontWeight: FontWeight.bold,
               color: Color(0xFF0F172A),
             ),
           ),
           const SizedBox(height: 16),
 
-          // Stripe Selection Row
+          // Stripe
           _buildPaymentOptionTile(
             context,
             id: 'stripe',
@@ -533,7 +569,7 @@ class CartPage extends StatelessWidget {
           ),
           const SizedBox(height: 12),
 
-          // Wallet Selection Row
+          // Wallet
           _buildPaymentOptionTile(
             context,
             id: 'wallet',
@@ -544,7 +580,7 @@ class CartPage extends StatelessWidget {
           ),
           const SizedBox(height: 12),
 
-          // SkipCash Selection Row
+          // SkipCash
           _buildPaymentOptionTile(
             context,
             id: 'skipcash',
@@ -552,10 +588,9 @@ class CartPage extends StatelessWidget {
             title: l10n.skipCash,
             isSelected: state.paymentMethod == 'skipcash',
           ),
-
           const SizedBox(height: 24),
 
-          // Checkout CTA button
+          // Checkout button
           SizedBox(
             width: double.infinity,
             height: 50,
@@ -575,7 +610,7 @@ class CartPage extends StatelessWidget {
                 ),
               ),
               child: Text(
-                l10n.checkoutWithPrice(state.total.toStringAsFixed(0)),
+                'Checkout · QAR ${state.total.toStringAsFixed(0)}',
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,

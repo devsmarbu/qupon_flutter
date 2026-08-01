@@ -16,26 +16,25 @@ class ProductDetailBloc extends Bloc<ProductDetailEvent, ProductDetailState> {
     Emitter<ProductDetailState> emit,
   ) {
     final offer = event.offer;
-    
-    // Generate options: Basic and Pro based on the offer's base price.
-    // Basic: originalPrice is double the base price, price is base price.
-    // Pro: originalPrice is double the base price, price is base price * 1.5.
-    // For QAR 20, Basic = 20, Pro = 30. Original = 40.
-    final basePrice = offer.price;
-    final options = [
-      OfferOption(
-        id: 'basic',
-        name: 'Basic',
-        originalPrice: basePrice * 2.0,
-        price: basePrice,
-      ),
-      OfferOption(
-        id: 'pro',
-        name: 'Pro',
-        originalPrice: basePrice * 2.0,
-        price: basePrice * 1.5,
-      ),
-    ];
+
+    // Use variants from the event if provided (populated from API).
+    // Fall back to a Basic/Pro pair derived from the offer price if none exist.
+    final List<OfferOption> options = event.variants.isNotEmpty
+        ? event.variants
+        : [
+            OfferOption(
+              id: '1',
+              name: 'Basic',
+              originalPrice: offer.price * 2.0,
+              price: offer.price,
+            ),
+            OfferOption(
+              id: '2',
+              name: 'Pro',
+              originalPrice: offer.price * 2.0,
+              price: offer.price * 1.5,
+            ),
+          ];
 
     emit(ProductDetailState(
       offer: offer,

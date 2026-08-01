@@ -115,73 +115,7 @@ class MainPageState extends State<MainPage> {
     );
   }
 
-  Widget _buildStickyBottomBar(BuildContext context, CartState state) {
-    final l10n = AppLocalizations.of(context)!;
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
-            blurRadius: 10,
-            offset: const Offset(0, -4),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      child: SafeArea(
-        top: false,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l10n.totalLabel,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Color(0xFF64748B),
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                Text(
-                  'QAR ${state.total.toStringAsFixed(0)}',
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w900,
-                    color: AppColors.primary,
-                  ),
-                ),
-              ],
-            ),
-            ElevatedButton(
-              onPressed: () {
-                _showCheckoutSuccessDialog(context);
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
-              ),
-              child: Text(
-                l10n.checkoutLabel,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+
 
 
 
@@ -247,19 +181,7 @@ class MainPageState extends State<MainPage> {
       bottomNavigationBar: Material(
         color: Colors.transparent,
         elevation: 0,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (_selectedIndex == 3) // Cart is index 3 now
-              BlocBuilder<CartBloc, CartState>(
-                builder: (context, state) {
-                  if (state.items.isEmpty) return const SizedBox.shrink();
-                  return _buildStickyBottomBar(context, state);
-                },
-              ),
-            _buildBottomNavigationBar(context, isArabic),
-          ],
-        ),
+        child: _buildBottomNavigationBar(context, isArabic),
       ),
     );
   }
@@ -365,6 +287,9 @@ class MainPageState extends State<MainPage> {
             }
             return;
           }
+        }
+        if (index == 3) {
+          context.read<CartBloc>().add(const LoadCart());
         }
         setState(() {
           _selectedIndex = index;

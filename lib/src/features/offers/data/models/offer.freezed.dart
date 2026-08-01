@@ -35,6 +35,8 @@ mixin _$Offer {
   String? get titleAr => throw _privateConstructorUsedError;
   String? get descriptionAr => throw _privateConstructorUsedError;
   String? get vendor => throw _privateConstructorUsedError;
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  List<OfferOption> get variants => throw _privateConstructorUsedError;
 
   /// Serializes this Offer to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -65,6 +67,7 @@ abstract class $OfferCopyWith<$Res> {
     String? titleAr,
     String? descriptionAr,
     String? vendor,
+    List<OfferOption> variants,
   });
 }
 
@@ -97,6 +100,7 @@ class _$OfferCopyWithImpl<$Res, $Val extends Offer>
     Object? titleAr = freezed,
     Object? descriptionAr = freezed,
     Object? vendor = freezed,
+    Object? variants = null,
   }) {
     return _then(
       _value.copyWith(
@@ -156,6 +160,10 @@ class _$OfferCopyWithImpl<$Res, $Val extends Offer>
                 ? _value.vendor
                 : vendor // ignore: cast_nullable_to_non_nullable
                       as String?,
+            variants: null == variants
+                ? _value.variants
+                : variants // ignore: cast_nullable_to_non_nullable
+                      as List<OfferOption>,
           )
           as $Val,
     );
@@ -185,6 +193,7 @@ abstract class _$$OfferImplCopyWith<$Res> implements $OfferCopyWith<$Res> {
     String? titleAr,
     String? descriptionAr,
     String? vendor,
+    List<OfferOption> variants,
   });
 }
 
@@ -216,6 +225,7 @@ class __$$OfferImplCopyWithImpl<$Res>
     Object? titleAr = freezed,
     Object? descriptionAr = freezed,
     Object? vendor = freezed,
+    Object? variants = null,
   }) {
     return _then(
       _$OfferImpl(
@@ -275,6 +285,10 @@ class __$$OfferImplCopyWithImpl<$Res>
             ? _value.vendor
             : vendor // ignore: cast_nullable_to_non_nullable
                   as String?,
+        variants: null == variants
+            ? _value.variants
+            : variants // ignore: cast_nullable_to_non_nullable
+                  as List<OfferOption>,
       ),
     );
   }
@@ -298,6 +312,7 @@ class _$OfferImpl implements _Offer {
     this.titleAr,
     this.descriptionAr,
     this.vendor,
+    this.variants = const [],
   });
 
   factory _$OfferImpl.fromJson(Map<String, dynamic> json) =>
@@ -331,10 +346,13 @@ class _$OfferImpl implements _Offer {
   final String? descriptionAr;
   @override
   final String? vendor;
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  final List<OfferOption> variants;
 
   @override
   String toString() {
-    return 'Offer(id: $id, title: $title, category: $category, imageUrl: $imageUrl, daysLeft: $daysLeft, hoursLeft: $hoursLeft, minutesLeft: $minutesLeft, location: $location, description: $description, price: $price, currency: $currency, titleAr: $titleAr, descriptionAr: $descriptionAr, vendor: $vendor)';
+    return 'Offer(id: $id, title: $title, category: $category, imageUrl: $imageUrl, daysLeft: $daysLeft, hoursLeft: $hoursLeft, minutesLeft: $minutesLeft, location: $location, description: $description, price: $price, currency: $currency, titleAr: $titleAr, descriptionAr: $descriptionAr, vendor: $vendor, variants: $variants)';
   }
 
   @override
@@ -364,7 +382,8 @@ class _$OfferImpl implements _Offer {
             (identical(other.titleAr, titleAr) || other.titleAr == titleAr) &&
             (identical(other.descriptionAr, descriptionAr) ||
                 other.descriptionAr == descriptionAr) &&
-            (identical(other.vendor, vendor) || other.vendor == vendor));
+            (identical(other.vendor, vendor) || other.vendor == vendor) &&
+            const DeepCollectionEquality().equals(other.variants, variants));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -385,6 +404,7 @@ class _$OfferImpl implements _Offer {
     titleAr,
     descriptionAr,
     vendor,
+    const DeepCollectionEquality().hash(variants),
   );
 
   /// Create a copy of Offer
@@ -417,6 +437,9 @@ abstract class _Offer implements Offer {
     final String? titleAr,
     final String? descriptionAr,
     final String? vendor,
+    @JsonKey(includeFromJson: false, includeToJson: false)
+    @Default([])
+    final List<OfferOption> variants,
   }) = _$OfferImpl;
 
   factory _Offer.fromJson(Map<String, dynamic> json) = _$OfferImpl.fromJson;
@@ -449,6 +472,9 @@ abstract class _Offer implements Offer {
   String? get descriptionAr;
   @override
   String? get vendor;
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  List<OfferOption> get variants;
 
   /// Create a copy of Offer
   /// with the given fields replaced by the non-null parameter values.
