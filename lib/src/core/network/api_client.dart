@@ -31,6 +31,14 @@ class ApiClient {
       responseHeader: false,
       responseBody: true,
       error: true,
+      logPrint: (object) {
+        final text = object.toString();
+        const segmentLength = 1000;
+        for (int i = 0; i < text.length; i += segmentLength) {
+          final end = (i + segmentLength < text.length) ? i + segmentLength : text.length;
+          print(text.substring(i, end));
+        }
+      },
     ));
   }
 

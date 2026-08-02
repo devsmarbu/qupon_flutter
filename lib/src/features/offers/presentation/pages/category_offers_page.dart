@@ -86,53 +86,6 @@ class _CategoryOffersPageState extends State<CategoryOffersPage> {
               ),
             ),
           ),
-          BlocBuilder<CartBloc, CartState>(
-            builder: (context, state) {
-              final count = state.totalQuantity;
-              return IconButton(
-                icon: count > 0
-                    ? Badge(
-                        backgroundColor: const Color(0xFFFF6B35),
-                        label: Text(
-                          '$count',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        child: const Icon(
-                          Icons.shopping_cart_outlined,
-                          color: Color(0xFF0F172A),
-                        ),
-                      )
-                    : const Icon(
-                        Icons.shopping_cart_outlined,
-                        color: Color(0xFF0F172A),
-                      ),
-                onPressed: () {
-                  final mainPageState = context.findAncestorStateOfType<MainPageState>();
-                  if (mainPageState != null) {
-                    mainPageState.setSelectedIndex(4);
-                  }
-                  Navigator.of(context).pop();
-                },
-              );
-            },
-          ),
-          IconButton(
-            icon: const Icon(
-              Icons.person_outline,
-              color: Color(0xFF0F172A),
-            ),
-            onPressed: () {
-              final mainPageState = context.findAncestorStateOfType<MainPageState>();
-              if (mainPageState != null) {
-                mainPageState.setSelectedIndex(5);
-              }
-              Navigator.of(context).pop();
-            },
-          ),
           const SizedBox(width: 8),
         ],
       ),

@@ -143,8 +143,15 @@ class ProductDetailView extends StatelessWidget {
             elevation: 0,
             scrolledUnderElevation: 0,
             automaticallyImplyLeading: false,
+            leading: IconButton(
+              icon: Icon(
+                isArabic ? Icons.arrow_forward : Icons.arrow_back,
+                color: const Color(0xFF0F172A),
+              ),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
             centerTitle: false,
-            titleSpacing: 16,
+            titleSpacing: 0,
             title: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
@@ -186,28 +193,6 @@ class ProductDetailView extends StatelessWidget {
                     fontSize: 14,
                   ),
                 ),
-              ),
-              IconButton(
-                icon: const Icon(
-                  Icons.shopping_cart_outlined,
-                  color: Color(0xFF0F172A),
-                ),
-                onPressed: () {},
-              ),
-              IconButton(
-                icon: const Icon(
-                  Icons.person_outline,
-                  color: Color(0xFF0F172A),
-                ),
-                onPressed: () {},
-              ),
-              IconButton(
-                icon: const Icon(
-                  Icons.menu,
-                  color: Color(0xFF0F172A),
-                  size: 26,
-                ),
-                onPressed: () {},
               ),
               const SizedBox(width: 8),
             ],
