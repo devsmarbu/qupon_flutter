@@ -46,9 +46,6 @@ class _CartPageState extends State<CartPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // ── Divider under AppBar ──────────────────────────────────────
-                Container(height: 1, color: const Color(0xFFE2E8F0)),
-
                 // ── Page Title ───────────────────────────────────────────────
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),

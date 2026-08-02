@@ -7,5 +7,6 @@ class ApiEndpoints {
   static const String forgotPassword = '/api/auth/forgot-password';
   static const String storefrontHome = '/api/storefront/home';
   static const String categoryDetail = '/api/storefront/categories/';
+  static const String pastDeals = '/api/storefront/past-deals';
   static const String cart = '/api/cart';
 }

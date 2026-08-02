@@ -11,6 +11,7 @@ class HomeCoupon {
   final String category;
   final String description;
   final String descriptionAr;
+  final String imageUrl;
 
   const HomeCoupon({
     required this.id,
@@ -24,9 +25,21 @@ class HomeCoupon {
     required this.category,
     required this.description,
     required this.descriptionAr,
+    required this.imageUrl,
   });
 
   factory HomeCoupon.fromJson(Map<String, dynamic> json) {
+    final rawImages = json['images'];
+    String imgUrl = '';
+    if (rawImages is List && rawImages.isNotEmpty) {
+      imgUrl = rawImages[0]?.toString() ?? '';
+    } else {
+      imgUrl = json['image']?.toString() ??
+          json['imageUrl']?.toString() ??
+          json['photo']?.toString() ??
+          '';
+    }
+
     return HomeCoupon(
       id: json['id']?.toString() ?? '',
       name: json['name']?.toString() ?? '',
@@ -39,6 +52,7 @@ class HomeCoupon {
       category: json['category']?.toString() ?? '',
       description: json['description']?.toString() ?? '',
       descriptionAr: json['descriptionAr']?.toString() ?? '',
+      imageUrl: imgUrl,
     );
   }
 

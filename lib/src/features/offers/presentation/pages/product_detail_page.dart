@@ -279,13 +279,14 @@ class ProductDetailView extends StatelessWidget {
                                       ),
                                     ),
                                     // Unsplash image if category is not mock electronic, else standard gradient/illustration
-                                    Positioned.fill(
-                                      child: Image.network(
-                                        offer.imageUrl,
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+                                    if (offer.imageUrl.isNotEmpty && offer.imageUrl.startsWith('http'))
+                                      Positioned.fill(
+                                        child: Image.network(
+                                          offer.imageUrl,
+                                          fit: BoxFit.cover,
+                                          errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+                                        ),
                                       ),
-                                    ),
                                   ],
                                 ),
                               ),

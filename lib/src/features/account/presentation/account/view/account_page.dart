@@ -45,7 +45,7 @@ class _AccountPageState extends State<AccountPage> {
       builder: (context, state) {
         if (state is AccountInitial) {
           return const Scaffold(
-            backgroundColor: Color(0xFFF8FAFC),
+            backgroundColor: Colors.transparent,
             body: Center(
               child: CircularProgressIndicator(color: Color(0xFFFF6B35)),
             ),
@@ -64,7 +64,7 @@ class _AccountPageState extends State<AccountPage> {
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: Colors.transparent,
       body: SafeArea(
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
@@ -516,7 +516,7 @@ class _AccountPageState extends State<AccountPage> {
   // ─────────────────────────── Logged-out View ────────────────────────────
   Widget _buildLoggedOut(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: Colors.transparent,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(vertical: 40),
