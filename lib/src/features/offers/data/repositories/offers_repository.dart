@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../core/network/api_endpoints.dart';
 import '../models/offer.dart';
+import '../models/offer_option.dart';
 
 abstract class OffersRepository {
   Future<List<Offer>> getOffers();
@@ -56,6 +57,20 @@ class OffersRepositoryImpl implements OffersRepository {
         final images = couponMap['images'] as List<dynamic>? ?? [];
         final imageUrl = images.isNotEmpty ? images[0].toString() : '';
 
+        // Parse variants from the API response.
+        // Expected shape: [{ "id": "1", "name": "Basic", "price": 20, "originalPrice": 40 }, ...]
+        final variantsList = couponMap['variants'] as List<dynamic>? ?? [];
+        final variants = variantsList.map((v) {
+          final vMap = v as Map<String, dynamic>;
+          return OfferOption(
+            id: vMap['id']?.toString() ?? '',
+            name: vMap['name']?.toString() ?? '',
+            originalPrice: (vMap['originalPrice'] as num?)?.toDouble() ??
+                (couponMap['price'] as num?)?.toDouble() ?? 0.0,
+            price: (vMap['price'] as num?)?.toDouble() ?? 0.0,
+          );
+        }).toList();
+
         return Offer(
           id: couponMap['id']?.toString() ?? '',
           title: couponMap['name']?.toString() ?? '',
@@ -71,6 +86,7 @@ class OffersRepositoryImpl implements OffersRepository {
           price: (couponMap['price'] as num?)?.toDouble() ?? 0.0,
           currency: 'QAR',
           vendor: couponMap['vendor']?.toString(),
+          variants: variants,
         );
       }).toList();
     } on DioException catch (e) {

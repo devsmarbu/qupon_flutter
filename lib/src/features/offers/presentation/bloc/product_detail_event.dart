@@ -1,4 +1,5 @@
 import '../../data/models/offer.dart';
+import '../../data/models/offer_option.dart';
 
 abstract class ProductDetailEvent {
   const ProductDetailEvent();
@@ -6,8 +7,9 @@ abstract class ProductDetailEvent {
 
 class InitializeProductDetail extends ProductDetailEvent {
   final Offer offer;
+  final List<OfferOption> variants;
 
-  const InitializeProductDetail(this.offer);
+  const InitializeProductDetail(this.offer, {this.variants = const []});
 }
 
 class SelectOption extends ProductDetailEvent {

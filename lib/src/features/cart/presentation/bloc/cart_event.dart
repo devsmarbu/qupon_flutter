@@ -1,9 +1,12 @@
 import '../../../offers/data/models/offer.dart';
 import '../../../offers/data/models/offer_option.dart';
-import '../../data/models/cart_item.dart';
 
 abstract class CartEvent {
   const CartEvent();
+}
+
+class LoadCart extends CartEvent {
+  const LoadCart();
 }
 
 class AddToCart extends CartEvent {
@@ -14,9 +17,9 @@ class AddToCart extends CartEvent {
 }
 
 class RemoveFromCart extends CartEvent {
-  final CartItem item;
+  final String key;
 
-  const RemoveFromCart({required this.item});
+  const RemoveFromCart({required this.key});
 }
 
 class ToggleGift extends CartEvent {

@@ -80,7 +80,7 @@ class ProductDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<ProductDetailBloc>(
-      create: (context) => ProductDetailBloc()..add(InitializeProductDetail(offer)),
+      create: (context) => ProductDetailBloc()..add(InitializeProductDetail(offer, variants: offer.variants)),
       child: const ProductDetailView(),
     );
   }
@@ -488,9 +488,7 @@ class ProductDetailView extends StatelessWidget {
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
                                         Text(
-                                          option.name == 'Basic'
-                                              ? _Localizations.get(context, 'basic')
-                                              : _Localizations.get(context, 'pro'),
+                                          option.name,
                                           style: const TextStyle(
                                             fontSize: 18,
                                             fontWeight: FontWeight.w800,

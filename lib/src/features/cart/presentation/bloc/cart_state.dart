@@ -1,33 +1,47 @@
-import '../../data/models/cart_item.dart';
+import '../../data/models/api_cart_model.dart';
 
 class CartState {
-  final List<CartItem> items;
+  final ApiCartData? cartData;
+  final List<Map<String, String>> localItems;
   final bool isGift;
   final String paymentMethod; // 'stripe', 'wallet', 'skipcash'
+  final bool isLoading;
+  final String? error;
 
   const CartState({
-    this.items = const [],
+    this.cartData,
+    this.localItems = const [],
     this.isGift = false,
     this.paymentMethod = 'stripe',
+    this.isLoading = false,
+    this.error,
   });
 
-  double get subtotal => items.fold(0.0, (sum, item) => sum + (item.option.price * item.quantity));
-  
-  double get totalSavings => items.fold(0.0, (sum, item) => sum + ((item.option.originalPrice - item.option.price) * item.quantity));
-  
+  List<ApiCartItem> get items => cartData?.items ?? const [];
+
+  double get subtotal => cartData?.totals.subtotal ?? 0.0;
+
+  double get totalSavings => cartData?.totals.totalSavings ?? 0.0;
+
   double get total => subtotal;
-  
-  int get totalQuantity => items.fold(0, (sum, item) => sum + item.quantity);
+
+  int get totalQuantity => cartData?.totals.itemCount ?? 0;
 
   CartState copyWith({
-    List<CartItem>? items,
+    ApiCartData? cartData,
+    List<Map<String, String>>? localItems,
     bool? isGift,
     String? paymentMethod,
+    bool? isLoading,
+    String? error,
   }) {
     return CartState(
-      items: items ?? this.items,
+      cartData: cartData ?? this.cartData,
+      localItems: localItems ?? this.localItems,
       isGift: isGift ?? this.isGift,
       paymentMethod: paymentMethod ?? this.paymentMethod,
+      isLoading: isLoading ?? this.isLoading,
+      error: error,
     );
   }
 }

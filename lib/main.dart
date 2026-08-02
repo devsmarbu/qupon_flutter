@@ -14,7 +14,9 @@ import 'src/features/account/data/repositories/auth_repository.dart';
 import 'src/core/preferences/pref_store.dart';
 import 'src/features/home/data/repositories/home_repository.dart';
 import 'src/features/home/presentation/bloc/home_bloc.dart';
+import 'src/features/cart/data/repositories/cart_repository.dart';
 import 'src/features/cart/presentation/bloc/cart_bloc.dart';
+import 'src/features/cart/presentation/bloc/cart_event.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -43,6 +45,9 @@ class MyApp extends StatelessWidget {
         RepositoryProvider<HomeRepository>(
           create: (context) => homeRepository ?? HomeRepositoryImpl(apiClient: ApiClient()),
         ),
+        RepositoryProvider<CartRepository>(
+          create: (context) => CartRepositoryImpl(apiClient: ApiClient()),
+        ),
       ],
       child: MultiBlocProvider(
         providers: [
@@ -50,7 +55,9 @@ class MyApp extends StatelessWidget {
             create: (context) => LocaleCubit(),
           ),
           BlocProvider<CartBloc>(
-            create: (context) => CartBloc(),
+            create: (context) => CartBloc(
+              cartRepository: context.read<CartRepository>(),
+            )..add(const LoadCart()),
           ),
           BlocProvider<OffersBloc>(
             create: (context) => OffersBloc(

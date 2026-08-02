@@ -31,35 +31,35 @@ class PastDealsPage extends StatelessWidget {
             Container(height: 1, color: const Color(0xFFE2E8F0)),
 
             // ── Back to Home Button ──────────────────────────────────────
-            Padding(
-              padding: const EdgeInsets.only(left: 16, right: 16, top: 16),
-              child: InkWell(
-                onTap: onNavigateHome,
-                borderRadius: BorderRadius.circular(4),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        isArabic ? Icons.arrow_forward : Icons.arrow_back,
-                        size: 16,
-                        color: const Color(0xFF64748B),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        l10n.drawerHome,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFF64748B),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+            // Padding(
+            //   padding: const EdgeInsets.only(left: 16, right: 16, top: 16),
+            //   child: InkWell(
+            //     onTap: onNavigateHome,
+            //     borderRadius: BorderRadius.circular(4),
+            //     child: Padding(
+            //       padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
+            //       child: Row(
+            //         mainAxisSize: MainAxisSize.min,
+            //         children: [
+            //           Icon(
+            //             isArabic ? Icons.arrow_forward : Icons.arrow_back,
+            //             size: 16,
+            //             color: const Color(0xFF64748B),
+            //           ),
+            //           const SizedBox(width: 8),
+            //           Text(
+            //             l10n.drawerHome,
+            //             style: const TextStyle(
+            //               fontSize: 14,
+            //               fontWeight: FontWeight.w600,
+            //               color: Color(0xFF64748B),
+            //             ),
+            //           ),
+            //         ],
+            //       ),
+            //     ),
+            //   ),
+            // ),
 
             // ── Page Title Row ───────────────────────────────────────────
             Padding(

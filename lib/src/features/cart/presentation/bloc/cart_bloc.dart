@@ -1,10 +1,15 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'cart_event.dart';
 import 'cart_state.dart';
-import '../../data/models/cart_item.dart';
+import '../../data/repositories/cart_repository.dart';
 
 class CartBloc extends Bloc<CartEvent, CartState> {
-  CartBloc() : super(const CartState()) {
+  final CartRepository _cartRepository;
+
+  CartBloc({required CartRepository cartRepository})
+      : _cartRepository = cartRepository,
+        super(const CartState()) {
+    on<LoadCart>(_onLoadCart);
     on<AddToCart>(_onAddToCart);
     on<RemoveFromCart>(_onRemoveFromCart);
     on<ToggleGift>(_onToggleGift);
@@ -12,28 +17,59 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     on<ClearCart>(_onClearCart);
   }
 
-  void _onAddToCart(AddToCart event, Emitter<CartState> emit) {
-    final existingIndex = state.items.indexWhere(
-      (item) => item.offer.id == event.offer.id && item.option.id == event.option.id,
-    );
-
-    List<CartItem> updatedItems;
-    if (existingIndex >= 0) {
-      final existingItem = state.items[existingIndex];
-      updatedItems = List.from(state.items)
-        ..[existingIndex] = existingItem.copyWith(quantity: existingItem.quantity + 1);
-    } else {
-      updatedItems = List.from(state.items)
-        ..add(CartItem(offer: event.offer, option: event.option));
+  Future<void> _onLoadCart(LoadCart event, Emitter<CartState> emit) async {
+    emit(state.copyWith(isLoading: true));
+    print("api calling");
+    try {
+      final cartData = await _cartRepository.getCart(state.localItems);
+      emit(state.copyWith(cartData: cartData, isLoading: false));
+    } catch (e) {
+      emit(state.copyWith(error: e.toString(), isLoading: false));
     }
-
-    emit(state.copyWith(items: updatedItems));
   }
 
-  void _onRemoveFromCart(RemoveFromCart event, Emitter<CartState> emit) {
-    final updatedItems = List<CartItem>.from(state.items)
-      ..removeWhere((item) => item.offer.id == event.item.offer.id && item.option.id == event.item.option.id);
-    emit(state.copyWith(items: updatedItems));
+  Future<void> _onAddToCart(AddToCart event, Emitter<CartState> emit) async {
+    emit(state.copyWith(isLoading: true));
+    try {
+      final now = DateTime.now().toUtc().toIso8601String();
+      // Build the new item map
+      final newItem = {
+        'couponId': event.offer.id,
+        'variantId': event.option.id,
+        'addedAt': now,
+      };
+      // Accumulate: add the new item to the existing local list
+      final updatedItems = List<Map<String, String>>.from(state.localItems)
+        ..add(newItem);
+
+      // Call API with the full accumulated list
+      final cartData = await _cartRepository.getCart(updatedItems);
+      emit(state.copyWith(
+        cartData: cartData,
+        localItems: updatedItems,
+        isLoading: false,
+      ));
+    } catch (e) {
+      emit(state.copyWith(error: e.toString(), isLoading: false));
+    }
+  }
+
+  Future<void> _onRemoveFromCart(RemoveFromCart event, Emitter<CartState> emit) async {
+    emit(state.copyWith(isLoading: true));
+    try {
+      final cartData = await _cartRepository.removeFromCart(event.key);
+      // Also remove from localItems by matching the key format "couponId:variantId"
+      final updatedItems = state.localItems
+          .where((item) => '${item['couponId']}:${item['variantId']}' != event.key)
+          .toList();
+      emit(state.copyWith(
+        cartData: cartData,
+        localItems: updatedItems,
+        isLoading: false,
+      ));
+    } catch (e) {
+      emit(state.copyWith(error: e.toString(), isLoading: false));
+    }
   }
 
   void _onToggleGift(ToggleGift event, Emitter<CartState> emit) {
@@ -48,3 +84,4 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     emit(const CartState());
   }
 }
+
