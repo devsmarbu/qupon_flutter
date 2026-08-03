@@ -2,49 +2,107 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../localization/presentation/cubit/locale_cubit.dart';
 import '../../../home/data/models/home_category.dart';
-import '../../../home/presentation/bloc/home_bloc.dart';
+import '../../../home/data/repositories/home_repository.dart';
 import '../../../offers/presentation/pages/category_offers_page.dart';
 import '../../../main/presentation/pages/main_page.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../../l10n/app_localizations.dart';
 
-class CategoriesPage extends StatelessWidget {
+class CategoriesPage extends StatefulWidget {
   const CategoriesPage({super.key, this.onNavigateHome});
 
   final VoidCallback? onNavigateHome;
+
+  @override
+  State<CategoriesPage> createState() => _CategoriesPageState();
+}
+
+class _CategoriesPageState extends State<CategoriesPage> {
+  List<HomeCategory>? _categories;
+  bool _isLoading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchCategories();
+  }
+
+  Future<void> _fetchCategories() async {
+    if (!mounted) return;
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+    try {
+      final categories = await context.read<HomeRepository>().getCategories();
+      if (!mounted) return;
+      setState(() {
+        _categories = categories;
+        _isLoading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString().replaceAll('Exception: ', '');
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final localeCubit = context.watch<LocaleCubit>();
     final isArabic = localeCubit.state.languageCode == 'ar';
 
-    // Trigger home data fetch if it hasn't been fetched yet
-    final homeBloc = context.read<HomeBloc>();
-    if (homeBloc.state is! HomeLoaded && homeBloc.state is! HomeLoading) {
-      homeBloc.add(const FetchHomeData());
+    return SafeArea(
+      child: _buildBody(context, isArabic),
+    );
+  }
+
+  Widget _buildBody(BuildContext context, bool isArabic) {
+    if (_isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(color: AppColors.primary),
+      );
     }
 
-    return SafeArea(
-      child: BlocBuilder<HomeBloc, HomeState>(
-        builder: (context, state) {
-          if (state is HomeLoading || state is HomeInitial) {
-            return const Center(
-              child: CircularProgressIndicator(color: AppColors.primary),
-            );
-          } else if (state is HomeLoaded) {
-            return _buildContent(context, state.data.categories, isArabic);
-          } else if (state is HomeError) {
-            return Center(
-              child: Text(
-                state.message,
-                style: const TextStyle(color: AppColors.textMuted),
+    if (_error != null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 40),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.wifi_off_outlined, size: 48, color: Color(0xFFCBD5E1)),
+              const SizedBox(height: 16),
+              Text(
+                isArabic
+                    ? 'فشل تحميل الفئات. يرجى التحقق من اتصالك بالإنترنت.'
+                    : 'Failed to load categories. Please check your network connection.',
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: Color(0xFF64748B)),
               ),
-            );
-          }
-          return const SizedBox.shrink();
-        },
-      ),
-    );
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _fetchCategories,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: Text(isArabic ? 'إعادة المحاولة' : 'Retry'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final categories = _categories ?? [];
+    return _buildContent(context, categories, isArabic);
   }
 
   Widget _buildContent(BuildContext context, List<HomeCategory> categories, bool isArabic) {
@@ -59,13 +117,7 @@ class CategoriesPage extends StatelessWidget {
     return RefreshIndicator(
       color: AppColors.primary,
       backgroundColor: Colors.white,
-      onRefresh: () async {
-        context.read<HomeBloc>().add(const FetchHomeData());
-        await context
-            .read<HomeBloc>()
-            .stream
-            .firstWhere((state) => state is HomeLoaded || state is HomeError);
-      },
+      onRefresh: _fetchCategories,
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         child: Column(
@@ -75,7 +127,7 @@ class CategoriesPage extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
               child: InkWell(
-                onTap: onNavigateHome,
+                onTap: widget.onNavigateHome,
                 borderRadius: BorderRadius.circular(8),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),

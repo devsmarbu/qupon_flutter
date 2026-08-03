@@ -23,7 +23,7 @@ class ApiClient {
       onRequest: (options, handler) {
         final token = PrefStore().loadString(AppStrings.keyToken);
         if (token != null && token.isNotEmpty) {
-          options.headers['Authorization'] = 'Bearer $token';
+          options.headers.putIfAbsent('Authorization', () => 'Bearer $token');
         }
         return handler.next(options);
       },

@@ -9,4 +9,6 @@ class ApiEndpoints {
   static const String categoryDetail = '/api/storefront/categories/';
   static const String pastDeals = '/api/storefront/past-deals';
   static const String cart = '/api/cart';
+  static const String categories = '/api/categories';
+  static const String dashboard = '/api/me/dashboard';
 }

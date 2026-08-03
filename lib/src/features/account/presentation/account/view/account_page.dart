@@ -6,6 +6,7 @@ import '../bloc/account_state.dart';
 import '../../login/view/login_page.dart';
 import 'package:qupon/src/core/constants/app_colors.dart';
 import 'package:qupon/l10n/app_localizations.dart';
+import '../../../data/models/dashboard_model.dart';
 
 class AccountPage extends StatefulWidget {
   final VoidCallback? onNavigateHome;
@@ -63,6 +64,69 @@ class _AccountPageState extends State<AccountPage> {
   Widget _buildDashboard(BuildContext context, AccountAuthenticated state) {
     final l10n = AppLocalizations.of(context)!;
 
+    if (state.isLoadingDashboard && state.dashboardData == null) {
+      return const Scaffold(
+        backgroundColor: Colors.transparent,
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(color: AppColors.primary),
+              SizedBox(height: 16),
+              Text(
+                'Loading dashboard...',
+                style: TextStyle(color: Color(0xFF64748B), fontSize: 14),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (state.error != null && state.dashboardData == null) {
+      return Scaffold(
+        backgroundColor: Colors.transparent,
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.error_outline, color: Colors.red, size: 48),
+                const SizedBox(height: 16),
+                Text(
+                  state.error!,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.red, fontSize: 14),
+                ),
+                const SizedBox(height: 24),
+                ElevatedButton(
+                  onPressed: () {
+                    context.read<AccountBloc>().add(const LoadDashboard());
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Text('Retry', style: TextStyle(color: Colors.white)),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    final data = state.dashboardData;
+    final totalSpent = data?.totalSpent ?? 0.0;
+    final couponsUsed = data?.couponsUsed ?? 0;
+    final totalSaved = data?.totalSaved ?? 0.0;
+    final activeCoupons = data?.activeCoupons ?? 0;
+    final wallet = data?.wallet ?? 0.0;
+    final transactions = data?.transactions ?? [];
+
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: SafeArea(
@@ -95,7 +159,11 @@ class _AccountPageState extends State<AccountPage> {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                l10n.dashboardSubtitle(3, 12, _selectedPeriod == 'All time' ? l10n.periodAllTime : _selectedPeriod),
+                                l10n.dashboardSubtitle(
+                                  transactions.length,
+                                  couponsUsed,
+                                  _selectedPeriod == 'All time' ? l10n.periodAllTime : _selectedPeriod,
+                                ),
                                 style: const TextStyle(
                                   fontSize: 13,
                                   color: Color(0xFF64748B),
@@ -149,7 +217,7 @@ class _AccountPageState extends State<AccountPage> {
                             decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(12),
-                             // border: Border.all(color: AppColors.primary, width: 1.5),
+                              // border: Border.all(color: AppColors.primary, width: 1.5),
                             ),
                             child: Row(
                               children: [
@@ -202,9 +270,9 @@ class _AccountPageState extends State<AccountPage> {
                             ),
                           ),
                           const SizedBox(height: 16),
-                          const Text(
-                            'QAR 1,250',
-                            style: TextStyle(
+                          Text(
+                            'QAR ${totalSpent.toStringAsFixed(0)}',
+                            style: const TextStyle(
                               fontSize: 32,
                               fontWeight: FontWeight.w900,
                               color: Color(0xFF0F172A),
@@ -233,7 +301,7 @@ class _AccountPageState extends State<AccountPage> {
                             icon: Icons.confirmation_number_outlined,
                             iconColor: const Color(0xFF0284C7),
                             bgColor: AppColors.iconBgBlue,
-                            value: '12',
+                            value: couponsUsed.toString(),
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -243,7 +311,7 @@ class _AccountPageState extends State<AccountPage> {
                             icon: Icons.stars_outlined,
                             iconColor: const Color(0xFF16A34A),
                             bgColor: AppColors.iconBgGreen,
-                            value: 'QAR 340',
+                            value: 'QAR ${totalSaved.toStringAsFixed(0)}',
                           ),
                         ),
                       ],
@@ -257,7 +325,7 @@ class _AccountPageState extends State<AccountPage> {
                             icon: Icons.local_offer_outlined,
                             iconColor: const Color(0xFFEA580C),
                             bgColor: AppColors.iconBgLightOrange,
-                            value: '5',
+                            value: activeCoupons.toString(),
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -267,7 +335,7 @@ class _AccountPageState extends State<AccountPage> {
                             icon: Icons.account_balance_wallet_outlined,
                             iconColor: const Color(0xFF9333EA),
                             bgColor: AppColors.iconBgPurple,
-                            value: 'QAR 500',
+                            value: 'QAR ${wallet.toStringAsFixed(0)}',
                           ),
                         ),
                       ],
@@ -299,35 +367,69 @@ class _AccountPageState extends State<AccountPage> {
                     const SizedBox(height: 12),
 
                     // Transaction Items
-                    _buildOrderItem(
-                      title: l10n.groceryStore,
-                      date: 'Jul 15, 2025',
-                      price: '-QAR 85',
-                      icon: Icons.shopping_bag_outlined,
-                      iconColor: const Color(0xFFEA580C),
-                      bgColor: AppColors.iconBgLightOrange,
-                    ),
-                    _buildOrderItem(
-                      title: l10n.couponRedeemed,
-                      date: 'Jul 14, 2025',
-                      price: '+QAR 25',
-                      priceColor: AppColors.textPositive,
-                      icon: Icons.card_giftcard_outlined,
-                      iconColor: const Color(0xFF16A34A),
-                      bgColor: AppColors.iconBgGreen,
-                    ),
-                    _buildOrderItem(
-                      title: l10n.coffeeShop,
-                      date: 'Jul 13, 2025',
-                      price: '-QAR 18',
-                      icon: Icons.local_cafe_outlined,
-                      iconColor: const Color(0xFF0284C7),
-                      bgColor: AppColors.iconBgBlue,
-                    ),
+                    if (transactions.isEmpty)
+                      const Center(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 24),
+                          child: Text(
+                            'No recent orders',
+                            style: TextStyle(color: Color(0xFF64748B), fontSize: 14),
+                          ),
+                        ),
+                      )
+                    else
+                      ...transactions.map((tx) {
+                        IconData icon;
+                        Color iconColor;
+                        Color bgColor;
+
+                        switch (tx.type) {
+                          case 'grocery':
+                            icon = Icons.shopping_bag_outlined;
+                            iconColor = const Color(0xFFEA580C);
+                            bgColor = AppColors.iconBgLightOrange;
+                            break;
+                          case 'redeemed':
+                            icon = Icons.card_giftcard_outlined;
+                            iconColor = const Color(0xFF16A34A);
+                            bgColor = AppColors.iconBgGreen;
+                            break;
+                          case 'coffee':
+                            icon = Icons.local_cafe_outlined;
+                            iconColor = const Color(0xFF0284C7);
+                            bgColor = AppColors.iconBgBlue;
+                            break;
+                          default:
+                            icon = Icons.receipt_long_outlined;
+                            iconColor = const Color(0xFF64748B);
+                            bgColor = const Color(0xFFF1F5F9);
+                        }
+
+                        Color? priceColor = tx.price.startsWith('+') ? AppColors.textPositive : null;
+
+                        String displayTitle = tx.title;
+                        if (tx.title == 'groceryStore') {
+                          displayTitle = l10n.groceryStore;
+                        } else if (tx.title == 'couponRedeemed') {
+                          displayTitle = l10n.couponRedeemed;
+                        } else if (tx.title == 'coffeeShop') {
+                          displayTitle = l10n.coffeeShop;
+                        }
+
+                        return _buildOrderItem(
+                          title: displayTitle,
+                          date: tx.date,
+                          price: tx.price,
+                          priceColor: priceColor,
+                          icon: icon,
+                          iconColor: iconColor,
+                          bgColor: bgColor,
+                        );
+                      }),
                   ],
                 ),
               ),
-           //   const AppFooter(),
+              // const AppFooter(),
             ],
           ),
         ),

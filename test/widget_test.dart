@@ -8,6 +8,7 @@ import 'package:qupon/src/core/preferences/pref_store.dart';
 import 'package:qupon/src/features/home/presentation/bloc/home_bloc.dart';
 import 'package:qupon/src/features/home/presentation/pages/home_page.dart';
 import 'package:qupon/src/features/account/data/models/profile_data.dart';
+import 'package:qupon/src/features/home/data/models/home_category.dart';
 import 'package:qupon/src/features/home/data/repositories/home_repository.dart';
 import 'package:qupon/src/features/offers/data/repositories/offers_repository.dart';
 import 'package:qupon/src/features/home/data/models/home_data.dart';
@@ -17,6 +18,11 @@ import 'package:qupon/src/features/main/presentation/pages/splash_page.dart';
 import 'package:qupon/src/features/account/presentation/welcome/view/welcome_page.dart';
 
 class FakeHomeRepository implements HomeRepository {
+  @override
+  Future<List<HomeCategory>> getCategories() async {
+    return [];
+  }
+
   @override
   Future<HomeData> getHomeData() async {
     return const HomeData(
@@ -91,8 +97,8 @@ void main() {
     expect(find.text('Shopping Cart'), findsOneWidget);
     expect(find.text('Your cart is empty'), findsOneWidget);
 
-    // Tap on "Continue shopping" button to return to Home page
-    final continueShoppingButton = find.text('Continue shopping');
+    // Tap on "Browse deals" button to return to Home page
+    final continueShoppingButton = find.text('Browse deals');
     expect(continueShoppingButton, findsOneWidget);
     await tester.tap(continueShoppingButton);
     await tester.pump(const Duration(milliseconds: 800));
