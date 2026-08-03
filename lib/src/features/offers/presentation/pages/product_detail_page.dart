@@ -11,8 +11,14 @@ import '../bloc/product_detail_event.dart';
 import '../bloc/product_detail_state.dart';
 
 import '../../../cart/presentation/bloc/cart_bloc.dart';
+import '../../../cart/presentation/bloc/cart_state.dart';
 import '../../../cart/presentation/bloc/cart_event.dart';
+import '../../../main/presentation/pages/main_page.dart';
+import '../../../account/presentation/account/bloc/account_bloc.dart';
+import '../../../account/presentation/account/bloc/account_state.dart';
+import '../../../account/presentation/login/view/sign_in_dialog.dart';
 import '../widgets/direct_checkout_sheet.dart';
+
 
 class _Localizations {
   static const Map<String, Map<String, String>> _localizedValues = {
@@ -123,6 +129,15 @@ class ProductDetailView extends StatelessWidget {
     });
   }
 
+  Future<bool> _ensureLoggedIn(BuildContext context) async {
+    final accountState = context.read<AccountBloc>().state;
+    if (accountState is AccountAuthenticated) {
+      return true;
+    }
+    final loggedIn = await SignInDialog.show(context);
+    return loggedIn == true;
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -195,13 +210,44 @@ class ProductDetailView extends StatelessWidget {
                   ),
                 ),
               ),
-              IconButton(
-                icon: const Icon(
-                  Icons.shopping_cart_outlined,
-                  color: Color(0xFF0F172A),
-                ),
-                onPressed: () {},
+              BlocBuilder<CartBloc, CartState>(
+                builder: (context, state) {
+                  final count = state.totalQuantity;
+                  return IconButton(
+                    icon: count > 0
+                        ? Badge(
+                            backgroundColor: const Color(0xFFFF6B35),
+                            label: Text(
+                              '$count',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            child: const Icon(
+                              Icons.shopping_cart_outlined,
+                              color: Color(0xFF0F172A),
+                            ),
+                          )
+                        : const Icon(
+                            Icons.shopping_cart_outlined,
+                            color: Color(0xFF0F172A),
+                          ),
+                    onPressed: () {
+                      final mainPageState =
+                          context.findAncestorStateOfType<MainPageState>();
+                      if (mainPageState != null) {
+                        mainPageState.setSelectedIndex(4);
+                      }
+                      if (Navigator.of(context).canPop()) {
+                        Navigator.of(context).pop();
+                      }
+                    },
+                  );
+                },
               ),
+
               IconButton(
                 icon: const Icon(
                   Icons.person_outline,
@@ -695,51 +741,71 @@ class ProductDetailView extends StatelessWidget {
                                 ],
                               ),
                               const SizedBox(height: 16),
-                              ElevatedButton(
-                                onPressed: () {
-                                  DirectCheckoutSheet.show(
-                                    context,
-                                    offer: offer,
-                                    option: selectedOption,
-                                    isGift: false,
-                                  );
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFFFF6B35),
-                                  foregroundColor: Colors.white,
-                                  minimumSize: const Size(double.infinity, 50),
-                                  elevation: 0,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    flex: 4,
+                                    child: ElevatedButton(
+                                      onPressed: () async {
+                                        if (!await _ensureLoggedIn(context)) return;
+                                        if (!context.mounted) return;
+                                        DirectCheckoutSheet.show(
+                                          context,
+                                          offer: offer,
+                                          option: selectedOption,
+                                          isGift: false,
+                                        );
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: const Color(0xFFFF6B35),
+                                        foregroundColor: Colors.white,
+                                        elevation: 0,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                        padding: const EdgeInsets.symmetric(vertical: 14),
+                                      ),
+                                      child: Text(
+                                        _Localizations.get(context, 'getDealNow'),
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
                                   ),
-                                ),
-                                child: Text(
-                                  _Localizations.get(context, 'getDealNow'),
-                                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                                ),
-                              ),
-                              const SizedBox(height: 10),
-                              OutlinedButton(
-                                onPressed: () {
-                                  DirectCheckoutSheet.show(
-                                    context,
-                                    offer: offer,
-                                    option: selectedOption,
-                                    isGift: true,
-                                  );
-                                },
-                                style: OutlinedButton.styleFrom(
-                                  foregroundColor: Colors.black,
-                                  side: const BorderSide(color: Color(0xFFE2E8F0)),
-                                  minimumSize: const Size(double.infinity, 50),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    flex: 4,
+                                    child: OutlinedButton(
+                                      onPressed: () async {
+                                        if (!await _ensureLoggedIn(context)) return;
+                                        if (!context.mounted) return;
+                                        DirectCheckoutSheet.show(
+                                          context,
+                                          offer: offer,
+                                          option: selectedOption,
+                                          isGift: true,
+                                        );
+                                      },
+                                      style: OutlinedButton.styleFrom(
+                                        foregroundColor: Colors.black,
+                                        side: const BorderSide(color: Color(0xFFE2E8F0)),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                        padding: const EdgeInsets.symmetric(vertical: 14),
+                                      ),
+                                      child: Text(
+                                        _Localizations.get(context, 'buyAsGift'),
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
                                   ),
-                                ),
-                                child: Text(
-                                  _Localizations.get(context, 'buyAsGift'),
-                                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                                ),
+                                ],
                               ),
 
                               const SizedBox(height: 16),

@@ -8,6 +8,9 @@ import '../bloc/cart_bloc.dart';
 import '../bloc/cart_state.dart';
 import '../bloc/cart_event.dart';
 import '../../data/models/api_cart_model.dart';
+import '../../../account/presentation/account/bloc/account_bloc.dart';
+import '../../../account/presentation/account/bloc/account_state.dart';
+import '../../../account/presentation/login/view/sign_in_dialog.dart';
 import 'payment_webview_page.dart';
 
 class CartPage extends StatefulWidget {
@@ -693,13 +696,19 @@ class _CartPageState extends State<CartPage> {
             child: ElevatedButton(
               onPressed: state.isCheckingOut
                   ? null
-                  : () {
+                  : () async {
+                      final accountState = context.read<AccountBloc>().state;
+                      if (accountState is! AccountAuthenticated) {
+                        final loggedIn = await SignInDialog.show(context);
+                        if (loggedIn != true || !context.mounted) return;
+                      }
                       context.read<CartBloc>().add(
                         PlaceOrder(
                           giftPhoneNumber: _phoneController.text.trim(),
                         ),
                       );
                     },
+
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFFFF6B35),
                 foregroundColor: Colors.white,
