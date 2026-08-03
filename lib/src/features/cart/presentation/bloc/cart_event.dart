@@ -28,10 +28,18 @@ class ToggleGift extends CartEvent {
   const ToggleGift({required this.isGift});
 }
 
+
 class SelectPaymentMethod extends CartEvent {
   final String method;
 
   const SelectPaymentMethod({required this.method});
+}
+
+class PlaceOrder extends CartEvent {
+  /// Recipient phone number — only relevant when gift == true
+  final String giftPhoneNumber;
+
+  const PlaceOrder({this.giftPhoneNumber = ''});
 }
 
 class ClearCart extends CartEvent {

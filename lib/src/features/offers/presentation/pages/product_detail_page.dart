@@ -12,6 +12,7 @@ import '../bloc/product_detail_state.dart';
 
 import '../../../cart/presentation/bloc/cart_bloc.dart';
 import '../../../cart/presentation/bloc/cart_event.dart';
+import '../widgets/direct_checkout_sheet.dart';
 
 class _Localizations {
   static const Map<String, Map<String, String>> _localizedValues = {
@@ -91,20 +92,22 @@ class ProductDetailView extends StatelessWidget {
 
   void _showAddedToCartSnackBar(BuildContext context) {
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    ScaffoldMessenger.of(context).showSnackBar(
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.clearSnackBars();
+    messenger.showSnackBar(
       SnackBar(
         content: Text(
           isArabic
-              ? 'تمت إضافة العرض إلى السلة بنجاح!'
-              : 'Offer added to cart successfully!',
+              ? 'تمت الإضافة إلى السلة!'
+              : 'Added to cart!',
+
           style: const TextStyle(fontWeight: FontWeight.w600),
         ),
         backgroundColor: const Color(0xFF1E293B),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         margin: const EdgeInsets.all(16),
-        duration: const Duration(seconds: 3),
+        duration: const Duration(seconds: 2),
         action: SnackBarAction(
           textColor: const Color(0xFFFF6B35),
           label: isArabic ? 'عرض السلة' : 'View Cart',
@@ -114,7 +117,12 @@ class ProductDetailView extends StatelessWidget {
         ),
       ),
     );
+
+    Future.delayed(const Duration(seconds: 2), () {
+      messenger.hideCurrentSnackBar();
+    });
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -689,10 +697,12 @@ class ProductDetailView extends StatelessWidget {
                               const SizedBox(height: 16),
                               ElevatedButton(
                                 onPressed: () {
-                                  context.read<CartBloc>().add(
-                                    AddToCart(offer: offer, option: selectedOption),
+                                  DirectCheckoutSheet.show(
+                                    context,
+                                    offer: offer,
+                                    option: selectedOption,
+                                    isGift: false,
                                   );
-                                  _showAddedToCartSnackBar(context);
                                 },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: const Color(0xFFFF6B35),
@@ -711,13 +721,12 @@ class ProductDetailView extends StatelessWidget {
                               const SizedBox(height: 10),
                               OutlinedButton(
                                 onPressed: () {
-                                  context.read<CartBloc>().add(
-                                    AddToCart(offer: offer, option: selectedOption),
+                                  DirectCheckoutSheet.show(
+                                    context,
+                                    offer: offer,
+                                    option: selectedOption,
+                                    isGift: true,
                                   );
-                                  context.read<CartBloc>().add(
-                                    const ToggleGift(isGift: true),
-                                  );
-                                  _showAddedToCartSnackBar(context);
                                 },
                                 style: OutlinedButton.styleFrom(
                                   foregroundColor: Colors.black,
@@ -732,6 +741,7 @@ class ProductDetailView extends StatelessWidget {
                                   style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                                 ),
                               ),
+
                               const SizedBox(height: 16),
                               Row(
                                 children: [
@@ -752,7 +762,12 @@ class ProductDetailView extends StatelessWidget {
                                   const SizedBox(width: 12),
                                   Expanded(
                                     child: OutlinedButton(
-                                      onPressed: () {},
+                                      onPressed: () {
+                                        context.read<CartBloc>().add(
+                                          AddToCart(offer: offer, option: selectedOption),
+                                        );
+                                        _showAddedToCartSnackBar(context);
+                                      },
                                       style: OutlinedButton.styleFrom(
                                         side: const BorderSide(color: Color(0xFFE2E8F0)),
                                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -1102,10 +1117,12 @@ class ProductDetailView extends StatelessWidget {
                               flex: 4,
                               child: ElevatedButton(
                                 onPressed: () {
-                                  context.read<CartBloc>().add(
-                                    AddToCart(offer: offer, option: selectedOption),
+                                  DirectCheckoutSheet.show(
+                                    context,
+                                    offer: offer,
+                                    option: selectedOption,
+                                    isGift: false,
                                   );
-                                  _showAddedToCartSnackBar(context);
                                 },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: const Color(0xFFFF6B35),
@@ -1131,13 +1148,12 @@ class ProductDetailView extends StatelessWidget {
                               flex: 4,
                               child: OutlinedButton(
                                 onPressed: () {
-                                  context.read<CartBloc>().add(
-                                    AddToCart(offer: offer, option: selectedOption),
+                                  DirectCheckoutSheet.show(
+                                    context,
+                                    offer: offer,
+                                    option: selectedOption,
+                                    isGift: true,
                                   );
-                                  context.read<CartBloc>().add(
-                                    const ToggleGift(isGift: true),
-                                  );
-                                  _showAddedToCartSnackBar(context);
                                 },
                                 style: OutlinedButton.styleFrom(
                                   foregroundColor: Colors.black,
@@ -1156,26 +1172,10 @@ class ProductDetailView extends StatelessWidget {
                                 ),
                               ),
                             ),
+
                           ],
                         ),
                         const SizedBox(height: 12),
-                        // qupon.marbu.in badge pill at bottom
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFF8FAFC),
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(color: const Color(0xFFF1F5F9)),
-                          ),
-                          child: const Text(
-                            'qupon.marbu.in',
-                            style: TextStyle(
-                              color: Color(0xFF475569),
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
                       ],
                     ),
                   ),

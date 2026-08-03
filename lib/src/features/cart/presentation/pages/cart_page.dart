@@ -8,6 +8,7 @@ import '../bloc/cart_bloc.dart';
 import '../bloc/cart_state.dart';
 import '../bloc/cart_event.dart';
 import '../../data/models/api_cart_model.dart';
+import 'payment_webview_page.dart';
 
 class CartPage extends StatefulWidget {
   final VoidCallback onNavigateHome;
@@ -36,82 +37,168 @@ class _CartPageState extends State<CartPage> {
     final localeCubit = context.watch<LocaleCubit>();
     final isArabic = localeCubit.state.languageCode == 'ar';
 
-    return SafeArea(
-      bottom: false,
-      child: BlocBuilder<CartBloc, CartState>(
-        builder: (context, state) {
-          final isEmpty = state.items.isEmpty;
-
-          return SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // ── Divider under AppBar ──────────────────────────────────────
-                Container(height: 1, color: const Color(0xFFE2E8F0)),
-
-                // ── Page Title ───────────────────────────────────────────────
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 56,
-                        height: 56,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFFFF7ED), // Soft orange tint background
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(
-                            color: const Color(0xFFFFD8C2),
-                            width: 1.5,
-                          ),
-                        ),
-                        child: const Center(
-                          child: Icon(
-                            Icons.shopping_bag_outlined,
-                            color: Color(0xFFFF6B35), // Signature Orange
-                            size: 28,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Text(
-                        isEmpty 
-                            ? l10n.shoppingCartTitle 
-                            : '${l10n.shoppingCartTitle} (${state.totalQuantity})',
-                        style: const TextStyle(
-                          fontSize: 26,
-                          fontWeight: FontWeight.w900,
-                          color: Color(0xFF0F172A),
-                        ),
-                      ),
-                    ],
+    return BlocListener<CartBloc, CartState>(
+      listenWhen: (previous, current) =>
+          previous.checkoutResponse != current.checkoutResponse ||
+          previous.checkoutError != current.checkoutError,
+      listener: (context, state) {
+        // ── Checkout error ──────────────────────────────────────────────────
+        if (state.checkoutError != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(Icons.error_outline, color: Colors.white, size: 18),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      state.checkoutError!,
+                      style: const TextStyle(fontSize: 14),
+                    ),
                   ),
-                ),
-
-                if (isEmpty)
-                  _buildEmptyState(context, l10n)
-                else ...[
-                  // ── Cart Items List ──────────────────────────────────────────
-                  ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    padding: EdgeInsets.zero,
-                    itemCount: state.items.length,
-                    itemBuilder: (context, index) {
-                      final item = state.items[index];
-                      return _buildCartItemCard(context, item, l10n, isArabic);
-                    },
-                  ),
-
-                  // ── Combined Order Summary Card ──────────────────────────────
-                  _buildCombinedOrderCard(context, state, l10n, isArabic),
                 ],
-
-                const SizedBox(height: 120),
-              ],
+              ),
+              backgroundColor: const Color(0xFFDC2626),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              margin: const EdgeInsets.all(16),
             ),
           );
-        },
+        }
+
+        // ── Checkout success — open WebView if redirectUrl is present ────────
+        if (state.checkoutResponse != null && state.checkoutResponse!.ok) {
+          final response = state.checkoutResponse!;
+
+          if (response.hasRedirect) {
+            // Open payment gateway in WebView
+            Navigator.of(context)
+                .push<PaymentResult>(
+                  MaterialPageRoute(
+                    fullscreenDialog: true,
+                    builder: (_) => PaymentWebViewPage(
+                      redirectUrl: response.redirectUrl!,
+                      sessionId: response.checkoutSessionId,
+                    ),
+                  ),
+                )
+                .then((result) {
+                  if (!context.mounted) return;
+                  if (result == PaymentResult.success) {
+                    // Payment completed — show success screen
+                    final mainPageState =
+                        context.findAncestorStateOfType<MainPageState>();
+                    if (mainPageState != null) {
+                      mainPageState.showCheckoutSuccess(context);
+                    }
+                  } else {
+                    // User cancelled / closed WebView
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: const Row(
+                          children: [
+                            Icon(Icons.info_outline, color: Colors.white, size: 18),
+                            SizedBox(width: 10),
+                            Text('Payment was cancelled.',
+                                style: TextStyle(fontSize: 14)),
+                          ],
+                        ),
+                        backgroundColor: const Color(0xFF64748B),
+                        behavior: SnackBarBehavior.floating,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10)),
+                        margin: const EdgeInsets.all(16),
+                      ),
+                    );
+                  }
+                });
+          } else {
+            // No redirect URL — gateway handled payment server-side
+            final mainPageState =
+                context.findAncestorStateOfType<MainPageState>();
+            if (mainPageState != null) {
+              mainPageState.showCheckoutSuccess(context);
+            }
+          }
+        }
+      },
+      child: SafeArea(
+        bottom: false,
+        child: BlocBuilder<CartBloc, CartState>(
+          builder: (context, state) {
+            final isEmpty = state.items.isEmpty;
+
+            return SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // ── Divider under AppBar ──────────────────────────────────────
+                  Container(height: 1, color: const Color(0xFFE2E8F0)),
+
+                  // ── Page Title ───────────────────────────────────────────────
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 56,
+                          height: 56,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFFF7ED), // Soft orange tint background
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(
+                              color: const Color(0xFFFFD8C2),
+                              width: 1.5,
+                            ),
+                          ),
+                          child: const Center(
+                            child: Icon(
+                              Icons.shopping_bag_outlined,
+                              color: Color(0xFFFF6B35), // Signature Orange
+                              size: 28,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Text(
+                          isEmpty
+                              ? l10n.shoppingCartTitle
+                              : '${l10n.shoppingCartTitle} (${state.totalQuantity})',
+                          style: const TextStyle(
+                            fontSize: 26,
+                            fontWeight: FontWeight.w900,
+                            color: Color(0xFF0F172A),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  if (isEmpty)
+                    _buildEmptyState(context, l10n)
+                  else ...[
+                    // ── Cart Items List ──────────────────────────────────────────
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      padding: EdgeInsets.zero,
+                      itemCount: state.items.length,
+                      itemBuilder: (context, index) {
+                        final item = state.items[index];
+                        return _buildCartItemCard(context, item, l10n, isArabic);
+                      },
+                    ),
+
+                    // ── Combined Order Summary Card ──────────────────────────────
+                    _buildCombinedOrderCard(context, state, l10n, isArabic),
+                  ],
+
+                  const SizedBox(height: 120),
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }
@@ -559,35 +646,44 @@ class _CartPageState extends State<CartPage> {
           ),
           const SizedBox(height: 16),
 
-          // Stripe
-          _buildPaymentOptionTile(
-            context,
-            id: 'stripe',
-            icon: Icons.credit_card,
-            title: l10n.stripe,
-            isSelected: state.paymentMethod == 'stripe',
-          ),
-          const SizedBox(height: 12),
+          // Dynamic payment methods from API
+          if (state.gatewaysLoading)
+            _buildGatewaysLoadingShimmer()
+          else if (state.activeGateways.isEmpty)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 8),
+              child: Text(
+                'No payment methods available.',
+                style: TextStyle(fontSize: 13, color: Color(0xFF94A3B8)),
+              ),
+            )
+          else
+            ...state.activeGateways.asMap().entries.map((entry) {
+              final index = entry.key;
+              final gateway = entry.value;
 
-          // Wallet
-          _buildPaymentOptionTile(
-            context,
-            id: 'wallet',
-            icon: Icons.account_balance_wallet_outlined,
-            title: l10n.wallet,
-            subtitle: l10n.walletBalance('0'),
-            isSelected: state.paymentMethod == 'wallet',
-          ),
-          const SizedBox(height: 12),
+              // Wallet: show balance subtitle and disable if balance == 0
+              String? subtitle;
+              bool isDisabled = false;
+              if (gateway.identifier == 'wallet') {
+                final walletBalance = gateway.walletSettings?.minBalance ?? 0.0;
+                subtitle = 'Balance: QAR ${walletBalance.toStringAsFixed(0)}';
+                isDisabled = walletBalance <= 0;
+              }
 
-          // SkipCash
-          _buildPaymentOptionTile(
-            context,
-            id: 'skipcash',
-            icon: Icons.payment,
-            title: l10n.skipCash,
-            isSelected: state.paymentMethod == 'skipcash',
-          ),
+              return Padding(
+                padding: EdgeInsets.only(bottom: index < state.activeGateways.length - 1 ? 12 : 0),
+                child: _buildPaymentOptionTile(
+                  context,
+                  id: gateway.identifier,
+                  icon: _iconForGateway(gateway.identifier),
+                  title: gateway.name,
+                  subtitle: subtitle,
+                  isSelected: state.paymentMethod == gateway.identifier,
+                  isDisabled: isDisabled,
+                ),
+              );
+            }),
           const SizedBox(height: 24),
 
           // Checkout button
@@ -595,27 +691,40 @@ class _CartPageState extends State<CartPage> {
             width: double.infinity,
             height: 50,
             child: ElevatedButton(
-              onPressed: () {
-                final mainPageState = context.findAncestorStateOfType<MainPageState>();
-                if (mainPageState != null) {
-                  mainPageState.showCheckoutSuccess(context);
-                }
-              },
+              onPressed: state.isCheckingOut
+                  ? null
+                  : () {
+                      context.read<CartBloc>().add(
+                        PlaceOrder(
+                          giftPhoneNumber: _phoneController.text.trim(),
+                        ),
+                      );
+                    },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFFFF6B35),
                 foregroundColor: Colors.white,
+                disabledBackgroundColor: const Color(0xFFFF6B35).withValues(alpha: 0.6),
                 elevation: 0,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              child: Text(
-                'Checkout · QAR ${state.total.toStringAsFixed(0)}',
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              child: state.isCheckingOut
+                  ? const SizedBox(
+                      width: 22,
+                      height: 22,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.5,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    )
+                  : Text(
+                      'Checkout · QAR ${state.total.toStringAsFixed(0)}',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
             ),
           ),
         ],
@@ -630,72 +739,169 @@ class _CartPageState extends State<CartPage> {
     required String title,
     String? subtitle,
     required bool isSelected,
+    bool isDisabled = false,
   }) {
+    final Color textColor = isDisabled ? const Color(0xFFB0BEC5) : const Color(0xFF0F172A);
+    final Color iconColor = isDisabled ? const Color(0xFFCFD8DC) : const Color(0xFF64748B);
+    final Color borderColor = isSelected && !isDisabled
+        ? const Color(0xFFFF6B35)
+        : const Color(0xFFE2E8F0);
+    final double borderWidth = isSelected && !isDisabled ? 2.0 : 1.2;
+    final Color radioColor = isSelected && !isDisabled
+        ? const Color(0xFFFF6B35)
+        : const Color(0xFFCBD5E1);
+    final double radioWidth = isSelected && !isDisabled ? 6.0 : 1.5;
+
     return InkWell(
-      onTap: () {
-        context.read<CartBloc>().add(SelectPaymentMethod(method: id));
-      },
+      onTap: isDisabled
+          ? null
+          : () => context.read<CartBloc>().add(SelectPaymentMethod(method: id)),
       borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSelected ? const Color(0xFFFF6B35) : const Color(0xFFE2E8F0),
-            width: isSelected ? 2.0 : 1.2,
+      child: Opacity(
+        opacity: isDisabled ? 0.55 : 1.0,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: borderColor, width: borderWidth),
           ),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: const Color(0xFFF8FAFC),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: const Color(0xFFE2E8F0)),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF8FAFC),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                ),
+                child: Icon(icon, color: iconColor, size: 20),
               ),
-              child: Icon(icon, color: const Color(0xFF64748B), size: 20),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF0F172A),
-                    ),
-                  ),
-                  if (subtitle != null) ...[
-                    const SizedBox(height: 2),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                     Text(
-                      subtitle,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Color(0xFF64748B),
+                      title,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: textColor,
                       ),
                     ),
+                    if (subtitle != null) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF64748B),
+                        ),
+                      ),
+                    ],
                   ],
-                ],
-              ),
-            ),
-            Container(
-              width: 20,
-              height: 20,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: isSelected ? const Color(0xFFFF6B35) : const Color(0xFFCBD5E1),
-                  width: isSelected ? 6.0 : 1.5,
                 ),
               ),
-            ),
-          ],
+              Container(
+                width: 20,
+                height: 20,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: radioColor,
+                    width: radioWidth,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Maps gateway identifier to a suitable icon
+  IconData _iconForGateway(String identifier) {
+    switch (identifier) {
+      case 'stripe':
+        return Icons.credit_card;
+      case 'wallet':
+        return Icons.account_balance_wallet_outlined;
+      case 'skipcash':
+        return Icons.payment;
+      case 'tap':
+        return Icons.tap_and_play_outlined;
+      case 'partner':
+        return Icons.handshake_outlined;
+      default:
+        return Icons.payment_outlined;
+    }
+  }
+
+  /// Skeleton placeholder shown while payment gateways are loading
+  Widget _buildGatewaysLoadingShimmer() {
+    return Column(
+      children: List.generate(3, (index) {
+        return Padding(
+          padding: EdgeInsets.only(bottom: index < 2 ? 12 : 0),
+          child: _ShimmerBox(
+            height: 68,
+            borderRadius: BorderRadius.circular(12),
+          ),
+        );
+      }),
+    );
+  }
+}
+
+/// Simple animated shimmer/skeleton box widget
+class _ShimmerBox extends StatefulWidget {
+  final double height;
+  final BorderRadius borderRadius;
+
+  const _ShimmerBox({required this.height, required this.borderRadius});
+
+  @override
+  State<_ShimmerBox> createState() => _ShimmerBoxState();
+}
+
+class _ShimmerBoxState extends State<_ShimmerBox>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    )..repeat(reverse: true);
+    _animation = Tween<double>(begin: 0.4, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _animation,
+      builder: (context, _) => Opacity(
+        opacity: _animation.value,
+        child: Container(
+          height: widget.height,
+          decoration: BoxDecoration(
+            color: const Color(0xFFE2E8F0),
+            borderRadius: widget.borderRadius,
+          ),
         ),
       ),
     );

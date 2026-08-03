@@ -31,11 +31,13 @@ class CustomSnackBar {
         backgroundColor: isError ? Colors.red : Colors.green,
         behavior: SnackBarBehavior.floating,
         dismissDirection: DismissDirection.up,
+        duration: const Duration(seconds: 2),
         margin: EdgeInsets.only(
           bottom: bottomMargin,
           left: 20,
           right: 20,
         ),
+
       ),
     );
   }

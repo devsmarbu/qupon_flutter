@@ -8,4 +8,6 @@ class ApiEndpoints {
   static const String storefrontHome = '/api/storefront/home';
   static const String categoryDetail = '/api/storefront/categories/';
   static const String cart = '/api/cart';
+  static const String paymentGateways = '/api/payment-gateways';
+  static const String checkout = '/api/checkout';
 }

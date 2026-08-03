@@ -47,6 +47,7 @@ dependencies:
   freezed: ^2.4.5
   json_serializable: ^6.8.0
   shared_preferences: ^2.5.5
+  webview_flutter: ^4.10.0
 
 dev_dependencies:
   flutter_test:

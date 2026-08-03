@@ -7,7 +7,8 @@ plugins {
 
 android {
     namespace = "com.example.qupon"
-    compileSdk = flutter.compileSdkVersion
+    // webview_flutter_android v4.x requires compileSdk >= 35
+    compileSdk = 35
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -22,8 +23,7 @@ android {
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.example.qupon"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
+        // webview_flutter v4 requires minSdk >= 21
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
