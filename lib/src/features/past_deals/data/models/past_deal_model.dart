@@ -1,10 +1,12 @@
 class PastDeal {
   final String id;
   final String title;
+  final String titleAr;
   final String brand;
   final String category;
   final String location;
   final String description;
+  final String descriptionAr;
   final double price;
   final String currency;
   final String imageUrl;
@@ -12,14 +14,48 @@ class PastDeal {
   const PastDeal({
     required this.id,
     required this.title,
+    this.titleAr = '',
     required this.brand,
     required this.category,
     required this.location,
     required this.description,
+    this.descriptionAr = '',
     required this.price,
     required this.currency,
     required this.imageUrl,
   });
+
+  factory PastDeal.fromJson(Map<String, dynamic> json) {
+    final rawImages = json['images'];
+    String imgUrl = '';
+    if (rawImages is List && rawImages.isNotEmpty) {
+      imgUrl = rawImages[0]?.toString() ?? '';
+    } else {
+      imgUrl = json['image']?.toString() ??
+          json['imageUrl']?.toString() ??
+          json['photo']?.toString() ??
+          '';
+    }
+
+    // Resolve relative URL path if any
+    if (imgUrl.isNotEmpty && !imgUrl.startsWith('http')) {
+      imgUrl = 'https://qupon.marbu.in$imgUrl';
+    }
+
+    return PastDeal(
+      id: json['id']?.toString() ?? '',
+      title: json['name']?.toString() ?? '',
+      titleAr: json['nameAr']?.toString() ?? '',
+      brand: json['vendor']?.toString() ?? '',
+      category: json['category']?.toString() ?? '',
+      location: json['location']?.toString() ?? 'Doha, Qatar',
+      description: json['description']?.toString() ?? '',
+      descriptionAr: json['descriptionAr']?.toString() ?? '',
+      price: (json['price'] as num?)?.toDouble() ?? 0.0,
+      currency: 'QAR',
+      imageUrl: imgUrl,
+    );
+  }
 
   static const List<PastDeal> mockPastDeals = [
     PastDeal(

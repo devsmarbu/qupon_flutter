@@ -1,5 +1,13 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:qupon/src/core/preferences/pref_store.dart';
+import 'package:qupon/src/core/constants/app_strings.dart';
+import 'package:qupon/src/features/account/data/models/profile_data.dart';
 import 'package:qupon/src/features/account/data/repositories/auth_repository.dart';
+import 'package:qupon/src/features/account/data/models/dashboard_model.dart';
+import 'package:qupon/src/features/account/presentation/account/bloc/account_bloc.dart';
+import 'package:qupon/src/features/account/presentation/account/bloc/account_event.dart';
+import 'package:qupon/src/features/account/presentation/account/bloc/account_state.dart';
 import 'package:qupon/src/features/account/presentation/login/bloc/login_bloc.dart';
 import 'package:qupon/src/features/account/presentation/login/bloc/login_event.dart';
 import 'package:qupon/src/features/account/presentation/login/bloc/login_state.dart';
@@ -112,13 +120,29 @@ class FakeAuthRepository implements AuthRepository {
     lastRole = role;
     if (throwError) throw Exception(errorMessage);
   }
+
+  @override
+  Future<DashboardData> getDashboard({required String token}) async {
+    if (throwError) throw Exception(errorMessage);
+    return DashboardData(
+      totalSpent: 1250,
+      couponsUsed: 12,
+      totalSaved: 340,
+      activeCoupons: 5,
+      wallet: 500,
+      transactions: [],
+    );
+  }
 }
 
 void main() {
   group('Authentication Blocs Tests', () {
     late FakeAuthRepository authRepository;
 
-    setUp(() {
+    setUp(() async {
+      SharedPreferences.setMockInitialValues({});
+      await PrefStore.init();
+      await PrefStore().clearAll();
       authRepository = FakeAuthRepository();
     });
 
@@ -390,6 +414,70 @@ void main() {
             isA<OtpResendSuccess>(),
           ]),
         );
+      });
+    });
+
+    group('AccountBloc', () {
+      test('initial state is AccountInitial', () {
+        final bloc = AccountBloc(authRepository: authRepository);
+        expect(bloc.state, const AccountInitial());
+        bloc.close();
+      });
+
+      test('LoadDashboard emits loading then loaded data when successful', () async {
+        final bloc = AccountBloc(authRepository: authRepository);
+        
+        // Wait for constructor AppStarted to complete (reaches AccountUnauthenticated)
+        await expectLater(
+          bloc.stream,
+          emitsThrough(isA<AccountUnauthenticated>()),
+        );
+
+        await PrefStore().saveString(AppStrings.keyToken, 'mock_token');
+
+        // Emit AccountAuthenticated manually
+        bloc.emit(const AccountAuthenticated(email: 'test@example.com'));
+
+        // Trigger LoadDashboard
+        bloc.add(const LoadDashboard());
+
+        await expectLater(
+          bloc.stream,
+          emitsInOrder([
+            predicate<AccountState>((state) => state is AccountAuthenticated && state.isLoadingDashboard),
+            predicate<AccountState>((state) => state is AccountAuthenticated && !state.isLoadingDashboard && state.dashboardData != null && state.error == null),
+          ]),
+        );
+        bloc.close();
+      });
+
+      test('LoadDashboard emits loading then error when repository fails', () async {
+        final bloc = AccountBloc(authRepository: authRepository);
+
+        // Wait for constructor AppStarted to complete (reaches AccountUnauthenticated)
+        await expectLater(
+          bloc.stream,
+          emitsThrough(isA<AccountUnauthenticated>()),
+        );
+
+        await PrefStore().saveString(AppStrings.keyToken, 'mock_token');
+        authRepository.throwError = true;
+        authRepository.errorMessage = 'Network error';
+
+        // Emit AccountAuthenticated manually
+        bloc.emit(const AccountAuthenticated(email: 'test@example.com'));
+
+        // Trigger LoadDashboard
+        bloc.add(const LoadDashboard());
+
+        await expectLater(
+          bloc.stream,
+          emitsInOrder([
+            predicate<AccountState>((state) => state is AccountAuthenticated && state.isLoadingDashboard),
+            predicate<AccountState>((state) => state is AccountAuthenticated && !state.isLoadingDashboard && state.error == 'Exception: Network error'),
+          ]),
+        );
+        bloc.close();
       });
     });
   });

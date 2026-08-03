@@ -7,11 +7,15 @@ import 'account_event.dart';
 import 'account_state.dart';
 
 class AccountBloc extends Bloc<AccountEvent, AccountState> {
+  final AuthRepository _authRepository;
+
   AccountBloc({required AuthRepository authRepository})
-      : super(const AccountInitial()) {
+      : _authRepository = authRepository,
+        super(const AccountInitial()) {
     on<AccountLoggedIn>(_onAccountLoggedIn);
     on<SignOutRequested>(_onSignOutRequested);
     on<AppStarted>(_onAppStarted);
+    on<LoadDashboard>(_onLoadDashboard);
 
     add(const AppStarted());
   }
@@ -36,6 +40,8 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
       name: event.name,
       role: event.role,
     ));
+
+    add(const LoadDashboard());
   }
 
   Future<void> _onSignOutRequested(
@@ -59,8 +65,40 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
         name: profile?.name ?? '',
         role: profile?.role ?? '',
       ));
+      add(const LoadDashboard());
     } else {
       emit(const AccountUnauthenticated());
+    }
+  }
+
+  Future<void> _onLoadDashboard(
+    LoadDashboard event,
+    Emitter<AccountState> emit,
+  ) async {
+    final currentState = state;
+    if (currentState is! AccountAuthenticated) return;
+
+    emit(currentState.copyWith(
+      isLoadingDashboard: true,
+      error: null,
+    ));
+
+    try {
+      final token = PrefStore().loadString(AppStrings.keyToken);
+      if (token == null || token.isEmpty) {
+        throw Exception('Token not found. Please log in again.');
+      }
+      final data = await _authRepository.getDashboard(token: token);
+      emit(currentState.copyWith(
+        isLoadingDashboard: false,
+        dashboardData: data,
+        error: null,
+      ));
+    } catch (e) {
+      emit(currentState.copyWith(
+        isLoadingDashboard: false,
+        error: e.toString(),
+      ));
     }
   }
 }

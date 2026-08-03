@@ -166,8 +166,15 @@ class ProductDetailView extends StatelessWidget {
             elevation: 0,
             scrolledUnderElevation: 0,
             automaticallyImplyLeading: false,
+            leading: IconButton(
+              icon: Icon(
+                isArabic ? Icons.arrow_forward : Icons.arrow_back,
+                color: const Color(0xFF0F172A),
+              ),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
             centerTitle: false,
-            titleSpacing: 16,
+            titleSpacing: 0,
             title: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
@@ -209,59 +216,6 @@ class ProductDetailView extends StatelessWidget {
                     fontSize: 14,
                   ),
                 ),
-              ),
-              BlocBuilder<CartBloc, CartState>(
-                builder: (context, state) {
-                  final count = state.totalQuantity;
-                  return IconButton(
-                    icon: count > 0
-                        ? Badge(
-                            backgroundColor: const Color(0xFFFF6B35),
-                            label: Text(
-                              '$count',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            child: const Icon(
-                              Icons.shopping_cart_outlined,
-                              color: Color(0xFF0F172A),
-                            ),
-                          )
-                        : const Icon(
-                            Icons.shopping_cart_outlined,
-                            color: Color(0xFF0F172A),
-                          ),
-                    onPressed: () {
-                      final mainPageState =
-                          context.findAncestorStateOfType<MainPageState>();
-                      if (mainPageState != null) {
-                        mainPageState.setSelectedIndex(4);
-                      }
-                      if (Navigator.of(context).canPop()) {
-                        Navigator.of(context).pop();
-                      }
-                    },
-                  );
-                },
-              ),
-
-              IconButton(
-                icon: const Icon(
-                  Icons.person_outline,
-                  color: Color(0xFF0F172A),
-                ),
-                onPressed: () {},
-              ),
-              IconButton(
-                icon: const Icon(
-                  Icons.menu,
-                  color: Color(0xFF0F172A),
-                  size: 26,
-                ),
-                onPressed: () {},
               ),
               const SizedBox(width: 8),
             ],
@@ -348,13 +302,14 @@ class ProductDetailView extends StatelessWidget {
                                       ),
                                     ),
                                     // Unsplash image if category is not mock electronic, else standard gradient/illustration
-                                    Positioned.fill(
-                                      child: Image.network(
-                                        offer.imageUrl,
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+                                    if (offer.imageUrl.isNotEmpty && offer.imageUrl.startsWith('http'))
+                                      Positioned.fill(
+                                        child: Image.network(
+                                          offer.imageUrl,
+                                          fit: BoxFit.cover,
+                                          errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+                                        ),
                                       ),
-                                    ),
                                   ],
                                 ),
                               ),

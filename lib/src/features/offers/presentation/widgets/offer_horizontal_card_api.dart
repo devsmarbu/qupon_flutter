@@ -11,33 +11,10 @@ class OfferHorizontalCardApi extends StatelessWidget {
 
   const OfferHorizontalCardApi({super.key, required this.coupon});
 
-  String _getMockImageUrl(HomeCoupon coupon) {
-    final name = coupon.name.toLowerCase();
-    if (name.contains('headset') || name.contains('gadget') || name.contains('tech') || name.contains('wireless')) {
-      return 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&auto=format&fit=crop&q=80';
-    } else if (name.contains('accessory') || name.contains('sleeve') || name.contains('bag') || name.contains('laptop')) {
-      return 'https://images.unsplash.com/photo-1625766763788-95dcce9bf5ac?w=500&auto=format&fit=crop&q=80';
-    } else if (name.contains('meal') || name.contains('burger') || name.contains('food') || name.contains('family')) {
-      return 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=500&auto=format&fit=crop&q=80';
-    } else if (name.contains('clinic') || name.contains('polyclinic') || name.contains('aesthetic') || name.contains('health')) {
-      return 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=500&auto=format&fit=crop&q=80';
-    }
-    // Fallbacks based on category
-    final category = coupon.category.toLowerCase();
-    if (category.contains('elect')) {
-      return 'https://images.unsplash.com/photo-1588508065123-287b28e013da?w=500&auto=format&fit=crop&q=80';
-    } else if (category.contains('food') || category.contains('dine')) {
-      return 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&auto=format&fit=crop&q=80';
-    } else if (category.contains('sport') || category.contains('fit')) {
-      return 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&auto=format&fit=crop&q=80';
-    }
-    return 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&auto=format&fit=crop&q=80';
-  }
-
   @override
   Widget build(BuildContext context) {
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
-    final imageUrl = _getMockImageUrl(coupon);
+    final imageUrl = coupon.imageUrl;
 
     return GestureDetector(
       onTap: () async {
@@ -92,36 +69,28 @@ class OfferHorizontalCardApi extends StatelessWidget {
                     topLeft: Radius.circular(16),
                     topRight: Radius.circular(16),
                   ),
-                  child: Image.network(
-                    imageUrl,
-                    height: 140,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    loadingBuilder: (ctx, child, progress) {
-                      if (progress == null) return child;
-                      return Container(
-                        height: 140,
-                        color: const Color(0xFFF1F5F9),
-                        child: const Center(
-                          child: CircularProgressIndicator(
-                            color: Color(0xFFFF6B35),
-                            strokeWidth: 2,
-                          ),
-                        ),
-                      );
-                    },
-                    errorBuilder: (_, __, ___) => Container(
-                      height: 140,
-                      color: const Color(0xFFF1F5F9),
-                      child: const Center(
-                        child: Icon(
-                          Icons.image_not_supported_outlined,
-                          size: 40,
-                          color: Color(0xFF94A3B8),
-                        ),
-                      ),
-                    ),
-                  ),
+                  child: imageUrl.isNotEmpty && imageUrl.startsWith('http')
+                      ? Image.network(
+                          imageUrl,
+                          height: 140,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          loadingBuilder: (ctx, child, progress) {
+                            if (progress == null) return child;
+                            return Container(
+                              height: 140,
+                              color: const Color(0xFFF1F5F9),
+                              child: const Center(
+                                child: CircularProgressIndicator(
+                                  color: Color(0xFFFF6B35),
+                                  strokeWidth: 2,
+                                ),
+                              ),
+                            );
+                          },
+                          errorBuilder: (_, __, ___) => _buildEmptyImage(),
+                        )
+                      : _buildEmptyImage(),
                 ),
                 // Countdown badge (top-left)
                 Positioned(
@@ -300,6 +269,21 @@ class OfferHorizontalCardApi extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyImage() {
+    return Container(
+      height: 140,
+      width: double.infinity,
+      color: const Color(0xFFF8FAFC),
+      child: const Center(
+        child: Icon(
+          Icons.image_outlined,
+          size: 44,
+          color: Color(0xFFCBD5E1),
         ),
       ),
     );

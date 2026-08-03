@@ -6,6 +6,7 @@ class HomeCategory {
   final String slug;
   final String iconUrl;
   final String imageUrl;
+  final int offersCount;
 
   const HomeCategory({
     required this.id,
@@ -14,6 +15,7 @@ class HomeCategory {
     required this.slug,
     required this.iconUrl,
     required this.imageUrl,
+    required this.offersCount,
   });
 
   factory HomeCategory.fromJson(Map<String, dynamic> json) {
@@ -24,6 +26,7 @@ class HomeCategory {
       slug: json['slug']?.toString() ?? '',
       iconUrl: json['icon']?.toString() ?? '',
       imageUrl: json['image']?.toString() ?? '',
+      offersCount: (json['categoryNumber'] as num?)?.toInt() ?? 0,
     );
   }
 }

@@ -128,14 +128,18 @@ class _HomePageState extends State<HomePage> {
       child: CustomScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         slivers: [
-          // ── Divider ────────────────────────────────────────────────────────
-          SliverToBoxAdapter(
-            child: Container(height: 1, color: const Color(0xFFE2E8F0)),
-          ),
-
           // ── Promotional Slider ──────────────────────────────────────────────
           SliverToBoxAdapter(
             child: HomePromoSliderApi(banners: data.banners),
+          ),
+
+          // ── Divider ────────────────────────────────────────────────────────
+          SliverToBoxAdapter(
+            child: Container(
+              margin: const EdgeInsets.only(top: 16),
+              height: 1,
+              color: const Color(0xFFE2E8F0),
+            ),
           ),
 
           // ── Shop by Category ────────────────────────────────────────────────
@@ -169,7 +173,7 @@ class _HomePageState extends State<HomePage> {
                     id: localPromo.id,
                     title: localPromo.name,
                     category: localPromo.category,
-                    imageUrl: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&auto=format&fit=crop&q=80',
+                    imageUrl: localPromo.imageUrl,
                     daysLeft: localPromo.daysLeft,
                     hoursLeft: localPromo.hoursLeft,
                     minutesLeft: localPromo.minutesLeft,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../localization/presentation/cubit/locale_cubit.dart';
@@ -115,73 +116,106 @@ class MainPageState extends State<MainPage> {
     );
   }
 
-
-
-
-
   @override
   Widget build(BuildContext context) {
     final localeCubit = context.watch<LocaleCubit>();
     final isArabic = localeCubit.state.languageCode == 'ar';
-
-    return Scaffold(
-      backgroundColor: Colors.white,
-      extendBody: true,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        centerTitle: false,
-        titleSpacing: 16,
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.baseline,
-          textBaseline: TextBaseline.alphabetic,
-          children: [
-            const Text(
-              'Qupon',
-              style: TextStyle(
-                color: AppColors.primary,
-                fontWeight: FontWeight.w900,
-                fontSize: 24,
-                letterSpacing: -0.5,
+    return Container(
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Color(0xFFFFF2EC), // Peach tint
+            Colors.white,
+          ],
+          stops: [0.0, 0.40],
+        ),
+      ),
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        extendBody: true,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          scrolledUnderElevation: 0,
+          systemOverlayStyle: SystemUiOverlayStyle.dark,
+          centerTitle: false,
+          titleSpacing: 16,
+          title: Row(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              const Text(
+                'Qupon',
+                style: TextStyle(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 24,
+                  letterSpacing: -0.5,
+                ),
+              ),
+              const SizedBox(width: 4),
+              Text(
+                'كوبون',
+                style: TextStyle(
+                  color: AppColors.primary.withValues(alpha: 0.8),
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                context.read<LocaleCubit>().toggleLocale();
+              },
+              child: Text(
+                localeCubit.state.languageCode == 'en'
+                    ? 'عربي'
+                    : 'English',
+                style: const TextStyle(
+                  color: Color(0xFF0F172A),
+                  fontWeight: FontWeight.w800,
+                  fontSize: 14,
+                ),
               ),
             ),
-            const SizedBox(width: 4),
-            Text(
-              'كوبون',
-              style: TextStyle(
-                color: AppColors.primary.withValues(alpha: 0.8),
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-              ),
+            IconButton(
+              icon: const Icon(Icons.shopping_cart_outlined, color: Color(0xFF0F172A)),
+              onPressed: () {
+                context.read<CartBloc>().add(const LoadCart());
+                setSelectedIndex(3);
+              },
             ),
+            IconButton(
+              icon: const Icon(Icons.person_outline, color: Color(0xFF0F172A)),
+              onPressed: () async {
+                final accountState = context.read<AccountBloc>().state;
+                if (accountState is! AccountAuthenticated) {
+                  final loggedIn = await Navigator.of(context).push<bool>(
+                    MaterialPageRoute(builder: (context) => const WelcomePage()),
+                  );
+                  if (loggedIn == true) {
+                    setSelectedIndex(4);
+                  }
+                  return;
+                }
+                setSelectedIndex(4);
+              },
+            ),
+            const SizedBox(width: 8),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              context.read<LocaleCubit>().toggleLocale();
-            },
-            child: Text(
-              localeCubit.state.languageCode == 'en'
-                  ? 'عربي'
-                  : 'English',
-              style: const TextStyle(
-                color: Color(0xFF0F172A),
-                fontWeight: FontWeight.w800,
-                fontSize: 14,
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
-        ],
-      ),
-      body: _buildBody(_selectedIndex),
-      bottomNavigationBar: Material(
-        color: Colors.transparent,
-        elevation: 0,
-        child: _buildBottomNavigationBar(context, isArabic),
+        body: _buildBody(_selectedIndex),
+        bottomNavigationBar: Material(
+          color: Colors.transparent,
+          elevation: 0,
+          child: _buildBottomNavigationBar(context, isArabic),
+        ),
       ),
     );
   }
@@ -349,7 +383,9 @@ class MainPageState extends State<MainPage> {
       case 0:
         return const HomePage();
       case 1:
-        return const CategoriesPage();
+        return CategoriesPage(
+          onNavigateHome: () => setState(() => _selectedIndex = 0),
+        );
       case 2:
         return PastDealsPage(
           onNavigateHome: () => setState(() => _selectedIndex = 0),

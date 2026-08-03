@@ -21,3 +21,7 @@ class SignOutRequested extends AccountEvent {
 class AppStarted extends AccountEvent {
   const AppStarted();
 }
+
+class LoadDashboard extends AccountEvent {
+  const LoadDashboard();
+}

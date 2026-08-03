@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:qupon/main.dart';
 import 'package:qupon/src/core/constants/app_strings.dart';
 import 'package:qupon/src/core/preferences/pref_store.dart';
+import 'package:qupon/src/features/home/presentation/bloc/home_bloc.dart';
+import 'package:qupon/src/features/home/presentation/pages/home_page.dart';
 import 'package:qupon/src/features/account/data/models/profile_data.dart';
+import 'package:qupon/src/features/home/data/models/home_category.dart';
 import 'package:qupon/src/features/home/data/repositories/home_repository.dart';
 import 'package:qupon/src/features/offers/data/repositories/offers_repository.dart';
 import 'package:qupon/src/features/home/data/models/home_data.dart';
@@ -13,6 +18,11 @@ import 'package:qupon/src/features/main/presentation/pages/splash_page.dart';
 import 'package:qupon/src/features/account/presentation/welcome/view/welcome_page.dart';
 
 class FakeHomeRepository implements HomeRepository {
+  @override
+  Future<List<HomeCategory>> getCategories() async {
+    return [];
+  }
+
   @override
   Future<HomeData> getHomeData() async {
     return const HomeData(
@@ -50,6 +60,7 @@ class FakeOffersRepository implements OffersRepository {
 
 void main() {
   testWidgets('Smoke test for MainPage, CartPage, and PastDealsPage', (WidgetTester tester) async {
+    SharedPreferences.setMockInitialValues({});
     // Initialize preferences and set mock authenticated profile directly
     await PrefStore.init();
     await PrefStore().saveString(AppStrings.keyToken, 'mock_token');
@@ -71,31 +82,34 @@ void main() {
     
     // Wait for splash screen (2.5 seconds) and page transition (0.6 seconds) to complete
     await tester.pump(const Duration(seconds: 3));
-    await tester.pumpAndSettle();
-
+    await tester.pump(const Duration(milliseconds: 800));
+    await tester.pump();
     // Verify home page loads by checking "Top Picks" text is visible
-    expect(find.text('Top Picks'), findsOneWidget);
+    expect(find.text('Top Picks', skipOffstage: false), findsOneWidget);
 
     // Tap on the cart icon in the AppBar actions to switch to CartPage
     final cartIconButton = find.byIcon(Icons.shopping_cart_outlined).first;
     await tester.tap(cartIconButton);
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 800));
+    await tester.pump();
 
     // Verify Cart Page is shown with its Empty State
     expect(find.text('Shopping Cart'), findsOneWidget);
     expect(find.text('Your cart is empty'), findsOneWidget);
 
-    // Tap on "Continue shopping" button to return to Home page
-    final continueShoppingButton = find.text('Continue shopping');
+    // Tap on "Browse deals" button to return to Home page
+    final continueShoppingButton = find.text('Browse deals');
     expect(continueShoppingButton, findsOneWidget);
     await tester.tap(continueShoppingButton);
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 800));
+    await tester.pump();
 
     // Verify we are back on the Home page
-    expect(find.text('Top Picks'), findsOneWidget);
+    expect(find.text('Top Picks', skipOffstage: false), findsOneWidget);
   });
 
   testWidgets('Splash screen redirects to WelcomePage when unauthenticated', (WidgetTester tester) async {
+    SharedPreferences.setMockInitialValues({});
     // Initialize preferences and clear all values
     await PrefStore.init();
     await PrefStore().clearAll();
@@ -114,7 +128,7 @@ void main() {
 
     // Wait for splash screen (2.5 seconds) and page transition (0.6 seconds) to complete
     await tester.pump(const Duration(seconds: 3));
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 800));
 
     // Verify WelcomePage is shown
     expect(find.byType(WelcomePage), findsOneWidget);

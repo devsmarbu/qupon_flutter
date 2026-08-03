@@ -4,6 +4,7 @@ import '../../../../core/network/api_endpoints.dart';
 import '../../../../core/preferences/pref_store.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../models/profile_data.dart';
+import '../models/dashboard_model.dart';
 
 abstract class AuthRepository {
   Future<void> register({
@@ -37,6 +38,8 @@ abstract class AuthRepository {
     required String phoneNumber,
     required String role,
   });
+
+  Future<DashboardData> getDashboard({required String token});
 }
 
 class AuthRepositoryImpl implements AuthRepository {
@@ -217,6 +220,35 @@ class AuthRepositoryImpl implements AuthRepository {
           message: 'Failed to send reset link. Server returned code ${response.statusCode}',
         );
       }
+    } on DioException catch (e) {
+      final errorMessage = e.response?.data?['message'] ?? e.message ?? 'Unknown network error occurred';
+      throw Exception(errorMessage);
+    } catch (e) {
+      throw Exception(e.toString());
+    }
+  }
+
+  @override
+  Future<DashboardData> getDashboard({required String token}) async {
+    try {
+      final response = await _apiClient.dio.get(
+        ApiEndpoints.dashboard,
+      );
+
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        throw DioException(
+          requestOptions: response.requestOptions,
+          response: response,
+          message: 'Failed to fetch dashboard data. Status: ${response.statusCode}',
+        );
+      }
+
+      final responseData = response.data;
+      if (responseData == null) {
+        throw Exception('Empty response from dashboard API');
+      }
+
+      return DashboardData.fromJson(responseData);
     } on DioException catch (e) {
       final errorMessage = e.response?.data?['message'] ?? e.message ?? 'Unknown network error occurred';
       throw Exception(errorMessage);

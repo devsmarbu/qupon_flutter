@@ -19,6 +19,7 @@ class HomeCategorySectionApi extends StatelessWidget {
       slug: 'electronics',
       iconUrl: 'https://images.unsplash.com/photo-1588508065123-287b28e013da?w=200&auto=format&fit=crop&q=80',
       imageUrl: '',
+      offersCount: 0,
     ),
     HomeCategory(
       id: '6a0988fb458bd9ca85ee6c2f',
@@ -27,6 +28,7 @@ class HomeCategorySectionApi extends StatelessWidget {
       slug: 'fashion',
       iconUrl: 'https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?w=200&auto=format&fit=crop&q=80',
       imageUrl: '',
+      offersCount: 0,
     ),
     HomeCategory(
       id: 'home-living',
@@ -35,6 +37,7 @@ class HomeCategorySectionApi extends StatelessWidget {
       slug: 'home-living',
       iconUrl: 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=200&auto=format&fit=crop&q=80',
       imageUrl: '',
+      offersCount: 0,
     ),
     HomeCategory(
       id: 'beauty',
@@ -43,6 +46,7 @@ class HomeCategorySectionApi extends StatelessWidget {
       slug: 'beauty',
       iconUrl: 'https://images.unsplash.com/photo-1526947425960-945c6e72858f?w=200&auto=format&fit=crop&q=80',
       imageUrl: '',
+      offersCount: 0,
     ),
     HomeCategory(
       id: 'sports',
@@ -51,6 +55,7 @@ class HomeCategorySectionApi extends StatelessWidget {
       slug: 'sports',
       iconUrl: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=200&auto=format&fit=crop&q=80',
       imageUrl: '',
+      offersCount: 0,
     ),
     HomeCategory(
       id: 'groceries',
@@ -59,6 +64,7 @@ class HomeCategorySectionApi extends StatelessWidget {
       slug: 'groceries',
       iconUrl: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=200&auto=format&fit=crop&q=80',
       imageUrl: '',
+      offersCount: 0,
     ),
   ];
 
@@ -66,6 +72,10 @@ class HomeCategorySectionApi extends StatelessWidget {
   Widget build(BuildContext context) {
     final localeCubit = context.watch<LocaleCubit>();
     final isArabic = localeCubit.state.languageCode == 'ar';
+
+    if (categories.isEmpty) {
+      return const SizedBox.shrink();
+    }
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -78,10 +88,14 @@ class HomeCategorySectionApi extends StatelessWidget {
           mainAxisSpacing: 16,
           childAspectRatio: 0.85,
         ),
-        itemCount: customCategoriesList.length,
+        itemCount: categories.length,
         itemBuilder: (context, index) {
-          final cat = customCategoriesList[index];
+          final cat = categories[index];
           final name = isArabic ? cat.nameAr : cat.name;
+
+          final hasValidIcon = cat.iconUrl.startsWith('http');
+          final hasValidImage = cat.imageUrl.startsWith('http');
+          final imageUrlToUse = hasValidIcon ? cat.iconUrl : (hasValidImage ? cat.imageUrl : '');
 
           return GestureDetector(
             onTap: () async {
@@ -112,15 +126,21 @@ class HomeCategorySectionApi extends StatelessWidget {
                     ),
                   ),
                   child: ClipOval(
-                    child: Image.network(
-                      cat.iconUrl,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => const Icon(
-                        Icons.category_outlined,
-                        size: 32,
-                        color: Color(0xFF94A3B8),
-                      ),
-                    ),
+                    child: imageUrlToUse.isNotEmpty
+                        ? Image.network(
+                            imageUrlToUse,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => const Icon(
+                              Icons.category_outlined,
+                              size: 32,
+                              color: Color(0xFF94A3B8),
+                            ),
+                          )
+                        : const Icon(
+                            Icons.category_outlined,
+                            size: 32,
+                            color: Color(0xFF94A3B8),
+                          ),
                   ),
                 ),
                 const SizedBox(height: 8),
