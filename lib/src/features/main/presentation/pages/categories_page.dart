@@ -68,7 +68,9 @@ class CategoriesPage extends StatelessWidget {
     final isArabic = localeCubit.state.languageCode == 'ar';
 
     return SafeArea(
+      bottom: false,
       child: SingleChildScrollView(
+
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

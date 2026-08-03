@@ -66,7 +66,9 @@ class _AccountPageState extends State<AccountPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       body: SafeArea(
+        bottom: false,
         child: SingleChildScrollView(
+
           physics: const BouncingScrollPhysics(),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -518,7 +520,9 @@ class _AccountPageState extends State<AccountPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       body: SafeArea(
+        bottom: false,
         child: SingleChildScrollView(
+
           padding: const EdgeInsets.symmetric(vertical: 40),
           child: Center(
             child: ConstrainedBox(
