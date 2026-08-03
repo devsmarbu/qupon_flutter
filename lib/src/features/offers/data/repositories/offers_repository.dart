@@ -80,12 +80,13 @@ class OffersRepositoryImpl implements OffersRepository {
           daysLeft: daysLeft,
           hoursLeft: hoursLeft,
           minutesLeft: minutesLeft,
-          location: 'Doha, Qatar',
+          location: '',
           description: couponMap['description']?.toString() ?? '',
           descriptionAr: couponMap['descriptionAr']?.toString() ?? '',
           price: (couponMap['price'] as num?)?.toDouble() ?? 0.0,
           currency: 'QAR',
           vendor: couponMap['vendor']?.toString(),
+          validity: '${daysLeft}d${hoursLeft}h${minutesLeft}m left',
           variants: variants,
         );
       }).toList();
