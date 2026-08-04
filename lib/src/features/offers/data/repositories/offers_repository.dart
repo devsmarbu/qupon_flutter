@@ -8,6 +8,7 @@ abstract class OffersRepository {
   Future<List<Offer>> getOffers();
   Future<List<Offer>> getCategoryOffers(String categoryId);
   Future<Offer> getCouponDetails(String slug);
+  Future<String?> submitCouponRequest({required Map<String, dynamic> body});
 }
 
 class OffersRepositoryImpl implements OffersRepository {
@@ -87,6 +88,7 @@ class OffersRepositoryImpl implements OffersRepository {
           price: (couponMap['price'] as num?)?.toDouble() ?? 0.0,
           currency: 'QAR',
           vendor: couponMap['vendor']?.toString(),
+          vendorId: couponMap['vendorId']?.toString() ?? couponMap['vendor_id']?.toString() ?? '',
           validity: '${daysLeft}d${hoursLeft}h${minutesLeft}m left',
           variants: variants,
         );
@@ -255,6 +257,7 @@ class OffersRepositoryImpl implements OffersRepository {
         price: (couponMap['price'] as num?)?.toDouble() ?? 0.0,
         currency: 'QAR',
         vendor: couponMap['vendor']?.toString(),
+        vendorId: couponMap['vendorId']?.toString() ?? couponMap['vendor_id']?.toString() ?? '',
         validity: '${daysLeft}d${hoursLeft}h${minutesLeft}m left',
         slug: couponMap['slug']?.toString() ?? slug,
         variants: variants,
@@ -263,6 +266,28 @@ class OffersRepositoryImpl implements OffersRepository {
       final msg = e.response?.data?['message'] ??
           e.message ??
           'Network error while fetching coupon details';
+      throw Exception(msg);
+    } catch (e) {
+      throw Exception(e.toString());
+    }
+  }
+
+  @override
+  Future<String?> submitCouponRequest({required Map<String, dynamic> body}) async {
+    try {
+      final response = await _apiClient.dio.post('/api/coupon-requests', data: body);
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        throw DioException(
+          requestOptions: response.requestOptions,
+          response: response,
+          message: 'Failed to submit coupon request. Status: ${response.statusCode}',
+        );
+      }
+      return response.data?['message']?.toString();
+    } on DioException catch (e) {
+      final msg = e.response?.data?['message'] ??
+          e.message ??
+          'Network error while submitting coupon request';
       throw Exception(msg);
     } catch (e) {
       throw Exception(e.toString());

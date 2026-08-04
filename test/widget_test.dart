@@ -74,6 +74,11 @@ class FakeOffersRepository implements OffersRepository {
       variants: const [],
     );
   }
+
+  @override
+  Future<String?> submitCouponRequest({required Map<String, dynamic> body}) async {
+    return null;
+  }
 }
 
 void main() {

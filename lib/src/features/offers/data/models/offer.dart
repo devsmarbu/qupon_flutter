@@ -21,6 +21,7 @@ class Offer with _$Offer {
     String? titleAr,
     String? descriptionAr,
     String? vendor,
+    String? vendorId,
     String? validity,
     String? slug,
     @JsonKey(includeFromJson: false, includeToJson: false)

@@ -9,6 +9,8 @@ import '../../data/models/past_deal_model.dart';
 import '../../../offers/data/models/offer.dart';
 import '../../../offers/presentation/pages/product_detail_page.dart';
 import '../../../main/presentation/pages/main_page.dart';
+import '../../../../core/preferences/pref_store.dart';
+import '../../../offers/data/repositories/offers_repository.dart';
 
 class PastDealsPage extends StatefulWidget {
   final VoidCallback onNavigateHome;
@@ -566,25 +568,75 @@ class _PastDealCard extends StatelessWidget {
                         );
 
                         if (result != null && context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                isArabic
-                                    ? 'تم تقديم طلب لإعادة الكوبون!'
-                                    : 'Request submitted to bring this coupon back!',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
+                          try {
+                            final profile = await PrefStore.getProfile();
+                            final customerId = profile?.id ?? 'guest';
+                            final customerName = profile?.name ?? 'Guest User';
+                            final customerEmail = profile?.email ?? 'guest@qupon.com';
+
+                            final payload = {
+                              'id': 'CR-${DateTime.now().millisecondsSinceEpoch}',
+                              'customerId': customerId,
+                              'customerName': customerName,
+                              'customerEmail': customerEmail,
+                              'couponId': deal.id,
+                              'couponName': title,
+                              'vendorId': deal.vendorId.isNotEmpty ? deal.vendorId : 'unknown',
+                              'vendor': deal.brand,
+                              'message': result,
+                              'requestedAt': DateTime.now().toUtc().toIso8601String(),
+                            };
+
+                            final successMsg = await OffersRepositoryImpl().submitCouponRequest(body: payload);
+
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).clearSnackBars();
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    (successMsg != null && successMsg.isNotEmpty)
+                                        ? successMsg
+                                        : (isArabic
+                                            ? 'تم تقديم طلب لإعادة الكوبون!'
+                                            : 'Request submitted to bring this coupon back!'),
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  backgroundColor: const Color(0xFFFF6B35),
+                                  behavior: SnackBarBehavior.floating,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  duration: const Duration(seconds: 2),
                                 ),
-                              ),
-                              backgroundColor: const Color(0xFFFF6B35),
-                              behavior: SnackBarBehavior.floating,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              duration: const Duration(seconds: 2),
-                            ),
-                          );
+                              );
+                            }
+                          } catch (e) {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).clearSnackBars();
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    isArabic
+                                        ? 'فشل تقديم الطلب. يرجى المحاولة مرة أخرى.'
+                                        : 'Failed to submit request. Please try again.',
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  backgroundColor: Colors.red,
+                                  behavior: SnackBarBehavior.floating,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  duration: const Duration(seconds: 2),
+                                ),
+                              );
+                            }
+                          }
                         }
                       },
                       style: ElevatedButton.styleFrom(

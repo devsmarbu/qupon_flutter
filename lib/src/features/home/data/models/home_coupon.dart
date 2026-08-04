@@ -13,6 +13,7 @@ class HomeCoupon {
   final String descriptionAr;
   final String imageUrl;
   final String slug;
+  final String vendorId;
 
   const HomeCoupon({
     required this.id,
@@ -28,6 +29,7 @@ class HomeCoupon {
     required this.descriptionAr,
     required this.imageUrl,
     required this.slug,
+    required this.vendorId,
   });
 
   factory HomeCoupon.fromJson(Map<String, dynamic> json) {
@@ -56,6 +58,7 @@ class HomeCoupon {
       descriptionAr: json['descriptionAr']?.toString() ?? '',
       imageUrl: imgUrl,
       slug: json['slug']?.toString() ?? '',
+      vendorId: json['vendorId']?.toString() ?? json['vendor_id']?.toString() ?? '',
     );
   }
 

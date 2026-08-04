@@ -35,6 +35,7 @@ mixin _$Offer {
   String? get titleAr => throw _privateConstructorUsedError;
   String? get descriptionAr => throw _privateConstructorUsedError;
   String? get vendor => throw _privateConstructorUsedError;
+  String? get vendorId => throw _privateConstructorUsedError;
   String? get validity => throw _privateConstructorUsedError;
   String? get slug => throw _privateConstructorUsedError;
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -69,6 +70,7 @@ abstract class $OfferCopyWith<$Res> {
     String? titleAr,
     String? descriptionAr,
     String? vendor,
+    String? vendorId,
     String? validity,
     String? slug,
     @JsonKey(includeFromJson: false, includeToJson: false)
@@ -105,6 +107,7 @@ class _$OfferCopyWithImpl<$Res, $Val extends Offer>
     Object? titleAr = freezed,
     Object? descriptionAr = freezed,
     Object? vendor = freezed,
+    Object? vendorId = freezed,
     Object? validity = freezed,
     Object? slug = freezed,
     Object? variants = null,
@@ -167,6 +170,10 @@ class _$OfferCopyWithImpl<$Res, $Val extends Offer>
                 ? _value.vendor
                 : vendor // ignore: cast_nullable_to_non_nullable
                       as String?,
+            vendorId: freezed == vendorId
+                ? _value.vendorId
+                : vendorId // ignore: cast_nullable_to_non_nullable
+                      as String?,
             validity: freezed == validity
                 ? _value.validity
                 : validity // ignore: cast_nullable_to_non_nullable
@@ -208,6 +215,7 @@ abstract class _$$OfferImplCopyWith<$Res> implements $OfferCopyWith<$Res> {
     String? titleAr,
     String? descriptionAr,
     String? vendor,
+    String? vendorId,
     String? validity,
     String? slug,
     @JsonKey(includeFromJson: false, includeToJson: false)
@@ -243,6 +251,7 @@ class __$$OfferImplCopyWithImpl<$Res>
     Object? titleAr = freezed,
     Object? descriptionAr = freezed,
     Object? vendor = freezed,
+    Object? vendorId = freezed,
     Object? validity = freezed,
     Object? slug = freezed,
     Object? variants = null,
@@ -305,6 +314,10 @@ class __$$OfferImplCopyWithImpl<$Res>
             ? _value.vendor
             : vendor // ignore: cast_nullable_to_non_nullable
                   as String?,
+        vendorId: freezed == vendorId
+            ? _value.vendorId
+            : vendorId // ignore: cast_nullable_to_non_nullable
+                  as String?,
         validity: freezed == validity
             ? _value.validity
             : validity // ignore: cast_nullable_to_non_nullable
@@ -340,6 +353,7 @@ class _$OfferImpl implements _Offer {
     this.titleAr,
     this.descriptionAr,
     this.vendor,
+    this.vendorId,
     this.validity,
     this.slug,
     @JsonKey(includeFromJson: false, includeToJson: false)
@@ -378,6 +392,8 @@ class _$OfferImpl implements _Offer {
   @override
   final String? vendor;
   @override
+  final String? vendorId;
+  @override
   final String? validity;
   @override
   final String? slug;
@@ -392,7 +408,7 @@ class _$OfferImpl implements _Offer {
 
   @override
   String toString() {
-    return 'Offer(id: $id, title: $title, category: $category, imageUrl: $imageUrl, daysLeft: $daysLeft, hoursLeft: $hoursLeft, minutesLeft: $minutesLeft, location: $location, description: $description, price: $price, currency: $currency, titleAr: $titleAr, descriptionAr: $descriptionAr, vendor: $vendor, validity: $validity, slug: $slug, variants: $variants)';
+    return 'Offer(id: $id, title: $title, category: $category, imageUrl: $imageUrl, daysLeft: $daysLeft, hoursLeft: $hoursLeft, minutesLeft: $minutesLeft, location: $location, description: $description, price: $price, currency: $currency, titleAr: $titleAr, descriptionAr: $descriptionAr, vendor: $vendor, vendorId: $vendorId, validity: $validity, slug: $slug, variants: $variants)';
   }
 
   @override
@@ -423,6 +439,8 @@ class _$OfferImpl implements _Offer {
             (identical(other.descriptionAr, descriptionAr) ||
                 other.descriptionAr == descriptionAr) &&
             (identical(other.vendor, vendor) || other.vendor == vendor) &&
+            (identical(other.vendorId, vendorId) ||
+                other.vendorId == vendorId) &&
             (identical(other.validity, validity) ||
                 other.validity == validity) &&
             (identical(other.slug, slug) || other.slug == slug) &&
@@ -447,6 +465,7 @@ class _$OfferImpl implements _Offer {
     titleAr,
     descriptionAr,
     vendor,
+    vendorId,
     validity,
     slug,
     const DeepCollectionEquality().hash(_variants),
@@ -482,6 +501,7 @@ abstract class _Offer implements Offer {
     final String? titleAr,
     final String? descriptionAr,
     final String? vendor,
+    final String? vendorId,
     final String? validity,
     final String? slug,
     @JsonKey(includeFromJson: false, includeToJson: false)
@@ -518,6 +538,8 @@ abstract class _Offer implements Offer {
   String? get descriptionAr;
   @override
   String? get vendor;
+  @override
+  String? get vendorId;
   @override
   String? get validity;
   @override
