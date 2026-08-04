@@ -18,6 +18,7 @@ import '../../../account/presentation/account/bloc/account_bloc.dart';
 import '../../../account/presentation/account/bloc/account_state.dart';
 import '../../../account/presentation/login/view/sign_in_dialog.dart';
 import '../widgets/direct_checkout_sheet.dart';
+import '../../../past_deals/presentation/pages/past_deals_page.dart';
 
 
 class _Localizations {
@@ -158,6 +159,8 @@ class ProductDetailView extends StatelessWidget {
         final selectedOption = state.options.isNotEmpty
             ? state.options[state.selectedOptionIndex]
             : OfferOption(id: 'dummy', name: 'Basic', originalPrice: offer.price * 2, price: offer.price);
+
+        final isExpired = offer.daysLeft == 0 && offer.hoursLeft == 0 && offer.minutesLeft == 0;
 
         return Scaffold(
           backgroundColor: Colors.white,
@@ -428,38 +431,70 @@ class ProductDetailView extends StatelessWidget {
                                     ),
                                   ),
                                 ),
-                              ],
-                            ),
-                            const SizedBox(height: 16),
-                            // Time Left Badge
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFE8FDF5),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(
-                                    Icons.access_time_filled,
-                                    size: 15,
-                                    color: Color(0xFF047857),
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    isArabic
-                                        ? 'متبقي ${offer.daysLeft} يوم و ${offer.hoursLeft} ساعة و ${offer.minutesLeft} دقيقة'
-                                        : '${offer.daysLeft}d ${offer.hoursLeft}h ${offer.minutesLeft}m left',
-                                    style: const TextStyle(
-                                      color: Color(0xFF047857),
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 12,
+                                if (isExpired) ...[
+                                  const SizedBox(width: 8),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFFEF2F2),
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(color: const Color(0xFFFEE2E2), width: 1),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Icon(
+                                          Icons.access_time,
+                                          size: 14,
+                                          color: Color(0xFFEF4444),
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          isArabic ? 'منتهي الصلاحية' : 'Expired',
+                                          style: const TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.bold,
+                                            color: Color(0xFFEF4444),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ],
-                              ),
+                              ],
                             ),
+                            if (!isExpired) ...[
+                              const SizedBox(height: 16),
+                              // Time Left Badge
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFE8FDF5),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(
+                                      Icons.access_time_filled,
+                                      size: 15,
+                                      color: Color(0xFF047857),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      isArabic
+                                          ? 'متبقي ${offer.daysLeft} يوم و ${offer.hoursLeft} ساعة و ${offer.minutesLeft} دقيقة'
+                                          : '${offer.daysLeft}d ${offer.hoursLeft}h ${offer.minutesLeft}m left',
+                                      style: const TextStyle(
+                                        color: Color(0xFF047857),
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ],
                         ),
                       ),
@@ -511,14 +546,17 @@ class ProductDetailView extends StatelessWidget {
                                     child: Row(
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
-                                        Text(
-                                          option.name,
-                                          style: const TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.w800,
-                                            color: Color(0xFF0F172A),
+                                        Expanded(
+                                          child: Text(
+                                            option.name,
+                                            style: const TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.w800,
+                                              color: Color(0xFF0F172A),
+                                            ),
                                           ),
                                         ),
+                                        const SizedBox(width: 16),
                                         Column(
                                           crossAxisAlignment: CrossAxisAlignment.end,
                                           children: [
@@ -661,109 +699,250 @@ class ProductDetailView extends StatelessWidget {
                           ),
                           child: Column(
                             children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    'QAR ${selectedOption.originalPrice.toInt()}',
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      color: Color(0xFF94A3B8),
-                                      decoration: TextDecoration.lineThrough,
-                                    ),
+                              if (isExpired) ...[
+                                Container(
+                                  margin: const EdgeInsets.only(bottom: 16),
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFFEF2F2),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(color: const Color(0xFFFEE2E2), width: 1),
                                   ),
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                  child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text(
-                                        _Localizations.get(context, 'youPay'),
-                                        style: const TextStyle(
-                                          fontSize: 11,
-                                          color: Color(0xFF64748B),
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                                      const Icon(
+                                        Icons.error_outline,
+                                        color: Color(0xFFEF4444),
+                                        size: 20,
                                       ),
-                                      Text(
-                                        'QAR ${selectedOption.price.toInt()}',
-                                        style: const TextStyle(
-                                          fontSize: 28,
-                                          fontWeight: FontWeight.w900,
-                                          color: Color(0xFFFF6B35),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              isArabic ? 'انتهى هذا العرض' : 'This offer has expired',
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                color: Color(0xFF0F172A),
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              isArabic
+                                                  ? 'هذا الكوبون لم يعد متاحاً للشراء. يمكنك طلبه من الصفقات السابقة وسنقوم بإخطار البائع.'
+                                                  : 'This coupon is no longer available for purchase. You can request it from Past Deals and we will notify the vendor.',
+                                              style: const TextStyle(
+                                                color: Color(0xFF64748B),
+                                                fontSize: 12,
+                                                height: 1.3,
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ),
                                     ],
                                   ),
-                                ],
+                                ),
+                              ],
+                              
+                              // Price Layout - Stacked vertically (as per mockup Screenshot 2)
+                              Align(
+                                alignment: Alignment.centerLeft,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'QAR ${selectedOption.originalPrice.toInt()}',
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        color: Color(0xFF94A3B8),
+                                        decoration: TextDecoration.lineThrough,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      _Localizations.get(context, 'youPay'),
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        color: Color(0xFF64748B),
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    Text(
+                                      'QAR ${selectedOption.price.toInt()}',
+                                      style: const TextStyle(
+                                        fontSize: 28,
+                                        fontWeight: FontWeight.w900,
+                                        color: Color(0xFFFF6B35),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              
+                              // 7d validity badge
+                              Align(
+                                alignment: Alignment.centerLeft,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFEFF6FF),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(color: const Color(0xFFDBEAFE), width: 1),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(
+                                        Icons.access_time,
+                                        size: 16,
+                                        color: Color(0xFF2563EB),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        isArabic
+                                            ? '٧ أيام للاسترداد بعد الشراء'
+                                            : '7d to redeem after purchase',
+                                        style: const TextStyle(
+                                          fontSize: 13,
+                                          color: Color(0xFF2563EB),
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ),
                               const SizedBox(height: 16),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    flex: 4,
-                                    child: ElevatedButton(
-                                      onPressed: () async {
-                                        if (!await _ensureLoggedIn(context)) return;
-                                        if (!context.mounted) return;
-                                        DirectCheckoutSheet.show(
-                                          context,
-                                          offer: offer,
-                                          option: selectedOption,
-                                          isGift: false,
+                              
+                              // Action Button(s)
+                              if (isExpired) ...[
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: ElevatedButton(
+                                    onPressed: () async {
+                                      final result = await showDialog<String>(
+                                        context: context,
+                                        builder: (context) => RequestCouponDialog(
+                                          brandName: offer.vendor ?? '',
+                                          isArabic: isArabic,
+                                        ),
+                                      );
+                                      if (result != null && context.mounted) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              isArabic
+                                                  ? 'تم تقديم طلب لإعادة الكوبون!'
+                                                  : 'Request submitted to bring this coupon back!',
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                            backgroundColor: const Color(0xFFFF6B35),
+                                            behavior: SnackBarBehavior.floating,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(10),
+                                            ),
+                                            duration: const Duration(seconds: 2),
+                                          ),
                                         );
-                                      },
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: const Color(0xFFFF6B35),
-                                        foregroundColor: Colors.white,
-                                        elevation: 0,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(12),
-                                        ),
-                                        padding: const EdgeInsets.symmetric(vertical: 14),
+                                      }
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: const Color(0xFFFF6B35),
+                                      foregroundColor: const Color(0xFF0F172A),
+                                      elevation: 0,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
                                       ),
-                                      child: Text(
-                                        _Localizations.get(context, 'getDealNow'),
-                                        style: const TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                                      padding: const EdgeInsets.symmetric(vertical: 14),
+                                    ),
+                                    child: Text(
+                                      isArabic ? 'طلب كوبون' : 'Request Coupon',
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
                                       ),
                                     ),
                                   ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    flex: 4,
-                                    child: OutlinedButton(
-                                      onPressed: () async {
-                                        if (!await _ensureLoggedIn(context)) return;
-                                        if (!context.mounted) return;
-                                        DirectCheckoutSheet.show(
-                                          context,
-                                          offer: offer,
-                                          option: selectedOption,
-                                          isGift: true,
-                                        );
-                                      },
-                                      style: OutlinedButton.styleFrom(
-                                        foregroundColor: Colors.black,
-                                        side: const BorderSide(color: Color(0xFFE2E8F0)),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(12),
+                                ),
+                              ] else ...[
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      flex: 4,
+                                      child: ElevatedButton(
+                                        onPressed: () async {
+                                          if (!await _ensureLoggedIn(context)) return;
+                                          if (!context.mounted) return;
+                                          DirectCheckoutSheet.show(
+                                            context,
+                                            offer: offer,
+                                            option: selectedOption,
+                                            isGift: false,
+                                          );
+                                        },
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: const Color(0xFFFF6B35),
+                                          foregroundColor: Colors.white,
+                                          elevation: 0,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                          padding: const EdgeInsets.symmetric(vertical: 14),
                                         ),
-                                        padding: const EdgeInsets.symmetric(vertical: 14),
-                                      ),
-                                      child: Text(
-                                        _Localizations.get(context, 'buyAsGift'),
-                                        style: const TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.bold,
+                                        child: Text(
+                                          _Localizations.get(context, 'getDealNow'),
+                                          style: const TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                         ),
                                       ),
                                     ),
-                                  ),
-                                ],
-                              ),
-
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      flex: 4,
+                                      child: OutlinedButton(
+                                        onPressed: () async {
+                                          if (!await _ensureLoggedIn(context)) return;
+                                          if (!context.mounted) return;
+                                          DirectCheckoutSheet.show(
+                                            context,
+                                            offer: offer,
+                                            option: selectedOption,
+                                            isGift: true,
+                                          );
+                                        },
+                                        style: OutlinedButton.styleFrom(
+                                          foregroundColor: Colors.black,
+                                          side: const BorderSide(color: Color(0xFFE2E8F0)),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                          padding: const EdgeInsets.symmetric(vertical: 14),
+                                        ),
+                                        child: Text(
+                                          _Localizations.get(context, 'buyAsGift'),
+                                          style: const TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
                               const SizedBox(height: 16),
+                              
+                              // Three action buttons
                               Row(
                                 children: [
                                   Expanded(
@@ -783,18 +962,23 @@ class ProductDetailView extends StatelessWidget {
                                   const SizedBox(width: 12),
                                   Expanded(
                                     child: OutlinedButton(
-                                      onPressed: () {
-                                        context.read<CartBloc>().add(
-                                          AddToCart(offer: offer, option: selectedOption),
-                                        );
-                                        _showAddedToCartSnackBar(context);
-                                      },
+                                      onPressed: isExpired
+                                          ? null // Disable cart for expired offers
+                                          : () {
+                                              context.read<CartBloc>().add(
+                                                AddToCart(offer: offer, option: selectedOption),
+                                              );
+                                              _showAddedToCartSnackBar(context);
+                                            },
                                       style: OutlinedButton.styleFrom(
                                         side: const BorderSide(color: Color(0xFFE2E8F0)),
                                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                                         padding: const EdgeInsets.symmetric(vertical: 12),
                                       ),
-                                      child: const Icon(Icons.shopping_cart_outlined, color: Color(0xFF64748B)),
+                                      child: Icon(
+                                        Icons.shopping_cart_outlined,
+                                        color: isExpired ? const Color(0xFFCBD5E1) : const Color(0xFF64748B),
+                                      ),
                                     ),
                                   ),
                                   const SizedBox(width: 12),
@@ -1133,66 +1317,120 @@ class ProductDetailView extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(width: 8),
-                            // Get Deal Now
-                            Expanded(
-                              flex: 4,
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  DirectCheckoutSheet.show(
-                                    context,
-                                    offer: offer,
-                                    option: selectedOption,
-                                    isGift: false,
-                                  );
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFFFF6B35),
-                                  foregroundColor: Colors.white,
-                                  elevation: 0,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
+                            if (isExpired) ...[
+                              Expanded(
+                                flex: 8,
+                                child: ElevatedButton(
+                                  onPressed: () async {
+                                    final result = await showDialog<String>(
+                                      context: context,
+                                      builder: (context) => RequestCouponDialog(
+                                        brandName: offer.vendor ?? '',
+                                        isArabic: isArabic,
+                                      ),
+                                    );
+                                    if (result != null && context.mounted) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            isArabic
+                                                ? 'تم تقديم طلب لإعادة الكوبون!'
+                                                : 'Request submitted to bring this coupon back!',
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                          backgroundColor: const Color(0xFFFF6B35),
+                                          behavior: SnackBarBehavior.floating,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(10),
+                                          ),
+                                          duration: const Duration(seconds: 2),
+                                        ),
+                                      );
+                                    }
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFFFF6B35),
+                                    foregroundColor: const Color(0xFF0F172A),
+                                    elevation: 0,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    padding: const EdgeInsets.symmetric(vertical: 14),
                                   ),
-                                  padding: const EdgeInsets.symmetric(vertical: 14),
-                                ),
-                                child: Text(
-                                  _Localizations.get(context, 'getDealNow'),
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            // Buy as Gift
-                            Expanded(
-                              flex: 4,
-                              child: OutlinedButton(
-                                onPressed: () {
-                                  DirectCheckoutSheet.show(
-                                    context,
-                                    offer: offer,
-                                    option: selectedOption,
-                                    isGift: true,
-                                  );
-                                },
-                                style: OutlinedButton.styleFrom(
-                                  foregroundColor: Colors.black,
-                                  side: const BorderSide(color: Color(0xFFE2E8F0)),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  padding: const EdgeInsets.symmetric(vertical: 14),
-                                ),
-                                child: Text(
-                                  _Localizations.get(context, 'buyAsGift'),
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
+                                  child: Text(
+                                    isArabic ? 'طلب كوبون' : 'Request Coupon',
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
+                            ] else ...[
+                              // Get Deal Now
+                              Expanded(
+                                flex: 4,
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    DirectCheckoutSheet.show(
+                                      context,
+                                      offer: offer,
+                                      option: selectedOption,
+                                      isGift: false,
+                                    );
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFFFF6B35),
+                                    foregroundColor: Colors.white,
+                                    elevation: 0,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    padding: const EdgeInsets.symmetric(vertical: 14),
+                                  ),
+                                  child: Text(
+                                    _Localizations.get(context, 'getDealNow'),
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              // Buy as Gift
+                              Expanded(
+                                flex: 4,
+                                child: OutlinedButton(
+                                  onPressed: () {
+                                    DirectCheckoutSheet.show(
+                                      context,
+                                      offer: offer,
+                                      option: selectedOption,
+                                      isGift: true,
+                                    );
+                                  },
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: Colors.black,
+                                    side: const BorderSide(color: Color(0xFFE2E8F0)),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    padding: const EdgeInsets.symmetric(vertical: 14),
+                                  ),
+                                  child: Text(
+                                    _Localizations.get(context, 'buyAsGift'),
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
 
                           ],
                         ),

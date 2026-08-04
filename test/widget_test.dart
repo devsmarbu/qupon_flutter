@@ -56,6 +56,24 @@ class FakeOffersRepository implements OffersRepository {
   Future<List<Offer>> getCategoryOffers(String categoryId) async {
     return [];
   }
+
+  @override
+  Future<Offer> getCouponDetails(String slug) async {
+    return Offer(
+      id: 'dummy',
+      title: 'Dummy',
+      category: 'Dummy',
+      imageUrl: '',
+      daysLeft: 0,
+      hoursLeft: 0,
+      minutesLeft: 0,
+      location: '',
+      description: '',
+      price: 0.0,
+      currency: 'QAR',
+      variants: const [],
+    );
+  }
 }
 
 void main() {

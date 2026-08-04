@@ -22,6 +22,7 @@ class Offer with _$Offer {
     String? descriptionAr,
     String? vendor,
     String? validity,
+    String? slug,
     @JsonKey(includeFromJson: false, includeToJson: false)
     @Default([])
     List<OfferOption> variants,

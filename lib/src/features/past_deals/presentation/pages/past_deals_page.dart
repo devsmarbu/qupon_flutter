@@ -6,6 +6,9 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../localization/presentation/cubit/locale_cubit.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../data/models/past_deal_model.dart';
+import '../../../offers/data/models/offer.dart';
+import '../../../offers/presentation/pages/product_detail_page.dart';
+import '../../../main/presentation/pages/main_page.dart';
 
 class PastDealsPage extends StatefulWidget {
   final VoidCallback onNavigateHome;
@@ -296,8 +299,41 @@ class _PastDealCard extends StatelessWidget {
     final title = isArabic && deal.titleAr.isNotEmpty ? deal.titleAr : deal.title;
     final description = isArabic && deal.descriptionAr.isNotEmpty ? deal.descriptionAr : deal.description;
 
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+    final offer = Offer(
+      id: deal.id,
+      title: deal.title,
+      category: deal.category,
+      imageUrl: deal.imageUrl,
+      daysLeft: 0,
+      hoursLeft: 0,
+      minutesLeft: 0,
+      location: deal.location,
+      description: deal.description,
+      price: deal.price,
+      currency: deal.currency,
+      titleAr: deal.titleAr,
+      descriptionAr: deal.descriptionAr,
+      vendor: deal.brand,
+      slug: deal.slug,
+      variants: const [],
+    );
+
+    return GestureDetector(
+      onTap: () async {
+        final viewCart = await Navigator.of(context).push<bool>(
+          MaterialPageRoute(
+            builder: (context) => ProductDetailPage(offer: offer),
+          ),
+        );
+        if (viewCart == true && context.mounted) {
+          final mainPageState = context.findAncestorStateOfType<MainPageState>();
+          if (mainPageState != null) {
+            mainPageState.setSelectedIndex(4);
+          }
+        }
+      },
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -520,26 +556,36 @@ class _PastDealCard extends StatelessWidget {
                       ),
                     ),
                     ElevatedButton(
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              isArabic
-                                  ? 'تم تقديم طلب لإعادة الكوبون!'
-                                  : 'Request submitted to bring this coupon back!',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                            backgroundColor: const Color(0xFFFF6B35),
-                            behavior: SnackBarBehavior.floating,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            duration: const Duration(seconds: 2),
+                      onPressed: () async {
+                        final result = await showDialog<String>(
+                          context: context,
+                          builder: (context) => RequestCouponDialog(
+                            brandName: deal.brand,
+                            isArabic: isArabic,
                           ),
                         );
+
+                        if (result != null && context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                isArabic
+                                    ? 'تم تقديم طلب لإعادة الكوبون!'
+                                    : 'Request submitted to bring this coupon back!',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              backgroundColor: const Color(0xFFFF6B35),
+                              behavior: SnackBarBehavior.floating,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              duration: const Duration(seconds: 2),
+                            ),
+                          );
+                        }
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFFF6B35),
@@ -551,7 +597,7 @@ class _PastDealCard extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                       ),
                       child: Text(
-                        isArabic ? 'اطلب الإعادة' : 'Request Back',
+                        isArabic ? 'اطلب الكوبون' : 'Request coupon',
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 13,
@@ -565,7 +611,7 @@ class _PastDealCard extends StatelessWidget {
           ),
         ],
       ),
-    );
+    ));
   }
 
   Widget _buildEmptyPlaceholderImage() {
@@ -577,6 +623,212 @@ class _PastDealCard extends StatelessWidget {
           Icons.image_outlined,
           size: 40,
           color: Color(0xFF94A3B8),
+        ),
+      ),
+    );
+  }
+}
+
+class RequestCouponDialog extends StatefulWidget {
+  final String brandName;
+  final bool isArabic;
+
+  const RequestCouponDialog({
+    required this.brandName,
+    required this.isArabic,
+  });
+
+  @override
+  State<RequestCouponDialog> createState() => _RequestCouponDialogState();
+}
+
+class _RequestCouponDialogState extends State<RequestCouponDialog> {
+  final TextEditingController _messageController = TextEditingController();
+
+  @override
+  void dispose() {
+    _messageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final title = widget.isArabic ? 'طلب هذا الكوبون' : 'Request this coupon';
+    final subtitle = widget.isArabic
+        ? 'أخبرنا لماذا تريد استعادة ${widget.brandName}. سيقوم البائع والمسؤول بمراجعة رسالتك.'
+        : 'Tell us why you want ${widget.brandName} back. The vendor and admin will review your message.';
+    final messageLabel = widget.isArabic ? 'رسالتك' : 'Your message';
+    final hintText = widget.isArabic
+        ? 'مثال: لقد فاتني هذا العرض وأود شراءه مرة أخرى...'
+        : 'e.g. I missed this deal and would love to buy it again...';
+    final submitLabel = widget.isArabic ? 'إرسال الطلب' : 'Submit request';
+    final cancelLabel = widget.isArabic ? 'إلغاء' : 'Cancel';
+
+    return Dialog(
+      backgroundColor: Colors.white,
+      surfaceTintColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+      child: Container(
+        width: double.infinity,
+        constraints: const BoxConstraints(maxWidth: 400),
+        padding: const EdgeInsets.all(24),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header with Title and Close Icon
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF0F172A),
+                      ),
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () => Navigator.of(context).pop(),
+                    child: const Icon(
+                      Icons.close,
+                      color: Color(0xFF0F172A),
+                      size: 20,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              
+              // Subtitle
+              Text(
+                subtitle,
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Color(0xFF64748B),
+                  height: 1.4,
+                ),
+              ),
+              const SizedBox(height: 16),
+              
+              // Field Label
+              Text(
+                messageLabel,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF0F172A),
+                ),
+              ),
+              const SizedBox(height: 8),
+              
+              // Custom Text Field
+              TextFormField(
+                controller: _messageController,
+                minLines: 3,
+                maxLines: 5,
+                decoration: InputDecoration(
+                  hintText: hintText,
+                  hintStyle: const TextStyle(
+                    color: Color(0xFF94A3B8),
+                    fontSize: 14,
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(
+                      color: Color(0xFFFFB399),
+                      width: 1.5,
+                    ),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(
+                      color: Color(0xFFFFB399),
+                      width: 1.5,
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(
+                      color: Color(0xFFFF6B35),
+                      width: 2.0,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              
+              // Divider
+              const Divider(
+                color: Color(0xFFE2E8F0),
+                height: 1,
+              ),
+              const SizedBox(height: 16),
+              
+              // Actions Stack
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    final message = _messageController.text;
+                    Navigator.of(context).pop(message);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFFF6B35),
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                  child: Text(
+                    submitLabel,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  style: OutlinedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    side: const BorderSide(
+                      color: Color(0xFFE2E8F0),
+                      width: 1,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                  child: Text(
+                    cancelLabel,
+                    style: const TextStyle(
+                      color: Color(0xFF475569),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

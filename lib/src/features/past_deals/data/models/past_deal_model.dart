@@ -10,6 +10,7 @@ class PastDeal {
   final double price;
   final String currency;
   final String imageUrl;
+  final String slug;
 
   const PastDeal({
     required this.id,
@@ -23,6 +24,7 @@ class PastDeal {
     required this.price,
     required this.currency,
     required this.imageUrl,
+    this.slug = '',
   });
 
   factory PastDeal.fromJson(Map<String, dynamic> json) {
@@ -54,6 +56,7 @@ class PastDeal {
       price: (json['price'] as num?)?.toDouble() ?? 0.0,
       currency: 'QAR',
       imageUrl: imgUrl,
+      slug: json['slug']?.toString() ?? json['id']?.toString() ?? '',
     );
   }
 

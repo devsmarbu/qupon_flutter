@@ -7,6 +7,7 @@ import '../models/offer_option.dart';
 abstract class OffersRepository {
   Future<List<Offer>> getOffers();
   Future<List<Offer>> getCategoryOffers(String categoryId);
+  Future<Offer> getCouponDetails(String slug);
 }
 
 class OffersRepositoryImpl implements OffersRepository {
@@ -181,8 +182,90 @@ class OffersRepositoryImpl implements OffersRepository {
         location: '123 Tech Avenue, Silicon Valley, CA 94025',
         description: 'Laptop Sleeve',
         price: 5.0,
-        currency: 'QAR',
+         currency: 'QAR',
       ),
     ];
+  }
+
+  @override
+  Future<Offer> getCouponDetails(String slug) async {
+    try {
+      final response = await _apiClient.dio.get('/api/storefront/coupons/$slug');
+
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        throw DioException(
+          requestOptions: response.requestOptions,
+          response: response,
+          message: 'Failed to fetch coupon details. Status: ${response.statusCode}',
+        );
+      }
+
+      final responseData = response.data;
+      if (responseData == null) {
+        throw Exception('Empty response from coupon details API');
+      }
+
+      final Map<String, dynamic> couponMap;
+      if (responseData is Map<String, dynamic> && responseData.containsKey('data')) {
+        couponMap = responseData['data'] as Map<String, dynamic>;
+      } else {
+        couponMap = responseData as Map<String, dynamic>;
+      }
+
+      final validityStr = couponMap['validity']?.toString() ?? '';
+      int daysLeft = 0;
+      int hoursLeft = 0;
+      int minutesLeft = 0;
+      try {
+        final expiry = DateTime.parse(validityStr);
+        final diff = expiry.difference(DateTime.now());
+        daysLeft = diff.inDays.clamp(0, 9999);
+        hoursLeft = (diff.inHours % 24).clamp(0, 23);
+        minutesLeft = (diff.inMinutes % 60).clamp(0, 59);
+      } catch (_) {}
+
+      final catName = couponMap['category']?.toString() ?? '';
+      final images = couponMap['images'] as List<dynamic>? ?? [];
+      final imageUrl = images.isNotEmpty ? images[0].toString() : '';
+
+      final variantsList = couponMap['variants'] as List<dynamic>? ?? [];
+      final variants = variantsList.map((v) {
+        final vMap = v as Map<String, dynamic>;
+        return OfferOption(
+          id: vMap['id']?.toString() ?? '',
+          name: vMap['name']?.toString() ?? '',
+          originalPrice: (vMap['originalPrice'] as num?)?.toDouble() ??
+              (couponMap['price'] as num?)?.toDouble() ?? 0.0,
+          price: (vMap['price'] as num?)?.toDouble() ?? 0.0,
+        );
+      }).toList();
+
+      return Offer(
+        id: couponMap['id']?.toString() ?? '',
+        title: couponMap['name']?.toString() ?? '',
+        titleAr: couponMap['nameAr']?.toString() ?? '',
+        category: catName,
+        imageUrl: imageUrl,
+        daysLeft: daysLeft,
+        hoursLeft: hoursLeft,
+        minutesLeft: minutesLeft,
+        location: couponMap['location']?.toString() ?? 'Doha, Qatar',
+        description: couponMap['description']?.toString() ?? '',
+        descriptionAr: couponMap['descriptionAr']?.toString() ?? '',
+        price: (couponMap['price'] as num?)?.toDouble() ?? 0.0,
+        currency: 'QAR',
+        vendor: couponMap['vendor']?.toString(),
+        validity: '${daysLeft}d${hoursLeft}h${minutesLeft}m left',
+        slug: couponMap['slug']?.toString() ?? slug,
+        variants: variants,
+      );
+    } on DioException catch (e) {
+      final msg = e.response?.data?['message'] ??
+          e.message ??
+          'Network error while fetching coupon details';
+      throw Exception(msg);
+    } catch (e) {
+      throw Exception(e.toString());
+    }
   }
 }
