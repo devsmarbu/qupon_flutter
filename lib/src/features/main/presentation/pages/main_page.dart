@@ -8,6 +8,7 @@ import '../../../home/presentation/pages/home_page.dart';
 import '../../../account/presentation/account/view/account_page.dart';
 import '../../../account/presentation/welcome/view/welcome_page.dart';
 import '../../../account/presentation/account/bloc/account_bloc.dart';
+import '../../../account/presentation/account/bloc/account_event.dart';
 import '../../../account/presentation/account/bloc/account_state.dart';
 import '../../../cart/presentation/pages/cart_page.dart';
 import '../../../past_deals/presentation/pages/past_deals_page.dart';
@@ -200,10 +201,12 @@ class MainPageState extends State<MainPage> {
                     MaterialPageRoute(builder: (context) => const WelcomePage()),
                   );
                   if (loggedIn == true) {
+                    context.read<AccountBloc>().add(const LoadDashboard());
                     setSelectedIndex(4);
                   }
                   return;
                 }
+                context.read<AccountBloc>().add(const LoadDashboard());
                 setSelectedIndex(4);
               },
             ),
@@ -315,11 +318,14 @@ class MainPageState extends State<MainPage> {
               MaterialPageRoute(builder: (context) => const WelcomePage()),
             );
             if (loggedIn == true) {
+              context.read<AccountBloc>().add(const LoadDashboard());
               setState(() {
                 _selectedIndex = 4;
               });
             }
             return;
+          } else {
+            context.read<AccountBloc>().add(const LoadDashboard());
           }
         }
         if (index == 3) {
