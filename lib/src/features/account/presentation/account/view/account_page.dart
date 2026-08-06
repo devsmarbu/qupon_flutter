@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/account_bloc.dart';
 import '../bloc/account_event.dart';
@@ -1385,33 +1386,31 @@ class _OrderCardItemState extends State<_OrderCardItem> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    final tx = widget.tx;
-    final isArabic = widget.isArabic;
+  Widget _buildCouponSection(BuildContext context, DashboardCoupon coupon, bool isArabic) {
+    final vendor = coupon.vendor.isNotEmpty ? coupon.vendor : 'ElectroWorld';
+    final offerName = coupon.offer.isNotEmpty ? coupon.offer : 'Tech Gadgets 15% — Basic';
+    final couponCode = coupon.code.isNotEmpty ? coupon.code : 'C-V0VH';
 
-    // Fallbacks matching screenshot if API fields are missing
-    final orderCode = tx.orderDisplayRef.isNotEmpty ? tx.orderDisplayRef : 'TG1-3-T-9-49';
-    final coupons = tx.couponsCount;
-    final price = tx.price;
-
-    final vendor = tx.vendor.isNotEmpty ? tx.vendor : 'ElectroWorld';
-    final offerName = tx.offer.isNotEmpty ? tx.offer : (tx.title.isNotEmpty ? tx.title : 'Tech Gadgets 15% — Basic');
-    final couponCode = tx.code.isNotEmpty ? tx.code : 'C-V0VH';
-
-    final couponUrl = tx.couponUrl.isNotEmpty
-        ? tx.couponUrl
+    final couponUrl = coupon.couponUrl.isNotEmpty
+        ? coupon.couponUrl
         : 'https://qupon.marbu.in/coupon/${couponCode.isNotEmpty ? couponCode : 'AJQKRTYM'}';
 
-    final status = tx.status.isNotEmpty ? tx.status : 'Awaiting redemption';
-    final redeemBy = tx.redeemBy.isNotEmpty ? tx.redeemBy : '1 Dec 2026';
+    final status = coupon.status.isNotEmpty ? coupon.status : 'Awaiting redemption';
+    final rawRedeemBy = coupon.redeemBy.isNotEmpty ? coupon.redeemBy : '1 Dec 2026';
 
     String timeLeft = '';
+    final daysUntil = coupon.daysUntilRedeem;
+    if (daysUntil != null) {
+      timeLeft = isArabic ? '$daysUntil يوم متبقي' : '${daysUntil}d left';
+    }
+
+    String redeemByFormatted = rawRedeemBy;
     try {
       DateTime? expiry;
-      if (redeemBy.contains('-') || redeemBy.contains('/')) {
-        expiry = DateTime.tryParse(redeemBy);
+      if (rawRedeemBy.contains('-') || rawRedeemBy.contains('/')) {
+        expiry = DateTime.tryParse(rawRedeemBy);
       } else {
-        final parts = redeemBy.split(' ');
+        final parts = rawRedeemBy.split(' ');
         if (parts.length == 3) {
           final day = int.tryParse(parts[0]);
           final monthStr = parts[1].toLowerCase();
@@ -1437,15 +1436,113 @@ class _OrderCardItemState extends State<_OrderCardItem> {
       }
 
       if (expiry != null) {
-        final difference = expiry.difference(DateTime.now());
-        final days = difference.inDays;
-        timeLeft = isArabic ? '$days يوم متبقي' : '${days}d left';
+        redeemByFormatted = DateFormat('d MMM yyyy', isArabic ? 'ar' : 'en').format(expiry);
+        if (timeLeft.isEmpty) {
+          final difference = expiry.difference(DateTime.now());
+          final days = difference.inDays;
+          timeLeft = isArabic ? '$days يوم متبقي' : '${days}d left';
+        }
       }
     } catch (_) {}
 
     if (timeLeft.isEmpty) {
       timeLeft = isArabic ? '118 يوم متبقي' : '118d left';
     }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildDetailRow(
+          isArabic ? 'البائع' : 'Vendor',
+          Text(vendor, style: const TextStyle(color: Color(0xFF0F172A))),
+        ),
+        _buildDetailRow(
+          isArabic ? 'العرض' : 'Offer',
+          Text(offerName, style: const TextStyle(color: Color(0xFF0F172A))),
+        ),
+        _buildDetailRow(
+          isArabic ? 'الكود' : 'Code',
+          Text(couponCode, style: const TextStyle(color: Color(0xFF0F172A), fontWeight: FontWeight.bold)),
+        ),
+        _buildDetailRow(
+          isArabic ? 'رابط الكوبون' : 'Coupon URL',
+          GestureDetector(
+            onTap: () => _copyToClipboard(
+              couponUrl,
+              isArabic ? 'تم نسخ الرابط في الحافظة' : 'Coupon URL copied to clipboard',
+            ),
+            child: Text(
+              couponUrl,
+              style: const TextStyle(
+                decoration: TextDecoration.underline,
+                color: AppColors.primary,
+                fontSize: 13,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ),
+        _buildDetailRow(
+          isArabic ? 'السعر' : 'Price',
+          Text(coupon.price.isNotEmpty ? coupon.price : 'QAR 20', style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
+        ),
+        _buildDetailRow(
+          isArabic ? 'الحالة' : 'Status',
+          _buildStatusWidget(status, isArabic),
+        ),
+        _buildDetailRow(
+          isArabic ? 'تاريخ الاسترداد' : 'Redeem by',
+          Text(redeemByFormatted, style: const TextStyle(color: Color(0xFF0F172A))),
+        ),
+        _buildDetailRow(
+          isArabic ? 'الوقت المتبقي' : 'Time left',
+          Row(
+            children: [
+              const Icon(Icons.access_time_outlined, size: 16, color: Color(0xFF64748B)),
+              const SizedBox(width: 4),
+              Text(
+                timeLeft,
+                style: const TextStyle(
+                  color: Color(0xFF0F172A),
+                ),
+              ),
+            ],
+          ),
+        ),
+        _buildDetailRow(
+          isArabic ? 'رمز QR' : 'QR code',
+          GestureDetector(
+            onTap: () => _showQrCodeDialog(context, couponCode),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.qr_code_2, size: 16, color: AppColors.primary),
+                const SizedBox(width: 4),
+                Text(
+                  isArabic ? 'عرض رمز QR' : 'Show QR code',
+                  style: const TextStyle(
+                    color: AppColors.primary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final tx = widget.tx;
+    final isArabic = widget.isArabic;
+
+    // Fallbacks matching screenshot if API fields are missing
+    final orderDisplayRef = tx.orderDisplayRef;
+    print("orderDisplayRef....$orderDisplayRef");
+    final coupons = tx.couponsCount;
+    final price = tx.price;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -1473,7 +1570,7 @@ class _OrderCardItemState extends State<_OrderCardItem> {
                   Expanded(
                     flex: 3,
                     child: Text(
-                      orderCode,
+                      orderDisplayRef,
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
@@ -1518,86 +1615,17 @@ class _OrderCardItemState extends State<_OrderCardItem> {
             const Divider(color: Color(0xFFF1F5F9), height: 1),
             Container(
               padding: const EdgeInsets.all(16),
-              color: const Color(0xFFFAFAFA),
+              color: Colors.white,
               child: Column(
                 children: [
-                  _buildDetailRow(
-                    isArabic ? 'البائع' : 'Vendor',
-                    Text(vendor, style: const TextStyle(color: Color(0xFF0F172A))),
-                  ),
-                  _buildDetailRow(
-                    isArabic ? 'العرض' : 'Offer',
-                    Text(offerName, style: const TextStyle(color: Color(0xFF0F172A))),
-                  ),
-                  _buildDetailRow(
-                    isArabic ? 'الكود' : 'Code',
-                    Text(couponCode, style: const TextStyle(color: Color(0xFF0F172A))),
-                  ),
-                  _buildDetailRow(
-                    isArabic ? 'رابط الكوبون' : 'Coupon URL',
-                    GestureDetector(
-                      onTap: () => _copyToClipboard(
-                        couponUrl,
-                        isArabic ? 'تم نسخ الرابط في الحافظة' : 'Coupon URL copied to clipboard',
-                      ),
-                      child: Text(
-                        couponUrl,
-                        style: const TextStyle(
-                          decoration: TextDecoration.underline,
-                          color: AppColors.primary,
-                          fontSize: 13,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ),
-                  _buildDetailRow(
-                    isArabic ? 'السعر' : 'Price',
-                    Text(price, style: const TextStyle(color: AppColors.primary)),
-                  ),
-                  _buildDetailRow(
-                    isArabic ? 'الحالة' : 'Status',
-                    _buildStatusWidget(status, isArabic),
-                  ),
-                  _buildDetailRow(
-                    isArabic ? 'تاريخ الاسترداد' : 'Redeem by',
-                    Text(redeemBy, style: const TextStyle(color: Color(0xFF0F172A))),
-                  ),
-                  _buildDetailRow(
-                    isArabic ? 'الوقت المتبقي' : 'Time left',
-                    Row(
-                      children: [
-                        const Icon(Icons.access_time_outlined, size: 16, color: Color(0xFF64748B)),
-                        const SizedBox(width: 4),
-                        Text(
-                          timeLeft,
-                          style: const TextStyle(
-                            color: Color(0xFF0F172A),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  _buildDetailRow(
-                    isArabic ? 'رمز QR' : 'QR code',
-                    GestureDetector(
-                      onTap: () => _showQrCodeDialog(context, couponCode),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.qr_code_scanner_outlined, size: 16, color: AppColors.primary),
-                          const SizedBox(width: 4),
-                          Text(
-                            isArabic ? 'عرض رمز QR' : 'Show QR code',
-                            style: const TextStyle(
-                              color: AppColors.primary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                  for (int i = 0; i < tx.coupons.length; i++) ...[
+                    if (i > 0) ...[
+                      const SizedBox(height: 16),
+                      const Divider(color: Color(0xFFE2E8F0), height: 1),
+                      const SizedBox(height: 16),
+                    ],
+                    _buildCouponSection(context, tx.coupons[i], isArabic),
+                  ],
                 ],
               ),
             ),
