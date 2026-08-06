@@ -8,7 +8,7 @@ import '../../../main/presentation/pages/main_page.dart';
 /// Driven by real [HomeCoupon] data from the storefront home API.
 class OfferListTileApi extends StatelessWidget {
   final HomeCoupon coupon;
-
+// offer tile
   const OfferListTileApi({super.key, required this.coupon});
 
   @override
