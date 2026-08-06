@@ -1214,31 +1214,63 @@ class _OrderCardItem extends StatefulWidget {
 class _OrderCardItemState extends State<_OrderCardItem> {
   bool _isExpanded = false;
 
-  void _showQrCodeDialog(BuildContext context, String code) {
+  void _showQrCodeDialog(BuildContext context, String code, String redeemBy) {
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
+      builder: (ctx) => Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         backgroundColor: Colors.white,
         surfaceTintColor: Colors.white,
-        title: Center(
-          child: Text(
-            widget.isArabic ? 'رمز الاستجابة السريعة للكوبون' : 'Coupon QR Code',
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFFF1F5F9)),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Top row: Title and close button
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const SizedBox(width: 24), // Offset for Close button to center title
+                  Expanded(
+                    child: Center(
+                      child: Text(
+                        widget.isArabic ? 'رمز الاستجابة السريعة للكوبون' : 'Your Coupon QR Code',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF0F172A),
+                        ),
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close, color: Color(0xFF64748B), size: 20),
+                    onPressed: () => Navigator.of(ctx).pop(),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                ],
               ),
-              child: Image.network(
-                'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=$code',
+              const SizedBox(height: 8),
+              // Subtitle
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Text(
+                  widget.isArabic
+                      ? 'قم بتقديم رمز QR للبائع لاسترداد مشترياتك.'
+                      : 'Show this QR code to the vendor to redeem your purchase.',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: Color(0xFF64748B),
+                    height: 1.4,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 32),
+              // QR Code Image
+              Image.network(
+                'https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=$code',
                 width: 200,
                 height: 200,
                 loadingBuilder: (context, child, progress) {
@@ -1261,28 +1293,61 @@ class _OrderCardItemState extends State<_OrderCardItem> {
                   );
                 },
               ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              code,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF0F172A),
-                letterSpacing: 1.0,
+              const SizedBox(height: 32),
+              // Coupon Code Label
+              Text(
+                widget.isArabic ? 'رمز الكوبون' : 'Coupon Code',
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  color: Color(0xFF64748B),
+                ),
               ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: Text(
-              widget.isArabic ? 'إغلاق' : 'Close',
-              style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary),
-            ),
+              const SizedBox(height: 6),
+              // Actual Code
+              Text(
+                code,
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF0F172A),
+                  letterSpacing: 1.0,
+                ),
+              ),
+              const SizedBox(height: 16),
+              // Redeem by badge
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEFF6FF), // light blue background
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.access_time_outlined,
+                      size: 16,
+                      color: Color(0xFF2563EB),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      widget.isArabic
+                          ? 'صالح للاستخدام حتى $redeemBy'
+                          : 'Redeem by $redeemBy',
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF2563EB),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 8),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -1513,7 +1578,7 @@ class _OrderCardItemState extends State<_OrderCardItem> {
         _buildDetailRow(
           isArabic ? 'رمز QR' : 'QR code',
           GestureDetector(
-            onTap: () => _showQrCodeDialog(context, couponCode),
+            onTap: () => _showQrCodeDialog(context, couponCode, redeemByFormatted),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
