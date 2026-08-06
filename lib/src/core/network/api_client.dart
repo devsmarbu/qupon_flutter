@@ -50,8 +50,8 @@ class _PrettyJsonInterceptor extends Interceptor {
       buffer.writeln(_prettyJson(options.data));
     }
     buffer.writeln('--> END ${options.method}');
-    
-    developer.log(buffer.toString(), name: 'network.request');
+
+    debugPrint(buffer.toString());
     super.onRequest(options, handler);
   }
 
@@ -65,7 +65,8 @@ class _PrettyJsonInterceptor extends Interceptor {
     }
     buffer.writeln('<-- END HTTP');
 
-    developer.log(buffer.toString(), name: 'network.response');
+    // developer.log(buffer.toString(), name: 'network.response');
+    debugPrint(buffer.toString());
     super.onResponse(response, handler);
   }
 

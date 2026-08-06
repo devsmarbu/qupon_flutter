@@ -428,6 +428,7 @@ class _AccountPageState extends State<AccountPage> {
                           bgColor: bgColor,
                         );
                       }),
+                    const SizedBox(height: 100)
                   ],
                 ),
               ),

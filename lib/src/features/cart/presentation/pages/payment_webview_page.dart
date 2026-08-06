@@ -26,22 +26,30 @@ class _PaymentWebViewPageState extends State<PaymentWebViewPage> {
   @override
   void initState() {
     super.initState();
+    print('PaymentWebView initial URL: ${widget.redirectUrl}');
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(Colors.white)
       ..setNavigationDelegate(
         NavigationDelegate(
-          onPageStarted: (_) => setState(() {
-            _isLoading = true;
-            _loadingProgress = 0;
-          }),
+          onPageStarted: (url) {
+            print('PaymentWebView page started: $url');
+            setState(() {
+              _isLoading = true;
+              _loadingProgress = 0;
+            });
+          },
           onProgress: (progress) => setState(() => _loadingProgress = progress),
-          onPageFinished: (_) => setState(() => _isLoading = false),
+          onPageFinished: (url) {
+            print('PaymentWebView page finished: $url');
+            setState(() => _isLoading = false);
+          },
           onWebResourceError: (error) {
             // Silently ignore sub-resource errors (ads, trackers, etc.)
             debugPrint('WebView resource error: ${error.description}');
           },
           onNavigationRequest: (request) {
+            print('PaymentWebView navigating to: ${request.url}');
             // Detect success / cancel callback URLs and close the WebView
             final url = request.url.toLowerCase();
             if (_isSuccessUrl(url)) {
