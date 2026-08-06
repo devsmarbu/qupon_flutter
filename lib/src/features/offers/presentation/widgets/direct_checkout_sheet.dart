@@ -145,6 +145,7 @@ class _DirectCheckoutSheetState extends State<DirectCheckoutSheet> {
               builder: (_) => PaymentWebViewPage(
                 redirectUrl: response.redirectUrl!,
                 sessionId: response.checkoutSessionId,
+                provider: _selectedGatewayId,
               ),
             ),
           );

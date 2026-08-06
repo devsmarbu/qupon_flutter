@@ -82,6 +82,7 @@ class _CartPageState extends State<CartPage> {
                     builder: (_) => PaymentWebViewPage(
                       redirectUrl: response.redirectUrl!,
                       sessionId: response.checkoutSessionId,
+                      provider: state.paymentMethod,
                     ),
                   ),
                 )

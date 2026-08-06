@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:qupon/src/core/network/api_client.dart';
+import 'package:qupon/src/core/network/api_endpoints.dart';
 
 /// Full-screen WebView that loads the payment redirect URL.
 /// Pops itself (with [PaymentResult]) when the user taps back or when the
@@ -7,11 +9,13 @@ import 'package:webview_flutter/webview_flutter.dart';
 class PaymentWebViewPage extends StatefulWidget {
   final String redirectUrl;
   final String? sessionId;
+  final String? provider;
 
   const PaymentWebViewPage({
     super.key,
     required this.redirectUrl,
     this.sessionId,
+    this.provider,
   });
 
   @override
@@ -22,11 +26,12 @@ class _PaymentWebViewPageState extends State<PaymentWebViewPage> {
   late final WebViewController _controller;
   int _loadingProgress = 0; // 0-100
   bool _isLoading = true;
+  bool _isConfirming = false;
 
   @override
   void initState() {
     super.initState();
-    print('PaymentWebView initial URL: ${widget.redirectUrl}');
+    print('PaymentWebView initial URL: ${widget.redirectUrl}, provider: ${widget.provider}, sessionId: ${widget.sessionId}');
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(Colors.white)
@@ -38,11 +43,13 @@ class _PaymentWebViewPageState extends State<PaymentWebViewPage> {
               _isLoading = true;
               _loadingProgress = 0;
             });
+            _checkUrlAndHandle(url);
           },
           onProgress: (progress) => setState(() => _loadingProgress = progress),
           onPageFinished: (url) {
             print('PaymentWebView page finished: $url');
             setState(() => _isLoading = false);
+            _checkUrlAndHandle(url);
           },
           onWebResourceError: (error) {
             // Silently ignore sub-resource errors (ads, trackers, etc.)
@@ -50,14 +57,8 @@ class _PaymentWebViewPageState extends State<PaymentWebViewPage> {
           },
           onNavigationRequest: (request) {
             print('PaymentWebView navigating to: ${request.url}');
-            // Detect success / cancel callback URLs and close the WebView
-            final url = request.url.toLowerCase();
-            if (_isSuccessUrl(url)) {
-              Navigator.of(context).pop(PaymentResult.success);
-              return NavigationDecision.prevent;
-            }
-            if (_isCancelUrl(url)) {
-              Navigator.of(context).pop(PaymentResult.cancelled);
+            final handled = _checkUrlAndHandle(request.url);
+            if (handled) {
               return NavigationDecision.prevent;
             }
             return NavigationDecision.navigate;
@@ -67,11 +68,94 @@ class _PaymentWebViewPageState extends State<PaymentWebViewPage> {
       ..loadRequest(Uri.parse(widget.redirectUrl));
   }
 
+  bool _checkUrlAndHandle(String url) {
+    if (_isConfirming) return true;
+
+    final lowerUrl = url.toLowerCase();
+    if (_isSuccessUrl(lowerUrl)) {
+      _confirmCheckoutAndPop(url);
+      return true;
+    }
+    if (_isCancelUrl(lowerUrl)) {
+      if (mounted) {
+        Navigator.of(context).pop(PaymentResult.cancelled);
+      }
+      return true;
+    }
+    return false;
+  }
+
+  Future<void> _confirmCheckoutAndPop(String url) async {
+    if (_isConfirming) return;
+    setState(() {
+      _isConfirming = true;
+      _isLoading = true;
+    });
+
+    final uri = Uri.tryParse(url);
+    final Map<String, String> params = Map<String, String>.from(uri?.queryParameters ?? {});
+
+    String provider = (params['provider'] ?? widget.provider ?? '').toLowerCase();
+
+    if (provider.isEmpty) {
+      if (params.containsKey('transId')) {
+        provider = 'skipcash';
+      } else if (params.containsKey('session_id')) {
+        provider = 'stripe';
+      } else if (params.containsKey('checkout_id') || params.containsKey('tap_id')) {
+        provider = 'tap';
+      }
+    }
+
+    if (provider.isNotEmpty && !params.containsKey('provider')) {
+      params['provider'] = provider;
+    }
+
+    // Provider specific fallbacks for missing required params
+    if (provider == 'skipcash' || params.containsKey('transId')) {
+      if (!params.containsKey('transId') && params.containsKey('id')) {
+        params['transId'] = params['id']!;
+      }
+      if (!params.containsKey('custom1') && params.containsKey('transId')) {
+        params['custom1'] = params['transId']!;
+      }
+    } else if (provider == 'stripe') {
+      if (!params.containsKey('session_id') && widget.sessionId != null && widget.sessionId!.isNotEmpty) {
+        params['session_id'] = widget.sessionId!;
+      }
+    } else if (provider == 'tap') {
+      if (!params.containsKey('checkout_id') && params.containsKey('tap_id')) {
+        params['checkout_id'] = params['tap_id']!;
+      }
+      if (!params.containsKey('checkout_id') && widget.sessionId != null && widget.sessionId!.isNotEmpty) {
+        params['checkout_id'] = widget.sessionId!;
+      }
+    }
+
+    final queryString = Uri(queryParameters: params).query;
+    final fullConfirmUrl = '${ApiEndpoints.checkoutConfirm}${queryString.isNotEmpty ? '?$queryString' : ''}';
+    debugPrint('Calling checkout confirm API with all params: $fullConfirmUrl');
+
+    try {
+      final response = await ApiClient().dio.get(fullConfirmUrl);
+      debugPrint('Checkout confirm success response: ${response.statusCode} ${response.data}');
+    } catch (e) {
+      debugPrint('Checkout confirm API error: $e');
+    }
+
+    if (mounted) {
+      Navigator.of(context).pop(PaymentResult.success);
+    }
+  }
+
   /// Recognise common success URL patterns (adjust to your backend's callbacks)
   bool _isSuccessUrl(String url) {
-    return url.contains('/success') ||
+    return url.contains('/checkout/success') ||
+        url.contains('/api/checkout/confirm') ||
+        url.contains('/success') ||
         url.contains('/payment-success') ||
         url.contains('/order-confirmed') ||
+        url.contains('status=paid') ||
         url.contains('status=success') ||
         url.contains('result=success');
   }
@@ -115,23 +199,23 @@ class _PaymentWebViewPageState extends State<PaymentWebViewPage> {
               ),
             ),
 
-          // ── Full-screen initial loader (before any content loads) ───────────
-          if (_isLoading && _loadingProgress == 0)
+          // ── Full-screen initial loader (before any content loads or when confirming)
+          if ((_isLoading && _loadingProgress == 0) || _isConfirming)
             Container(
               color: Colors.white,
-              child: const Center(
+              child: Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    CircularProgressIndicator(
+                    const CircularProgressIndicator(
                       valueColor: AlwaysStoppedAnimation<Color>(
                         Color(0xFFFF6B35),
                       ),
                     ),
-                    SizedBox(height: 16),
+                    const SizedBox(height: 16),
                     Text(
-                      'Opening payment page…',
-                      style: TextStyle(
+                      _isConfirming ? 'Confirming payment…' : 'Opening payment page…',
+                      style: const TextStyle(
                         fontSize: 14,
                         color: Color(0xFF64748B),
                       ),

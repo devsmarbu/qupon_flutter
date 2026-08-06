@@ -11,6 +11,7 @@ class ApiEndpoints {
   static const String cart = '/api/cart';
   static const String paymentGateways = '/api/payment-gateways';
   static const String checkout = '/api/checkout';
+  static const String checkoutConfirm = '/api/checkout/confirm';
   static const String categories = '/api/categories';
   static const String dashboard = '/api/me/dashboard';
 }
