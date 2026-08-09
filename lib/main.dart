@@ -27,11 +27,15 @@ void main() async {
 class MyApp extends StatelessWidget {
   final HomeRepository? homeRepository;
   final OffersRepository? offersRepository;
+  final CartRepository? cartRepository;
+  final AuthRepository? authRepository;
 
   const MyApp({
     super.key,
     this.homeRepository,
     this.offersRepository,
+    this.cartRepository,
+    this.authRepository,
   });
 
   @override
@@ -46,7 +50,7 @@ class MyApp extends StatelessWidget {
           create: (context) => homeRepository ?? HomeRepositoryImpl(apiClient: ApiClient()),
         ),
         RepositoryProvider<CartRepository>(
-          create: (context) => CartRepositoryImpl(apiClient: ApiClient()),
+          create: (context) => cartRepository ?? CartRepositoryImpl(apiClient: ApiClient()),
         ),
       ],
       child: MultiBlocProvider(
@@ -57,7 +61,7 @@ class MyApp extends StatelessWidget {
           BlocProvider<CartBloc>(
             create: (context) => CartBloc(
               cartRepository: context.read<CartRepository>(),
-            )..add(const LoadCart()),
+            ),
           ),
           BlocProvider<OffersBloc>(
             create: (context) => OffersBloc(
@@ -71,7 +75,7 @@ class MyApp extends StatelessWidget {
           ),
           BlocProvider<AccountBloc>(
             create: (context) => AccountBloc(
-              authRepository: AuthRepositoryImpl(
+              authRepository: authRepository ?? AuthRepositoryImpl(
                 apiClient: ApiClient(),
               ),
             ),

@@ -42,7 +42,8 @@ class CartRepositoryImpl implements CartRepository {
       final apiResponse = ApiCartResponse.fromJson(responseData);
       return apiResponse.data;
     } on DioException catch (e) {
-      final msg = e.response?.data?['message'] ??
+      final responseData = e.response?.data;
+      final msg = (responseData is Map ? responseData['message'] : null) ??
           e.message ??
           'Network error while fetching cart';
       throw Exception(msg);
@@ -82,7 +83,8 @@ class CartRepositoryImpl implements CartRepository {
       final apiResponse = ApiCartResponse.fromJson(responseData);
       return apiResponse.data;
     } on DioException catch (e) {
-      final msg = e.response?.data?['message'] ??
+      final responseData = e.response?.data;
+      final msg = (responseData is Map ? responseData['message'] : null) ??
           e.message ??
           'Network error while adding to cart';
       throw Exception(msg);
@@ -117,7 +119,8 @@ class CartRepositoryImpl implements CartRepository {
       final apiResponse = ApiCartResponse.fromJson(responseData);
       return apiResponse.data;
     } on DioException catch (e) {
-      final msg = e.response?.data?['message'] ??
+      final responseData = e.response?.data;
+      final msg = (responseData is Map ? responseData['message'] : null) ??
           e.message ??
           'Network error while removing from cart';
       throw Exception(msg);
@@ -151,7 +154,8 @@ class CartRepositoryImpl implements CartRepository {
 
       return list.map((e) => PaymentGateway.fromJson(e as Map<String, dynamic>)).toList();
     } on DioException catch (e) {
-      final msg = e.response?.data?['message'] ??
+      final responseData = e.response?.data;
+      final msg = (responseData is Map ? responseData['message'] : null) ??
           e.message ??
           'Network error while fetching payment gateways';
       throw Exception(msg);

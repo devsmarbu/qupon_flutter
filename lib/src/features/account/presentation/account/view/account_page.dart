@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/account_bloc.dart';
 import '../bloc/account_event.dart';
@@ -127,6 +129,108 @@ class _AccountPageState extends State<AccountPage> {
     final wallet = data?.wallet ?? 0.0;
     final transactions = data?.transactions ?? [];
 
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
+
+    final vendors = transactions.map((t) => t.vendor).where((v) => v.isNotEmpty).toSet().toList();
+    if (_selectedVendor != 'all' && !vendors.contains(_selectedVendor)) {
+      _selectedVendor = 'all';
+    }
+
+    final filteredTransactions = transactions.where((tx) {
+      if (_selectedStatus != 'all') {
+        final lowerStatus = tx.status.toLowerCase();
+        if (_selectedStatus == 'active' && !lowerStatus.contains('active') && !lowerStatus.contains('awaiting')) {
+          return false;
+        }
+        if (_selectedStatus == 'expired' && !lowerStatus.contains('expired')) {
+          return false;
+        }
+        if (_selectedStatus == 'pending' && !lowerStatus.contains('pending')) {
+          return false;
+        }
+      }
+      
+      if (_selectedVendor != 'all') {
+        if (tx.vendor.toLowerCase() != _selectedVendor.toLowerCase()) {
+          return false;
+        }
+      }
+      
+      if (_selectedPeriod != 'All time') {
+        try {
+          DateTime? txDate;
+          if (tx.date.contains('-') || tx.date.contains('/')) {
+            txDate = DateTime.tryParse(tx.date);
+          }
+          if (txDate != null) {
+            final now = DateTime.now();
+            if (_selectedPeriod == 'Today') {
+              if (txDate.year != now.year || txDate.month != now.month || txDate.day != now.day) {
+                return false;
+              }
+            } else if (_selectedPeriod == 'Last 7 days') {
+              if (now.difference(txDate).inDays > 7) {
+                return false;
+              }
+            } else if (_selectedPeriod == 'Last 30 days') {
+              if (now.difference(txDate).inDays > 30) {
+                return false;
+              }
+            } else if (_selectedPeriod == 'Last 90 days') {
+              if (now.difference(txDate).inDays > 90) {
+                return false;
+              }
+            } else if (_selectedPeriod == 'This month') {
+              if (txDate.year != now.year || txDate.month != now.month) {
+                return false;
+              }
+            } else if (_selectedPeriod == 'This year') {
+              if (txDate.year != now.year) {
+                return false;
+              }
+            }
+          }
+        } catch (_) {}
+      }
+
+      if (_fromCtrl.text.isNotEmpty || _toCtrl.text.isNotEmpty) {
+        try {
+          DateTime? txDate;
+          if (tx.date.contains('-') || tx.date.contains('/')) {
+            txDate = DateTime.tryParse(tx.date);
+          }
+          if (txDate != null) {
+            DateTime? parseCustomDate(String s) {
+              final parts = s.split('/');
+              if (parts.length == 3) {
+                final day = int.tryParse(parts[0]);
+                final month = int.tryParse(parts[1]);
+                final year = int.tryParse(parts[2]);
+                if (day != null && month != null && year != null) {
+                  return DateTime(year, month, day);
+                }
+              }
+              return null;
+            }
+            if (_fromCtrl.text.isNotEmpty) {
+              final fromDate = parseCustomDate(_fromCtrl.text);
+              if (fromDate != null && txDate.isBefore(fromDate)) {
+                return false;
+              }
+            }
+            if (_toCtrl.text.isNotEmpty) {
+              final toDate = parseCustomDate(_toCtrl.text);
+              if (toDate != null && txDate.isAfter(toDate)) {
+                return false;
+              }
+            }
+          }
+        } catch (_) {}
+      }
+      
+      return true;
+    }).toList();
+
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: SafeArea(
@@ -212,7 +316,7 @@ class _AccountPageState extends State<AccountPage> {
                         ),
                         const SizedBox(width: 12),
                         GestureDetector(
-                          onTap: () => _showFilterBottomSheet(context),
+                          onTap: () => _showFilterBottomSheet(context, vendors),
                           child: Container(
                             height: 48,
                             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -369,7 +473,7 @@ class _AccountPageState extends State<AccountPage> {
                     const SizedBox(height: 12),
 
                     // Transaction Items
-                    if (transactions.isEmpty)
+                    if (filteredTransactions.isEmpty)
                       const Center(
                         child: Padding(
                           padding: EdgeInsets.symmetric(vertical: 24),
@@ -379,60 +483,62 @@ class _AccountPageState extends State<AccountPage> {
                           ),
                         ),
                       )
-                    else
-                      ...transactions.map((tx) {
-                        IconData icon;
-                        Color iconColor;
-                        Color bgColor;
-
-                        switch (tx.type) {
-                          case 'grocery':
-                            icon = Icons.shopping_bag_outlined;
-                            iconColor = const Color(0xFFEA580C);
-                            bgColor = AppColors.iconBgLightOrange;
-                            break;
-                          case 'redeemed':
-                            icon = Icons.card_giftcard_outlined;
-                            iconColor = const Color(0xFF16A34A);
-                            bgColor = AppColors.iconBgGreen;
-                            break;
-                          case 'coffee':
-                            icon = Icons.local_cafe_outlined;
-                            iconColor = const Color(0xFF0284C7);
-                            bgColor = AppColors.iconBgBlue;
-                            break;
-                          default:
-                            icon = Icons.receipt_long_outlined;
-                            iconColor = const Color(0xFF64748B);
-                            bgColor = const Color(0xFFF1F5F9);
-                        }
-
-                        Color? priceColor = tx.price.startsWith('+') ? AppColors.textPositive : null;
-
-                        String displayTitle = tx.title;
-                        if (tx.title == 'groceryStore') {
-                          displayTitle = l10n.groceryStore;
-                        } else if (tx.title == 'couponRedeemed') {
-                          displayTitle = l10n.couponRedeemed;
-                        } else if (tx.title == 'coffeeShop') {
-                          displayTitle = l10n.coffeeShop;
-                        }
-
-                        return _buildOrderItem(
-                          title: displayTitle,
-                          date: tx.date,
-                          price: tx.price,
-                          priceColor: priceColor,
-                          icon: icon,
-                          iconColor: iconColor,
-                          bgColor: bgColor,
-                        );
-                      }),
-                    const SizedBox(height: 100)
+                    else ...[
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        child: Row(
+                          children: [
+                            const SizedBox(width: 32),
+                            Expanded(
+                              flex: 3,
+                              child: Text(
+                                isArabic ? 'الطلب' : 'Order',
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF64748B),
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              flex: 2,
+                              child: Center(
+                                child: Text(
+                                  isArabic ? 'الكوبونات' : 'Coupons',
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF64748B),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              flex: 2,
+                              child: Align(
+                                alignment: isArabic ? Alignment.centerLeft : Alignment.centerRight,
+                                child: Text(
+                                  isArabic ? 'السعر' : 'Price',
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF64748B),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Divider(color: Color(0xFFE2E8F0), height: 1),
+                      const SizedBox(height: 8),
+                      ...filteredTransactions.map((tx) => _OrderCardItem(tx: tx, isArabic: isArabic)),
+                    ],
                   ],
                 ),
               ),
               // const AppFooter(),
+              const SizedBox(height: 100),
             ],
           ),
         ),
@@ -501,75 +607,7 @@ class _AccountPageState extends State<AccountPage> {
     );
   }
 
-  Widget _buildOrderItem({
-    required String title,
-    required String date,
-    required String price,
-    Color? priceColor,
-    required IconData icon,
-    required Color iconColor,
-    required Color bgColor,
-  }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFF1F5F9)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: bgColor,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              icon,
-              color: iconColor,
-              size: 20,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w800,
-                    color: Color(0xFF0F172A),
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  date,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Color(0xFF64748B),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Text(
-            price,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w900,
-              color: priceColor ?? const Color(0xFF0F172A),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showFilterBottomSheet(BuildContext context) {
+  void _showFilterBottomSheet(BuildContext context, List<String> vendors) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -581,6 +619,7 @@ class _AccountPageState extends State<AccountPage> {
         initialFrom: _fromCtrl.text,
         initialTo: _toCtrl.text,
         periods: _periods,
+        vendors: vendors,
         onApply: (period, status, vendor, from, to) {
           setState(() {
             _selectedPeriod = period;
@@ -758,6 +797,7 @@ class _FilterBottomSheetContent extends StatefulWidget {
   final String initialFrom;
   final String initialTo;
   final List<String> periods;
+  final List<String> vendors;
   final Function(String period, String status, String vendor, String from, String to) onApply;
 
   const _FilterBottomSheetContent({
@@ -767,6 +807,7 @@ class _FilterBottomSheetContent extends StatefulWidget {
     required this.initialFrom,
     required this.initialTo,
     required this.periods,
+    required this.vendors,
     required this.onApply,
   });
 
@@ -787,6 +828,9 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
     _localPeriod = widget.selectedPeriod;
     _localStatus = widget.selectedStatus;
     _localVendor = widget.selectedVendor;
+    if (_localVendor != 'all' && !widget.vendors.contains(_localVendor)) {
+      _localVendor = 'all';
+    }
     _localFromCtrl = TextEditingController(text: widget.initialFrom);
     _localToCtrl = TextEditingController(text: widget.initialTo);
   }
@@ -1028,6 +1072,7 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
                         ),
                         items: [
                           DropdownMenuItem(value: 'all', child: Text(l10n.statusAll)),
+                          ...widget.vendors.map((v) => DropdownMenuItem(value: v, child: Text(v))),
                         ],
                         onChanged: (v) => setState(() => _localVendor = v!),
                       ),
@@ -1146,6 +1191,511 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
             const Icon(Icons.calendar_today_outlined, color: Color(0xFF64748B), size: 18),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// _OrderCardItem represents the expandable row item in the My Orders list.
+class _OrderCardItem extends StatefulWidget {
+  final DashboardTransaction tx;
+  final bool isArabic;
+
+  const _OrderCardItem({
+    super.key,
+    required this.tx,
+    required this.isArabic,
+  });
+
+  @override
+  State<_OrderCardItem> createState() => _OrderCardItemState();
+}
+
+class _OrderCardItemState extends State<_OrderCardItem> {
+  bool _isExpanded = false;
+
+  void _showQrCodeDialog(BuildContext context, String code, String redeemBy) {
+    showDialog(
+      context: context,
+      builder: (ctx) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.white,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Top row: Title and close button
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const SizedBox(width: 24), // Offset for Close button to center title
+                  Expanded(
+                    child: Center(
+                      child: Text(
+                        widget.isArabic ? 'رمز الاستجابة السريعة للكوبون' : 'Your Coupon QR Code',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF0F172A),
+                        ),
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close, color: Color(0xFF64748B), size: 20),
+                    onPressed: () => Navigator.of(ctx).pop(),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              // Subtitle
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Text(
+                  widget.isArabic
+                      ? 'قم بتقديم رمز QR للبائع لاسترداد مشترياتك.'
+                      : 'Show this QR code to the vendor to redeem your purchase.',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: Color(0xFF64748B),
+                    height: 1.4,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 32),
+              // QR Code Image
+              Image.network(
+                'https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=$code',
+                width: 200,
+                height: 200,
+                loadingBuilder: (context, child, progress) {
+                  if (progress == null) return child;
+                  return const SizedBox(
+                    width: 200,
+                    height: 200,
+                    child: Center(
+                      child: CircularProgressIndicator(color: AppColors.primary),
+                    ),
+                  );
+                },
+                errorBuilder: (context, error, stackTrace) {
+                  return const SizedBox(
+                    width: 200,
+                    height: 200,
+                    child: Center(
+                      child: Icon(Icons.qr_code, size: 100, color: Color(0xFF94A3B8)),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 32),
+              // Coupon Code Label
+              Text(
+                widget.isArabic ? 'رمز الكوبون' : 'Coupon Code',
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  color: Color(0xFF64748B),
+                ),
+              ),
+              const SizedBox(height: 6),
+              // Actual Code
+              Text(
+                code,
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF0F172A),
+                  letterSpacing: 1.0,
+                ),
+              ),
+              const SizedBox(height: 16),
+              // Redeem by badge
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEFF6FF), // light blue background
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.access_time_outlined,
+                      size: 16,
+                      color: Color(0xFF2563EB),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      widget.isArabic
+                          ? 'صالح للاستخدام حتى $redeemBy'
+                          : 'Redeem by $redeemBy',
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF2563EB),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 8),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _copyToClipboard(String text, String message) {
+    Clipboard.setData(ClipboardData(text: text));
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+        ),
+        backgroundColor: AppColors.primary,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(String label, Widget valueWidget) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 110,
+            child: Text(
+              label,
+              style: const TextStyle(
+                fontSize: 13,
+                color: Color(0xFF64748B),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: valueWidget,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatusWidget(String status, bool isArabic) {
+    Color bgColor;
+    Color textColor;
+    IconData icon;
+    String text;
+
+    final lowerStatus = status.toLowerCase();
+    if (lowerStatus.contains('awaiting') || lowerStatus.contains('pending')) {
+      bgColor = const Color(0xFFFEF3C7);
+      textColor = const Color(0xFFD97706);
+      icon = Icons.access_time;
+      text = isArabic ? 'في انتظار الاسترداد' : 'Awaiting redemption';
+    } else if (lowerStatus.contains('expired')) {
+      bgColor = const Color(0xFFFEE2E2);
+      textColor = const Color(0xFFEF4444);
+      icon = Icons.error_outline;
+      text = isArabic ? 'منتهي الصلاحية' : 'Expired';
+    } else if (lowerStatus.contains('redeemed') || lowerStatus.contains('used')) {
+      bgColor = const Color(0xFFDCFCE7);
+      textColor = const Color(0xFF15803D);
+      icon = Icons.check_circle_outline;
+      text = isArabic ? 'تم الاسترداد' : 'Redeemed';
+    } else {
+      bgColor = const Color(0xFFFEF3C7);
+      textColor = const Color(0xFFD97706);
+      icon = Icons.access_time;
+      text = isArabic ? 'في انتظار الاسترداد' : 'Awaiting redemption';
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: textColor),
+          const SizedBox(width: 4),
+          Text(
+            text,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: textColor,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget _buildCouponSection(BuildContext context, DashboardCoupon coupon, bool isArabic) {
+    final vendor = coupon.vendor.isNotEmpty ? coupon.vendor : 'ElectroWorld';
+    final offerName = coupon.offer.isNotEmpty ? coupon.offer : 'Tech Gadgets 15% — Basic';
+    final couponCode = coupon.code.isNotEmpty ? coupon.code : 'C-V0VH';
+
+    final couponUrl = coupon.couponUrl.isNotEmpty
+        ? coupon.couponUrl
+        : 'https://qupon.marbu.in/coupon/${couponCode.isNotEmpty ? couponCode : 'AJQKRTYM'}';
+
+    final status = coupon.status.isNotEmpty ? coupon.status : 'Awaiting redemption';
+    final rawRedeemBy = coupon.redeemBy.isNotEmpty ? coupon.redeemBy : '1 Dec 2026';
+
+    String timeLeft = '';
+    final daysUntil = coupon.daysUntilRedeem;
+    if (daysUntil != null) {
+      timeLeft = isArabic ? '$daysUntil يوم متبقي' : '${daysUntil}d left';
+    }
+
+    String redeemByFormatted = rawRedeemBy;
+    try {
+      DateTime? expiry;
+      if (rawRedeemBy.contains('-') || rawRedeemBy.contains('/')) {
+        expiry = DateTime.tryParse(rawRedeemBy);
+      } else {
+        final parts = rawRedeemBy.split(' ');
+        if (parts.length == 3) {
+          final day = int.tryParse(parts[0]);
+          final monthStr = parts[1].toLowerCase();
+          final year = int.tryParse(parts[2]);
+          int? month;
+          if (monthStr.startsWith('jan')) month = 1;
+          else if (monthStr.startsWith('feb')) month = 2;
+          else if (monthStr.startsWith('mar')) month = 3;
+          else if (monthStr.startsWith('apr')) month = 4;
+          else if (monthStr.startsWith('may')) month = 5;
+          else if (monthStr.startsWith('jun')) month = 6;
+          else if (monthStr.startsWith('jul')) month = 7;
+          else if (monthStr.startsWith('aug')) month = 8;
+          else if (monthStr.startsWith('sep')) month = 9;
+          else if (monthStr.startsWith('oct')) month = 10;
+          else if (monthStr.startsWith('nov')) month = 11;
+          else if (monthStr.startsWith('dec')) month = 12;
+
+          if (day != null && month != null && year != null) {
+            expiry = DateTime(year, month, day);
+          }
+        }
+      }
+
+      if (expiry != null) {
+        redeemByFormatted = DateFormat('d MMM yyyy', isArabic ? 'ar' : 'en').format(expiry);
+        if (timeLeft.isEmpty) {
+          final difference = expiry.difference(DateTime.now());
+          final days = difference.inDays;
+          timeLeft = isArabic ? '$days يوم متبقي' : '${days}d left';
+        }
+      }
+    } catch (_) {}
+
+    if (timeLeft.isEmpty) {
+      timeLeft = isArabic ? '118 يوم متبقي' : '118d left';
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildDetailRow(
+          isArabic ? 'البائع' : 'Vendor',
+          Text(vendor, style: const TextStyle(color: Color(0xFF0F172A))),
+        ),
+        _buildDetailRow(
+          isArabic ? 'العرض' : 'Offer',
+          Text(offerName, style: const TextStyle(color: Color(0xFF0F172A))),
+        ),
+        _buildDetailRow(
+          isArabic ? 'الكود' : 'Code',
+          Text(couponCode, style: const TextStyle(color: Color(0xFF0F172A), fontWeight: FontWeight.bold)),
+        ),
+        _buildDetailRow(
+          isArabic ? 'رابط الكوبون' : 'Coupon URL',
+          GestureDetector(
+            onTap: () => _copyToClipboard(
+              couponUrl,
+              isArabic ? 'تم نسخ الرابط في الحافظة' : 'Coupon URL copied to clipboard',
+            ),
+            child: Text(
+              couponUrl,
+              style: const TextStyle(
+                decoration: TextDecoration.underline,
+                color: AppColors.primary,
+                fontSize: 13,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ),
+        _buildDetailRow(
+          isArabic ? 'السعر' : 'Price',
+          Text(coupon.price.isNotEmpty ? coupon.price : 'QAR 20', style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
+        ),
+        _buildDetailRow(
+          isArabic ? 'الحالة' : 'Status',
+          _buildStatusWidget(status, isArabic),
+        ),
+        _buildDetailRow(
+          isArabic ? 'تاريخ الاسترداد' : 'Redeem by',
+          Text(redeemByFormatted, style: const TextStyle(color: Color(0xFF0F172A))),
+        ),
+        _buildDetailRow(
+          isArabic ? 'الوقت المتبقي' : 'Time left',
+          Row(
+            children: [
+              const Icon(Icons.access_time_outlined, size: 16, color: Color(0xFF64748B)),
+              const SizedBox(width: 4),
+              Text(
+                timeLeft,
+                style: const TextStyle(
+                  color: Color(0xFF0F172A),
+                ),
+              ),
+            ],
+          ),
+        ),
+        _buildDetailRow(
+          isArabic ? 'رمز QR' : 'QR code',
+          GestureDetector(
+            onTap: () => _showQrCodeDialog(context, couponCode, redeemByFormatted),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.qr_code_2, size: 16, color: AppColors.primary),
+                const SizedBox(width: 4),
+                Text(
+                  isArabic ? 'عرض رمز QR' : 'Show QR code',
+                  style: const TextStyle(
+                    color: AppColors.primary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final tx = widget.tx;
+    final isArabic = widget.isArabic;
+
+    // Fallbacks matching screenshot if API fields are missing
+    final orderDisplayRef = tx.orderDisplayRef;
+    print("orderDisplayRef....$orderDisplayRef");
+    final coupons = tx.couponsCount;
+    final price = tx.price;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFF1F5F9)),
+      ),
+      child: Column(
+        children: [
+          // Order main row
+          InkWell(
+            onTap: () => setState(() => _isExpanded = !_isExpanded),
+            borderRadius: BorderRadius.circular(16),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+              child: Row(
+                children: [
+                  Icon(
+                    _isExpanded ? Icons.keyboard_arrow_down : (isArabic ? Icons.keyboard_arrow_left : Icons.keyboard_arrow_right),
+                    color: AppColors.primary,
+                    size: 24,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    flex: 3,
+                    child: Text(
+                      orderDisplayRef,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: Center(
+                      child: Text(
+                        coupons.toString(),
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF0F172A),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: Align(
+                      alignment: isArabic ? Alignment.centerLeft : Alignment.centerRight,
+                      child: Text(
+                        price,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF0F172A),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          
+          // Expanded detail section
+          if (_isExpanded) ...[
+            const Divider(color: Color(0xFFF1F5F9), height: 1),
+            Container(
+              padding: const EdgeInsets.all(16),
+              color: Colors.white,
+              child: Column(
+                children: [
+                  for (int i = 0; i < tx.coupons.length; i++) ...[
+                    if (i > 0) ...[
+                      const SizedBox(height: 16),
+                      const Divider(color: Color(0xFFE2E8F0), height: 1),
+                      const SizedBox(height: 16),
+                    ],
+                    _buildCouponSection(context, tx.coupons[i], isArabic),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }

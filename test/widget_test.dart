@@ -16,6 +16,12 @@ import 'package:qupon/src/features/home/data/models/home_collection.dart';
 import 'package:qupon/src/features/offers/data/models/offer.dart';
 import 'package:qupon/src/features/main/presentation/pages/splash_page.dart';
 import 'package:qupon/src/features/account/presentation/welcome/view/welcome_page.dart';
+import 'package:qupon/src/features/cart/data/repositories/cart_repository.dart';
+import 'package:qupon/src/features/account/data/repositories/auth_repository.dart';
+import 'package:qupon/src/features/cart/data/models/api_cart_model.dart';
+import 'package:qupon/src/features/cart/data/models/payment_gateway.dart';
+import 'package:qupon/src/features/cart/data/models/checkout_model.dart';
+import 'package:qupon/src/features/account/data/models/dashboard_model.dart';
 
 class FakeHomeRepository implements HomeRepository {
   @override
@@ -81,6 +87,115 @@ class FakeOffersRepository implements OffersRepository {
   }
 }
 
+class FakeCartRepository implements CartRepository {
+  @override
+  Future<ApiCartData> getCart(List<Map<String, String>> items) async {
+    return ApiCartData(
+      items: [],
+      unavailable: [],
+      totals: ApiCartTotals(
+        itemCount: 0,
+        subtotal: 0.0,
+        totalListPrice: 0.0,
+        totalSavings: 0.0,
+      ),
+    );
+  }
+
+  @override
+  Future<ApiCartData> addToCart(String couponId, String variantId) async {
+    return ApiCartData(
+      items: [],
+      unavailable: [],
+      totals: ApiCartTotals(
+        itemCount: 0,
+        subtotal: 0.0,
+        totalListPrice: 0.0,
+        totalSavings: 0.0,
+      ),
+    );
+  }
+
+  @override
+  Future<ApiCartData> removeFromCart(String key) async {
+    return ApiCartData(
+      items: [],
+      unavailable: [],
+      totals: ApiCartTotals(
+        itemCount: 0,
+        subtotal: 0.0,
+        totalListPrice: 0.0,
+        totalSavings: 0.0,
+      ),
+    );
+  }
+
+  @override
+  Future<List<PaymentGateway>> getPaymentGateways() async {
+    return [];
+  }
+
+  @override
+  Future<CheckoutResponse> checkout(CheckoutRequest request) async {
+    return const CheckoutResponse(
+      ok: true,
+      redirectUrl: 'https://example.com',
+      checkoutSessionId: '123',
+    );
+  }
+}
+
+class FakeAuthRepository implements AuthRepository {
+  @override
+  Future<void> register({
+    required String email,
+    required String password,
+    required String name,
+    required String phoneNumber,
+    required String role,
+    String recaptchaToken = '',
+  }) async {}
+
+  @override
+  Future<void> login({
+    required String email,
+    required String password,
+    required String role,
+  }) async {}
+
+  @override
+  Future<void> verifyOtp({
+    required String email,
+    required String otp,
+    required String role,
+  }) async {}
+
+  @override
+  Future<void> resendOtp({
+    required String email,
+    required String role,
+    String recaptchaToken = '',
+  }) async {}
+
+  @override
+  Future<void> forgotPassword({
+    required String phoneNumber,
+    required String role,
+  }) async {}
+
+  @override
+  Future<DashboardData> getDashboard({required String token}) async {
+    return DashboardData(
+      totalSpent: 0.0,
+      couponsUsed: 0,
+      totalSaved: 0.0,
+      activeCoupons: 0,
+      wallet: 0.0,
+      transactions: [],
+    );
+  }
+}
+
 void main() {
   testWidgets('Smoke test for MainPage, CartPage, and PastDealsPage', (WidgetTester tester) async {
     SharedPreferences.setMockInitialValues({});
@@ -96,11 +211,15 @@ void main() {
 
     final fakeHomeRepo = FakeHomeRepository();
     final fakeOffersRepo = FakeOffersRepository();
+    final fakeCartRepo = FakeCartRepository();
+    final fakeAuthRepo = FakeAuthRepository();
 
     // Build our app and trigger a frame.
     await tester.pumpWidget(MyApp(
       homeRepository: fakeHomeRepo,
       offersRepository: fakeOffersRepo,
+      cartRepository: fakeCartRepo,
+      authRepository: fakeAuthRepo,
     ));
     
     // Wait for splash screen (2.5 seconds) and page transition (0.6 seconds) to complete
@@ -139,11 +258,15 @@ void main() {
 
     final fakeHomeRepo = FakeHomeRepository();
     final fakeOffersRepo = FakeOffersRepository();
+    final fakeCartRepo = FakeCartRepository();
+    final fakeAuthRepo = FakeAuthRepository();
 
     // Build our app and trigger a frame.
     await tester.pumpWidget(MyApp(
       homeRepository: fakeHomeRepo,
       offersRepository: fakeOffersRepo,
+      cartRepository: fakeCartRepo,
+      authRepository: fakeAuthRepo,
     ));
 
     // Verify we start on splash page

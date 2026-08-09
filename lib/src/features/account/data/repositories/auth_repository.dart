@@ -77,7 +77,8 @@ class AuthRepositoryImpl implements AuthRepository {
         );
       }
     } on DioException catch (e) {
-      final errorMessage = e.response?.data?['message'] ?? e.message ?? 'Unknown network error occurred';
+      final data = e.response?.data;
+      final errorMessage = (data is Map ? data['message'] : null) ?? e.message ?? 'Unknown network error occurred';
       throw Exception(errorMessage);
     } catch (e) {
       throw Exception(e.toString());
@@ -130,7 +131,8 @@ class AuthRepositoryImpl implements AuthRepository {
         }
       }
     } on DioException catch (e) {
-      final errorMessage = e.response?.data?['message'] ?? e.message ?? 'Unknown network error occurred';
+      final data = e.response?.data;
+      final errorMessage = (data is Map ? data['message'] : null) ?? e.message ?? 'Unknown network error occurred';
       throw Exception(errorMessage);
     } catch (e) {
       throw Exception(e.toString());
@@ -161,7 +163,8 @@ class AuthRepositoryImpl implements AuthRepository {
         );
       }
     } on DioException catch (e) {
-      final errorMessage = e.response?.data?['message'] ?? e.message ?? 'Unknown network error occurred';
+      final data = e.response?.data;
+      final errorMessage = (data is Map ? data['message'] : null) ?? e.message ?? 'Unknown network error occurred';
       throw Exception(errorMessage);
     } catch (e) {
       throw Exception(e.toString());
@@ -192,7 +195,8 @@ class AuthRepositoryImpl implements AuthRepository {
         );
       }
     } on DioException catch (e) {
-      final errorMessage = e.response?.data?['message'] ?? e.message ?? 'Unknown network error occurred';
+      final data = e.response?.data;
+      final errorMessage = (data is Map ? data['message'] : null) ?? e.message ?? 'Unknown network error occurred';
       throw Exception(errorMessage);
     } catch (e) {
       throw Exception(e.toString());
@@ -221,7 +225,8 @@ class AuthRepositoryImpl implements AuthRepository {
         );
       }
     } on DioException catch (e) {
-      final errorMessage = e.response?.data?['message'] ?? e.message ?? 'Unknown network error occurred';
+      final data = e.response?.data;
+      final errorMessage = (data is Map ? data['message'] : null) ?? e.message ?? 'Unknown network error occurred';
       throw Exception(errorMessage);
     } catch (e) {
       throw Exception(e.toString());
@@ -250,7 +255,8 @@ class AuthRepositoryImpl implements AuthRepository {
 
       return DashboardData.fromJson(responseData);
     } on DioException catch (e) {
-      final errorMessage = e.response?.data?['message'] ?? e.message ?? 'Unknown network error occurred';
+      final data = e.response?.data;
+      final errorMessage = (data is Map ? data['message'] : null) ?? e.message ?? 'Unknown network error occurred';
       throw Exception(errorMessage);
     } catch (e) {
       throw Exception(e.toString());
