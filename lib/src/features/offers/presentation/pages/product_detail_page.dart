@@ -443,7 +443,12 @@ class ProductDetailView extends StatelessWidget {
                                   _ImageCircularButton(
                                     icon: state.isFavorite ? Icons.favorite : Icons.favorite_border_outlined,
                                     iconColor: state.isFavorite ? Colors.red : const Color(0xFF64748B),
-                                    onTap: () => context.read<ProductDetailBloc>().add(const ToggleFavorite()),
+                                    onTap: () async {
+                                      final loggedIn = await _ensureLoggedIn(context);
+                                      if (loggedIn && context.mounted) {
+                                        context.read<ProductDetailBloc>().add(const ToggleFavorite());
+                                      }
+                                    },
                                   ),
                                   const SizedBox(height: 12),
                                   _ImageCircularButton(

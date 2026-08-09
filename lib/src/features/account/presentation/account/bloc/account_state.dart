@@ -1,4 +1,5 @@
 import '../../../data/models/dashboard_model.dart';
+import '../../../../home/data/models/home_coupon.dart';
 
 abstract class AccountState {
   const AccountState();
@@ -17,6 +18,7 @@ class AccountAuthenticated extends AccountState {
   final String name;
   final String role;
   final DashboardData? dashboardData;
+  final List<HomeCoupon> wishlist;
   final bool isLoadingDashboard;
   final String? error;
 
@@ -25,6 +27,7 @@ class AccountAuthenticated extends AccountState {
     this.name = '',
     this.role = '',
     this.dashboardData,
+    this.wishlist = const [],
     this.isLoadingDashboard = false,
     this.error,
   });
@@ -34,6 +37,7 @@ class AccountAuthenticated extends AccountState {
     String? name,
     String? role,
     DashboardData? dashboardData,
+    List<HomeCoupon>? wishlist,
     bool? isLoadingDashboard,
     String? error,
   }) {
@@ -42,6 +46,7 @@ class AccountAuthenticated extends AccountState {
       name: name ?? this.name,
       role: role ?? this.role,
       dashboardData: dashboardData ?? this.dashboardData,
+      wishlist: wishlist ?? this.wishlist,
       isLoadingDashboard: isLoadingDashboard ?? this.isLoadingDashboard,
       error: error ?? this.error,
     );

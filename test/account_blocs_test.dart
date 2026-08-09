@@ -5,6 +5,7 @@ import 'package:qupon/src/core/constants/app_strings.dart';
 import 'package:qupon/src/features/account/data/models/profile_data.dart';
 import 'package:qupon/src/features/account/data/repositories/auth_repository.dart';
 import 'package:qupon/src/features/account/data/models/dashboard_model.dart';
+import 'package:qupon/src/features/home/data/models/home_coupon.dart';
 import 'package:qupon/src/features/account/presentation/account/bloc/account_bloc.dart';
 import 'package:qupon/src/features/account/presentation/account/bloc/account_event.dart';
 import 'package:qupon/src/features/account/presentation/account/bloc/account_state.dart';
@@ -132,6 +133,12 @@ class FakeAuthRepository implements AuthRepository {
       wallet: 500,
       transactions: [],
     );
+  }
+
+  @override
+  Future<List<HomeCoupon>> getWishlist({required String token}) async {
+    if (throwError) throw Exception(errorMessage);
+    return [];
   }
 }
 

@@ -14,4 +14,6 @@ class ApiEndpoints {
   static const String checkoutConfirm = '/api/checkout/confirm';
   static const String categories = '/api/categories';
   static const String dashboard = '/api/me/dashboard';
+  static const String wishlist = '/api/me/wishlist';
 }
+

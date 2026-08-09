@@ -9,6 +9,8 @@ import '../../login/view/login_page.dart';
 import 'package:qupon/src/core/constants/app_colors.dart';
 import 'package:qupon/l10n/app_localizations.dart';
 import '../../../data/models/dashboard_model.dart';
+import 'package:qupon/src/features/offers/presentation/widgets/offer_horizontal_card_api.dart';
+import 'package:qupon/src/features/home/data/models/home_coupon.dart';
 
 class AccountPage extends StatefulWidget {
   final VoidCallback? onNavigateHome;
@@ -534,6 +536,62 @@ class _AccountPageState extends State<AccountPage> {
                       const SizedBox(height: 8),
                       ...filteredTransactions.map((tx) => _OrderCardItem(tx: tx, isArabic: isArabic)),
                     ],
+
+                    const SizedBox(height: 32),
+
+                    // ── My Wishlist Section ──────────────────────────────────────
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          isArabic ? 'قائمة رغباتي' : 'My Wishlist',
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w900,
+                            color: Color(0xFF0F172A),
+                          ),
+                        ),
+                        if (state.wishlist.isNotEmpty)
+                          Text(
+                            '${state.wishlist.length} ${isArabic ? 'عناصر' : (state.wishlist.length == 1 ? 'item' : 'items')}',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF64748B),
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+
+                    if (state.wishlist.isEmpty)
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(24),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: const Color(0xFFE2E8F0)),
+                        ),
+                        child: Center(
+                          child: Text(
+                            isArabic ? 'لا توجد عناصر في قائمة رغباتك حالياً' : 'No items in your wishlist yet',
+                            style: const TextStyle(color: Color(0xFF64748B), fontSize: 14),
+                          ),
+                        ),
+                      )
+                    else
+                      SizedBox(
+                        height: 310,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          physics: const BouncingScrollPhysics(),
+                          itemCount: state.wishlist.length,
+                          itemBuilder: (context, index) {
+                            return OfferHorizontalCardApi(coupon: state.wishlist[index]);
+                          },
+                        ),
+                      ),
                   ],
                 ),
               ),
@@ -1452,16 +1510,16 @@ class _OrderCardItemState extends State<_OrderCardItem> {
 
   @override
   Widget _buildCouponSection(BuildContext context, DashboardCoupon coupon, bool isArabic) {
-    final vendor = coupon.vendor.isNotEmpty ? coupon.vendor : 'ElectroWorld';
-    final offerName = coupon.offer.isNotEmpty ? coupon.offer : 'Tech Gadgets 15% — Basic';
-    final couponCode = coupon.code.isNotEmpty ? coupon.code : 'C-V0VH';
+    final vendor = coupon.vendor.isNotEmpty ? coupon.vendor : '';
+    final offerName = coupon.offer.isNotEmpty ? coupon.offer : '';
+    final couponCode = coupon.code.isNotEmpty ? coupon.code : '';
 
     final couponUrl = coupon.couponUrl.isNotEmpty
         ? coupon.couponUrl
-        : 'https://qupon.marbu.in/coupon/${couponCode.isNotEmpty ? couponCode : 'AJQKRTYM'}';
+        : 'https://qupon.marbu.in/coupon/${couponCode.isNotEmpty ? couponCode : ''}';
 
-    final status = coupon.status.isNotEmpty ? coupon.status : 'Awaiting redemption';
-    final rawRedeemBy = coupon.redeemBy.isNotEmpty ? coupon.redeemBy : '1 Dec 2026';
+    final status = coupon.status.isNotEmpty ? coupon.status : '';
+    final rawRedeemBy = coupon.redeemBy.isNotEmpty ? coupon.redeemBy : '';
 
     String timeLeft = '';
     final daysUntil = coupon.daysUntilRedeem;

@@ -9,6 +9,7 @@ abstract class OffersRepository {
   Future<List<Offer>> getCategoryOffers(String categoryId);
   Future<Offer> getCouponDetails(String slug);
   Future<String?> submitCouponRequest({required Map<String, dynamic> body});
+  Future<bool> toggleWishlist({required String couponId});
 }
 
 class OffersRepositoryImpl implements OffersRepository {
@@ -293,4 +294,39 @@ class OffersRepositoryImpl implements OffersRepository {
       throw Exception(e.toString());
     }
   }
+
+  @override
+  Future<bool> toggleWishlist({required String couponId}) async {
+    try {
+      final response = await _apiClient.dio.post(
+        ApiEndpoints.wishlist,
+        data: {
+          'couponId': couponId,
+          'toggle': true,
+        },
+      );
+
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        throw DioException(
+          requestOptions: response.requestOptions,
+          response: response,
+          message: 'Failed to update wishlist. Status: ${response.statusCode}',
+        );
+      }
+
+      final responseData = response.data;
+      if (responseData is Map && responseData['wishlisted'] is bool) {
+        return responseData['wishlisted'] as bool;
+      }
+      return true;
+    } on DioException catch (e) {
+      final msg = e.response?.data?['message'] ??
+          e.message ??
+          'Network error while updating wishlist';
+      throw Exception(msg);
+    } catch (e) {
+      throw Exception(e.toString());
+    }
+  }
 }
+

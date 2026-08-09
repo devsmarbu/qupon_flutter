@@ -86,9 +86,11 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
         throw Exception('Token not found. Please log in again.');
       }
       final data = await _authRepository.getDashboard(token: token);
+      final wishlist = await _authRepository.getWishlist(token: token);
       emit(currentState.copyWith(
         isLoadingDashboard: false,
         dashboardData: data,
+        wishlist: wishlist,
         error: null,
       ));
     } catch (e) {

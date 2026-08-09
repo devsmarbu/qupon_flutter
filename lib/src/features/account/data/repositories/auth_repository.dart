@@ -5,6 +5,7 @@ import '../../../../core/preferences/pref_store.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../models/profile_data.dart';
 import '../models/dashboard_model.dart';
+import '../../../home/data/models/home_coupon.dart';
 
 abstract class AuthRepository {
   Future<void> register({
@@ -40,6 +41,8 @@ abstract class AuthRepository {
   });
 
   Future<DashboardData> getDashboard({required String token});
+
+  Future<List<HomeCoupon>> getWishlist({required String token});
 }
 
 class AuthRepositoryImpl implements AuthRepository {
@@ -262,4 +265,45 @@ class AuthRepositoryImpl implements AuthRepository {
       throw Exception(e.toString());
     }
   }
+
+  @override
+  Future<List<HomeCoupon>> getWishlist({required String token}) async {
+    try {
+      final response = await _apiClient.dio.get(
+        ApiEndpoints.wishlist,
+      );
+
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        return [];
+      }
+
+      final responseData = response.data;
+      if (responseData == null) {
+        return [];
+      }
+
+      final List<HomeCoupon> items = [];
+      if (responseData is Map && responseData['items'] is List) {
+        for (var item in responseData['items']) {
+          if (item is Map && item['coupon'] is Map<String, dynamic>) {
+            items.add(HomeCoupon.fromJson(item['coupon'] as Map<String, dynamic>));
+          } else if (item is Map) {
+            items.add(HomeCoupon.fromJson(Map<String, dynamic>.from(item)));
+          }
+        }
+      } else if (responseData is List) {
+        for (var item in responseData) {
+          if (item is Map && item['coupon'] is Map<String, dynamic>) {
+            items.add(HomeCoupon.fromJson(item['coupon'] as Map<String, dynamic>));
+          } else if (item is Map) {
+            items.add(HomeCoupon.fromJson(Map<String, dynamic>.from(item)));
+          }
+        }
+      }
+      return items;
+    } catch (_) {
+      return [];
+    }
+  }
 }
+

@@ -21,6 +21,7 @@ class OfferHorizontalCardApi extends StatelessWidget {
         final offer = Offer(
           id: coupon.id,
           title: coupon.name,
+          titleAr: coupon.nameAr,
           category: coupon.category,
           imageUrl: imageUrl,
           daysLeft: coupon.daysLeft,
@@ -28,6 +29,7 @@ class OfferHorizontalCardApi extends StatelessWidget {
           minutesLeft: coupon.minutesLeft,
           location: '123 Tech Avenue, Silicon Valley, CA 94025',
           description: coupon.description,
+          descriptionAr: coupon.descriptionAr,
           price: coupon.price,
           currency: 'QAR',
           slug: coupon.slug,
@@ -174,7 +176,7 @@ class OfferHorizontalCardApi extends StatelessWidget {
 
                   // Card Title
                   Text(
-                    coupon.name,
+                    isArabic && coupon.nameAr.isNotEmpty ? coupon.nameAr : coupon.name,
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w900,

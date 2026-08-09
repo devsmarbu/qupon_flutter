@@ -22,6 +22,7 @@ import 'package:qupon/src/features/cart/data/models/api_cart_model.dart';
 import 'package:qupon/src/features/cart/data/models/payment_gateway.dart';
 import 'package:qupon/src/features/cart/data/models/checkout_model.dart';
 import 'package:qupon/src/features/account/data/models/dashboard_model.dart';
+import 'package:qupon/src/features/home/data/models/home_coupon.dart';
 
 class FakeHomeRepository implements HomeRepository {
   @override
@@ -84,6 +85,11 @@ class FakeOffersRepository implements OffersRepository {
   @override
   Future<String?> submitCouponRequest({required Map<String, dynamic> body}) async {
     return null;
+  }
+
+  @override
+  Future<bool> toggleWishlist({required String couponId}) async {
+    return true;
   }
 }
 
@@ -193,6 +199,11 @@ class FakeAuthRepository implements AuthRepository {
       wallet: 0.0,
       transactions: [],
     );
+  }
+
+  @override
+  Future<List<HomeCoupon>> getWishlist({required String token}) async {
+    return [];
   }
 }
 

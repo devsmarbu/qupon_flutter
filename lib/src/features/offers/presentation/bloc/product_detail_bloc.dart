@@ -75,11 +75,25 @@ class ProductDetailBloc extends Bloc<ProductDetailEvent, ProductDetailState> {
     emit(state.copyWith(selectedOptionIndex: event.index));
   }
 
-  void _onToggleFavorite(
+  Future<void> _onToggleFavorite(
     ToggleFavorite event,
     Emitter<ProductDetailState> emit,
-  ) {
-    emit(state.copyWith(isFavorite: !state.isFavorite));
+  ) async {
+    final couponId = state.offer?.id;
+    final nextFav = !state.isFavorite;
+
+    // Optimistic UI state update
+    emit(state.copyWith(isFavorite: nextFav));
+
+    if (couponId != null && couponId.isNotEmpty) {
+      try {
+        final wishlisted = await _offersRepository.toggleWishlist(couponId: couponId);
+        emit(state.copyWith(isFavorite: wishlisted));
+      } catch (_) {
+        // Revert on error
+        emit(state.copyWith(isFavorite: !nextFav));
+      }
+    }
   }
 
   void _onToggleBookmark(
