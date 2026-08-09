@@ -1,5 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'offer_option.dart';
+import 'vendor_details.dart';
 
 part 'offer.freezed.dart';
 part 'offer.g.dart';
@@ -27,6 +28,7 @@ class Offer with _$Offer {
     @JsonKey(includeFromJson: false, includeToJson: false)
     @Default([])
     List<OfferOption> variants,
+    VendorDetails? vendorDetails,
   }) = _Offer;
 
   factory Offer.fromJson(Map<String, dynamic> json) => _$OfferFromJson(json);

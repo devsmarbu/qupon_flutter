@@ -483,57 +483,41 @@ class _AccountPageState extends State<AccountPage> {
                           ),
                         ),
                       )
-                    else ...[
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        child: Row(
+                    else
+                      Container(
+                        margin: const EdgeInsets.only(top: 8),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(24),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.02),
+                              blurRadius: 16,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                          border: Border.all(color: const Color(0xFFF1F5F9)),
+                        ),
+                        child: Column(
                           children: [
-                            const SizedBox(width: 32),
-                            Expanded(
-                              flex: 3,
-                              child: Text(
-                                isArabic ? 'الطلب' : 'Order',
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                  color: Color(0xFF64748B),
+                            for (int i = 0; i < filteredTransactions.length; i++) ...[
+                              if (i > 0)
+                                const Divider(
+                                  color: Color(0xFFF1F5F9),
+                                  height: 1,
+                                  indent: 76,
+                                  endIndent: 16,
                                 ),
+                              _OrderCardItem(
+                                tx: filteredTransactions[i],
+                                isArabic: isArabic,
+                                isFirst: i == 0,
+                                isLast: i == filteredTransactions.length - 1,
                               ),
-                            ),
-                            Expanded(
-                              flex: 2,
-                              child: Center(
-                                child: Text(
-                                  isArabic ? 'الكوبونات' : 'Coupons',
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFF64748B),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              flex: 2,
-                              child: Align(
-                                alignment: isArabic ? Alignment.centerLeft : Alignment.centerRight,
-                                child: Text(
-                                  isArabic ? 'السعر' : 'Price',
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFF64748B),
-                                  ),
-                                ),
-                              ),
-                            ),
+                            ],
                           ],
                         ),
                       ),
-                      const Divider(color: Color(0xFFE2E8F0), height: 1),
-                      const SizedBox(height: 8),
-                      ...filteredTransactions.map((tx) => _OrderCardItem(tx: tx, isArabic: isArabic)),
-                    ],
                   ],
                 ),
               ),
@@ -1200,11 +1184,15 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
 class _OrderCardItem extends StatefulWidget {
   final DashboardTransaction tx;
   final bool isArabic;
+  final bool isFirst;
+  final bool isLast;
 
   const _OrderCardItem({
     super.key,
     required this.tx,
     required this.isArabic,
+    this.isFirst = false,
+    this.isLast = false,
   });
 
   @override
@@ -1598,105 +1586,205 @@ class _OrderCardItemState extends State<_OrderCardItem> {
     );
   }
 
+  IconData _getIcon(DashboardTransaction tx) {
+    final type = tx.type.toLowerCase();
+    final title = tx.title.toLowerCase();
+    final vendor = tx.vendor.toLowerCase();
+
+    if (type.contains('redeemed') || type.contains('credit') || tx.price.startsWith('+') || title.contains('redeem') || title.contains('coupon')) {
+      return Icons.card_giftcard;
+    }
+    if (type.contains('coffee') || type.contains('cafe') || title.contains('coffee') || title.contains('cafe') || title.contains('starbucks') || vendor.contains('coffee') || vendor.contains('cafe')) {
+      return Icons.local_cafe_outlined;
+    }
+    return Icons.shopping_bag_outlined;
+  }
+
+  Color _getIconColor(DashboardTransaction tx) {
+    final type = tx.type.toLowerCase();
+    final title = tx.title.toLowerCase();
+    final vendor = tx.vendor.toLowerCase();
+
+    if (type.contains('redeemed') || type.contains('credit') || tx.price.startsWith('+') || title.contains('redeem') || title.contains('coupon')) {
+      return const Color(0xFF22C55E); // Green
+    }
+    if (type.contains('coffee') || type.contains('cafe') || title.contains('coffee') || title.contains('cafe') || title.contains('starbucks') || vendor.contains('coffee') || vendor.contains('cafe')) {
+      return const Color(0xFF2563EB); // Blue
+    }
+    return const Color(0xFFFF6B35); // Orange
+  }
+
+  Color _getBgColor(DashboardTransaction tx) {
+    final type = tx.type.toLowerCase();
+    final title = tx.title.toLowerCase();
+    final vendor = tx.vendor.toLowerCase();
+
+    if (type.contains('redeemed') || type.contains('credit') || tx.price.startsWith('+') || title.contains('redeem') || title.contains('coupon')) {
+      return const Color(0xFFE8F8EE); // Light green
+    }
+    if (type.contains('coffee') || type.contains('cafe') || title.contains('coffee') || title.contains('cafe') || title.contains('starbucks') || vendor.contains('coffee') || vendor.contains('cafe')) {
+      return const Color(0xFFEFF6FF); // Light blue
+    }
+    return const Color(0xFFFFEFEA); // Light orange
+  }
+
+  String _getDisplayTitle(DashboardTransaction tx) {
+    if (tx.title.isNotEmpty) return tx.title;
+    if (tx.vendor.isNotEmpty) return tx.vendor;
+
+    final type = tx.type.toLowerCase();
+    if (type.contains('redeemed') || type.contains('credit') || tx.price.startsWith('+')) {
+      return 'Coupon Redeemed';
+    }
+    if (type.contains('coffee') || type.contains('cafe')) {
+      return 'Coffee Shop';
+    }
+    return 'Grocery Store';
+  }
+
+  String _getFormattedDate(String dateStr, bool isArabic) {
+    if (dateStr.isEmpty) return 'Jul 15, 2025';
+    try {
+      final dt = DateTime.parse(dateStr);
+      return DateFormat('MMM d, yyyy', isArabic ? 'ar' : 'en').format(dt);
+    } catch (_) {
+      return dateStr;
+    }
+  }
+
+  String _getFormattedPrice(DashboardTransaction tx) {
+    String p = tx.price;
+    if (p.isEmpty) return '-QAR 0';
+
+    p = p.replaceAll(' ', '');
+    final isCredit = p.startsWith('+') || tx.type.toLowerCase().contains('redeemed') || tx.type.toLowerCase().contains('credit');
+
+    String numericPart = p.replaceAll('+', '').replaceAll('-', '').replaceAll('QAR', '');
+    final numVal = double.tryParse(numericPart);
+    if (numVal != null && numVal % 1 == 0) {
+      numericPart = numVal.toInt().toString();
+    }
+    return '${isCredit ? '+' : '-'}QAR $numericPart';
+  }
+
+  Color _getPriceColor(DashboardTransaction tx) {
+    final p = tx.price;
+    final isCredit = p.startsWith('+') || tx.type.toLowerCase().contains('redeemed') || tx.type.toLowerCase().contains('credit');
+    return isCredit ? const Color(0xFF22C55E) : const Color(0xFF0F172A);
+  }
+
   @override
   Widget build(BuildContext context) {
     final tx = widget.tx;
     final isArabic = widget.isArabic;
 
-    // Fallbacks matching screenshot if API fields are missing
-    final orderDisplayRef = tx.orderDisplayRef;
-    print("orderDisplayRef....$orderDisplayRef");
-    final coupons = tx.couponsCount;
-    final price = tx.price;
+    final borderRadius = BorderRadius.only(
+      topLeft: widget.isFirst ? const Radius.circular(24) : Radius.zero,
+      topRight: widget.isFirst ? const Radius.circular(24) : Radius.zero,
+      bottomLeft: widget.isLast && !_isExpanded ? const Radius.circular(24) : Radius.zero,
+      bottomRight: widget.isLast && !_isExpanded ? const Radius.circular(24) : Radius.zero,
+    );
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFF1F5F9)),
-      ),
-      child: Column(
-        children: [
-          // Order main row
-          InkWell(
-            onTap: () => setState(() => _isExpanded = !_isExpanded),
-            borderRadius: BorderRadius.circular(16),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-              child: Row(
-                children: [
-                  Icon(
-                    _isExpanded ? Icons.keyboard_arrow_down : (isArabic ? Icons.keyboard_arrow_left : Icons.keyboard_arrow_right),
-                    color: AppColors.primary,
-                    size: 24,
+    return Column(
+      children: [
+        // Order main row styled exactly like the screenshot
+        InkWell(
+          onTap: () => setState(() => _isExpanded = !_isExpanded),
+          borderRadius: borderRadius,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            child: Row(
+              children: [
+                // Category-specific circular icon container
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: _getBgColor(tx),
+                    shape: BoxShape.circle,
                   ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    flex: 3,
-                    child: Text(
-                      orderDisplayRef,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.primary,
-                      ),
+                  child: Center(
+                    child: Icon(
+                      _getIcon(tx),
+                      color: _getIconColor(tx),
+                      size: 24,
                     ),
                   ),
-                  Expanded(
-                    flex: 2,
-                    child: Center(
-                      child: Text(
-                        coupons.toString(),
+                ),
+                const SizedBox(width: 16),
+                
+                // Title and Date Column
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _getDisplayTitle(tx),
                         style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFF0F172A),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    flex: 2,
-                    child: Align(
-                      alignment: isArabic ? Alignment.centerLeft : Alignment.centerRight,
-                      child: Text(
-                        price,
-                        style: const TextStyle(
-                          fontSize: 14,
+                          fontSize: 15,
                           fontWeight: FontWeight.bold,
                           color: Color(0xFF0F172A),
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    ),
+                      const SizedBox(height: 4),
+                      Text(
+                        _getFormattedDate(tx.date, isArabic),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF94A3B8),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(width: 8),
+                
+                // Formatted price with proper green/black coloring and sign (+/-)
+                Text(
+                  _getFormattedPrice(tx),
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w900,
+                    color: _getPriceColor(tx),
+                  ),
+                ),
+              ],
             ),
           ),
-          
-          // Expanded detail section
-          if (_isExpanded) ...[
-            const Divider(color: Color(0xFFF1F5F9), height: 1),
-            Container(
-              padding: const EdgeInsets.all(16),
-              color: Colors.white,
-              child: Column(
-                children: [
-                  for (int i = 0; i < tx.coupons.length; i++) ...[
-                    if (i > 0) ...[
-                      const SizedBox(height: 16),
-                      const Divider(color: Color(0xFFE2E8F0), height: 1),
-                      const SizedBox(height: 16),
-                    ],
-                    _buildCouponSection(context, tx.coupons[i], isArabic),
-                  ],
-                ],
-              ),
+        ),
+        
+        // Expanded detail section (retains expandable coupon metadata visual layout)
+        if (_isExpanded) ...[
+          const Divider(color: Color(0xFFF1F5F9), height: 1),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF8FAFC),
+              borderRadius: widget.isLast
+                  ? const BorderRadius.only(
+                      bottomLeft: Radius.circular(24),
+                      bottomRight: Radius.circular(24),
+                    )
+                  : null,
             ),
-          ],
+            child: Column(
+              children: [
+                for (int i = 0; i < tx.coupons.length; i++) ...[
+                  if (i > 0) ...[
+                    const SizedBox(height: 16),
+                    const Divider(color: Color(0xFFE2E8F0), height: 1),
+                    const SizedBox(height: 16),
+                  ],
+                  _buildCouponSection(context, tx.coupons[i], isArabic),
+                ],
+              ],
+            ),
+          ),
         ],
-      ),
+      ],
     );
   }
 }

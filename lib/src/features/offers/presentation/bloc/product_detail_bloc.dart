@@ -50,7 +50,7 @@ class ProductDetailBloc extends Bloc<ProductDetailEvent, ProductDetailState> {
     ));
 
     final slug = (offer.slug != null && offer.slug!.isNotEmpty) ? offer.slug! : offer.id;
-    if (slug.isNotEmpty) {
+    if (slug.isNotEmpty && !['1', '2', '3', '4', '5', '6'].contains(slug)) {
       try {
         final detailedOffer = await _offersRepository.getCouponDetails(slug);
         

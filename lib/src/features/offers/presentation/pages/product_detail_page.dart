@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 import '../../../localization/presentation/cubit/locale_cubit.dart';
 import '../../../main/presentation/widgets/app_footer.dart';
 
 import '../../data/models/offer.dart';
 import '../../data/models/offer_option.dart';
+import '../../data/models/vendor_details.dart';
 import '../bloc/product_detail_bloc.dart';
 import '../bloc/product_detail_event.dart';
 import '../bloc/product_detail_state.dart';
@@ -227,6 +231,24 @@ class ProductDetailView extends StatelessWidget {
     return loggedIn == true;
   }
 
+  void _shareOffer(BuildContext context, Offer offer) {
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
+    final vendorName = offer.vendorDetails?.name ?? offer.vendor ?? (isArabic ? 'كوبون' : 'Qupon');
+    final title = (isArabic && offer.titleAr != null && offer.titleAr!.isNotEmpty)
+        ? offer.titleAr!
+        : offer.title;
+    final desc = (isArabic && offer.descriptionAr != null && offer.descriptionAr!.isNotEmpty)
+        ? offer.descriptionAr!
+        : offer.description;
+    
+    final shareLink = offer.vendorDetails?.websiteUrl ?? offer.vendorDetails?.mapsOpenUrl ?? 'https://qupon.marbu.in/vendor/${offer.vendorDetails?.slug ?? ''}';
+
+    final text = isArabic
+        ? 'تحقق من هذا العرض الرائع من $vendorName!\n\n$title\n$desc\n\nلمزيد من التفاصيل: $shareLink'
+        : 'Check out this amazing deal from $vendorName!\n\n$title\n$desc\n\nMore details: $shareLink';
+
+    Share.share(text, subject: title);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -454,7 +476,7 @@ class ProductDetailView extends StatelessWidget {
                                   const SizedBox(height: 12),
                                   _ImageCircularButton(
                                     icon: Icons.share_outlined,
-                                    onTap: () {},
+                                    onTap: () => _shareOffer(context, offer),
                                   ),
                                 ],
                               ),
@@ -493,7 +515,9 @@ class ProductDetailView extends StatelessWidget {
                                     border: Border.all(color: const Color(0xFFFFEDD5), width: 0.5),
                                   ),
                                   child: Text(
-                                    offer.vendor ?? _Localizations.get(context, 'electroWorld'),
+                                    (isArabic && offer.vendorDetails?.nameAr != null && offer.vendorDetails!.nameAr!.isNotEmpty)
+                                        ? offer.vendorDetails!.nameAr!
+                                        : (offer.vendorDetails?.nameEn ?? offer.vendorDetails?.name ?? offer.vendor ?? _Localizations.get(context, 'electroWorld')),
                                     style: const TextStyle(
                                       color: Color(0xFFEA580C),
                                       fontWeight: FontWeight.bold,
@@ -1043,7 +1067,7 @@ class ProductDetailView extends StatelessWidget {
                                   const SizedBox(width: 12),
                                   Expanded(
                                     child: OutlinedButton(
-                                      onPressed: () {},
+                                      onPressed: () => _shareOffer(context, offer),
                                       style: OutlinedButton.styleFrom(
                                         side: const BorderSide(color: Color(0xFFE2E8F0)),
                                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -1117,7 +1141,9 @@ class ProductDetailView extends StatelessWidget {
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
                                             Text(
-                                              offer.vendor ?? _Localizations.get(context, 'electroWorld'),
+                                              (isArabic && offer.vendorDetails?.nameAr != null && offer.vendorDetails!.nameAr!.isNotEmpty)
+                                                  ? offer.vendorDetails!.nameAr!
+                                                  : (offer.vendorDetails?.nameEn ?? offer.vendorDetails?.name ?? offer.vendor ?? _Localizations.get(context, 'electroWorld')),
                                               style: const TextStyle(
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.bold,
@@ -1126,7 +1152,13 @@ class ProductDetailView extends StatelessWidget {
                                             ),
                                             const SizedBox(height: 2),
                                             InkWell(
-                                              onTap: () {},
+                                              onTap: () async {
+                                                final profileLink = offer.vendorDetails?.websiteUrl ?? 'https://qupon.marbu.in/vendor/${offer.vendorDetails?.slug ?? ''}';
+                                                final uri = Uri.parse(profileLink);
+                                                if (await canLaunchUrl(uri)) {
+                                                  await launchUrl(uri, mode: LaunchMode.externalApplication);
+                                                }
+                                              },
                                               child: Text(
                                                 _Localizations.get(context, 'viewVendorProfile'),
                                                 style: const TextStyle(
@@ -1160,7 +1192,7 @@ class ProductDetailView extends StatelessWidget {
                                           size: 18,
                                         ),
                                         const SizedBox(width: 8),
-                                        const Expanded(
+                                        Expanded(
                                           child: Text(
                                             '123 Tech Avenue, Silicon Valley, CA 94025',
                                             style: TextStyle(
@@ -1176,104 +1208,43 @@ class ProductDetailView extends StatelessWidget {
                                   const SizedBox(height: 16),
 
                                   // Map View
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(16),
-                                    child: Container(
-                                      height: 180,
-                                      width: double.infinity,
-                                      color: const Color(0xFFE0F2FE), // water blue
-                                      child: Stack(
-                                        children: [
-                                          // Custom drawn map vector elements
-                                          Positioned.fill(
-                                            child: CustomPaint(
-                                              painter: _MapPainter(),
-                                            ),
-                                          ),
-                                          // Map Marker labels
-                                          const Positioned(
-                                            top: 80,
-                                            left: 90,
-                                            child: Column(
-                                              children: [
-                                                Icon(
-                                                  Icons.location_on,
-                                                  color: Colors.red,
-                                                  size: 32,
-                                                ),
-                                                Text(
-                                                  'Future Today Inc.',
-                                                  style: TextStyle(
-                                                    color: Colors.black,
-                                                    fontSize: 10,
-                                                    fontWeight: FontWeight.bold,
-                                                    backgroundColor: Colors.white70,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                          const Positioned(
-                                            top: 100,
-                                            left: 170,
-                                            child: Column(
-                                              children: [
-                                                Icon(
-                                                  Icons.location_on,
-                                                  color: Color(0xFFFF6B35),
-                                                  size: 32,
-                                                ),
-                                                Text(
-                                                  'Baytech Digital',
-                                                  style: TextStyle(
-                                                    color: Colors.black,
-                                                    fontSize: 10,
-                                                    fontWeight: FontWeight.bold,
-                                                    backgroundColor: Colors.white70,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                          // Open in maps button overlay
-                                          Positioned(
-                                            top: 12,
-                                            left: 12,
-                                            child: Container(
-                                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                              decoration: BoxDecoration(
-                                                color: Colors.white,
-                                                borderRadius: BorderRadius.circular(8),
-                                                boxShadow: [
-                                                  BoxShadow(
-                                                    color: Colors.black.withOpacity(0.1),
-                                                    blurRadius: 4,
-                                                  ),
-                                                ],
+                                  Builder(
+                                    builder: (context) {
+                                      final details = offer.vendorDetails;
+                                      final locationName = details?.locationEn ?? details?.locationAr ?? offer.location;
+                                      final embedUrl = details?.mapsEmbedUrl ?? 
+                                          (locationName.isNotEmpty 
+                                              ? 'https://www.google.com/maps?q=${Uri.encodeComponent(locationName)}&output=embed'
+                                              : '');
+                                      final openUrl = details?.mapsOpenUrl ?? details?.locationLink ?? 
+                                          (locationName.isNotEmpty
+                                              ? 'https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(locationName)}'
+                                              : '');
+
+                                      if (embedUrl.isNotEmpty) {
+                                        return VendorMapWidget(
+                                          embedUrl: embedUrl,
+                                          openUrl: openUrl,
+                                        );
+                                      }
+
+                                      // Fallback mock map if location is completely empty
+                                      return ClipRRect(
+                                        borderRadius: BorderRadius.circular(16),
+                                        child: Container(
+                                          height: 180,
+                                          width: double.infinity,
+                                          color: const Color(0xFFE0F2FE),
+                                          child: Stack(
+                                            children: [
+                                              Positioned.fill(
+                                                child: CustomPaint(painter: _MapPainter()),
                                               ),
-                                              child: Row(
-                                                children: [
-                                                  Text(
-                                                    _Localizations.get(context, 'openInMaps'),
-                                                    style: const TextStyle(
-                                                      color: Color(0xFF2563EB),
-                                                      fontSize: 12,
-                                                      fontWeight: FontWeight.bold,
-                                                    ),
-                                                  ),
-                                                  const SizedBox(width: 4),
-                                                  const Icon(
-                                                    Icons.open_in_new,
-                                                    size: 12,
-                                                    color: Color(0xFF2563EB),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
+                                            ],
                                           ),
-                                        ],
-                                      ),
-                                    ),
+                                        ),
+                                      );
+                                    },
                                   ),
                                 ],
                               ),
@@ -1299,17 +1270,68 @@ class ProductDetailView extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(height: 12),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                _SocialCircleButton(icon: Icons.language),
-                                _SocialCircleButton(icon: Icons.facebook),
-                                _SocialCircleButton(icon: Icons.camera_alt),
-                                _SocialCircleButton(icon: Icons.alternate_email),
-                                _SocialCircleButton(icon: Icons.music_note),
-                                _SocialCircleButton(icon: Icons.snapchat),
-                                _SocialCircleButton(icon: Icons.chat_bubble_outline),
-                              ],
+                            Builder(
+                              builder: (context) {
+                                final details = offer.vendorDetails;
+                                final vendorName = offer.vendor ?? 'Qupon';
+                                final List<Widget> buttons = [];
+                                
+                                void addSocial(IconData icon, String? url) {
+                                  if (url != null && url.isNotEmpty) {
+                                    buttons.add(
+                                      _SocialCircleButton(
+                                        icon: icon,
+                                        onTap: () async {
+                                          try {
+                                            final uri = Uri.parse(url);
+                                            await launchUrl(uri, mode: LaunchMode.externalApplication);
+                                          } catch (_) {
+                                            try {
+                                              await launchUrl(Uri.parse(url), mode: LaunchMode.platformDefault);
+                                            } catch (_) {}
+                                          }
+                                        },
+                                      ),
+                                    );
+                                  }
+                                }
+
+                                if (details != null) {
+                                  addSocial(Icons.language, details.websiteUrl);
+                                  addSocial(Icons.facebook, details.facebook);
+                                  addSocial(Icons.camera_alt, details.instagram);
+                                  addSocial(Icons.alternate_email, details.twitter);
+                                  addSocial(Icons.music_note, details.tiktok);
+                                  addSocial(details.whatsapp != null && details.whatsapp!.isNotEmpty ? Icons.chat_bubble : Icons.chat_bubble_outline, details.whatsapp != null && details.whatsapp!.isNotEmpty
+                                      ? (details.whatsapp!.startsWith('http')
+                                          ? details.whatsapp
+                                          : 'https://wa.me/${details.whatsapp!.replaceAll(RegExp(r'[^0-9]'), '')}')
+                                      : null);
+                                  addSocial(Icons.snapchat, details.snapchat != null && details.snapchat!.isNotEmpty 
+                                      ? (details.snapchat!.startsWith('http') 
+                                          ? details.snapchat 
+                                          : 'https://www.snapchat.com/add/${details.snapchat}')
+                                      : null);
+                                }
+
+                                if (buttons.isEmpty) {
+                                  final query = Uri.encodeComponent(vendorName);
+                                  addSocial(Icons.language, 'https://qupon.marbu.in');
+                                  addSocial(Icons.facebook, 'https://www.facebook.com/search/top/?q=$query');
+                                  addSocial(Icons.camera_alt, 'https://www.instagram.com');
+                                  addSocial(Icons.alternate_email, 'https://twitter.com');
+                                  addSocial(Icons.music_note, 'https://www.tiktok.com');
+                                  addSocial(Icons.snapchat, 'https://www.snapchat.com');
+                                  addSocial(Icons.chat_bubble_outline, 'https://wa.me/97412345678');
+                                }
+
+                                return Wrap(
+                                  spacing: 12,
+                                  runSpacing: 12,
+                                  alignment: WrapAlignment.start,
+                                  children: buttons,
+                                );
+                              },
                             ),
                           ],
                         ),
@@ -1521,23 +1543,140 @@ class _ImageCircularButton extends StatelessWidget {
 
 class _SocialCircleButton extends StatelessWidget {
   final IconData icon;
+  final VoidCallback onTap;
 
-  const _SocialCircleButton({required this.icon});
+  const _SocialCircleButton({
+    required this.icon,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(22),
+      child: Container(
+        width: 44,
+        height: 44,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          shape: BoxShape.circle,
+          border: Border.all(color: const Color(0xFFE2E8F0)),
+        ),
+        child: Icon(
+          icon,
+          color: const Color(0xFF64748B),
+          size: 20,
+        ),
+      ),
+    );
+  }
+}
+
+class VendorMapWidget extends StatefulWidget {
+  final String embedUrl;
+  final String openUrl;
+
+  const VendorMapWidget({
+    super.key,
+    required this.embedUrl,
+    required this.openUrl,
+  });
+
+  @override
+  State<VendorMapWidget> createState() => _VendorMapWidgetState();
+}
+
+class _VendorMapWidgetState extends State<VendorMapWidget> {
+  late final WebViewController _controller;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onPageFinished: (_) {
+            if (mounted) {
+              setState(() {
+                _isLoading = false;
+              });
+            }
+          },
+        ),
+      )
+      ..loadRequest(Uri.parse(widget.embedUrl));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
     return Container(
-      width: 44,
-      height: 44,
+      height: 180,
+      width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
-        shape: BoxShape.circle,
+        color: const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: const Color(0xFFE2E8F0)),
       ),
-      child: Icon(
-        icon,
-        color: const Color(0xFF64748B),
-        size: 20,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: Stack(
+          children: [
+            WebViewWidget(controller: _controller),
+            if (_isLoading)
+              const Center(
+                child: CircularProgressIndicator(color: Color(0xFFFF6B35)),
+              ),
+            // Open in maps button overlay
+            PositionedDirectional(
+              top: 12,
+              start: 12,
+              child: GestureDetector(
+                onTap: () async {
+                  final uri = Uri.parse(widget.openUrl);
+                  if (await canLaunchUrl(uri)) {
+                    await launchUrl(uri, mode: LaunchMode.externalApplication);
+                  }
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 4,
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        isArabic ? 'افتح في الخرائط' : 'Open in Maps',
+                        style: const TextStyle(
+                          color: Color(0xFF2563EB),
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      const Icon(
+                        Icons.open_in_new,
+                        size: 12,
+                        color: Color(0xFF2563EB),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

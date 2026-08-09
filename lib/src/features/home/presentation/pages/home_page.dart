@@ -181,6 +181,7 @@ class _HomePageState extends State<HomePage> {
                     description: localPromo.description,
                     price: localPromo.price,
                     currency: 'QAR',
+                    slug: localPromo.slug,
                   );
                   final viewCart = await Navigator.of(context).push<bool>(
                     MaterialPageRoute(

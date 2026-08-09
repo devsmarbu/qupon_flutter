@@ -27,6 +27,7 @@ class OfferListTileApi extends StatelessWidget {
           description: coupon.description,
           price: coupon.price,
           currency: 'QAR',
+          slug: coupon.slug,
         );
         final viewCart = await Navigator.of(context).push<bool>(
           MaterialPageRoute(
