@@ -14,6 +14,7 @@ class HomeCoupon {
   final String imageUrl;
   final String slug;
   final String vendorId;
+  final bool? wishlisted;
 
   const HomeCoupon({
     required this.id,
@@ -30,6 +31,7 @@ class HomeCoupon {
     required this.imageUrl,
     required this.slug,
     required this.vendorId,
+    this.wishlisted,
   });
 
   factory HomeCoupon.fromJson(Map<String, dynamic> json) {
@@ -42,6 +44,15 @@ class HomeCoupon {
           json['imageUrl']?.toString() ??
           json['photo']?.toString() ??
           '';
+    }
+
+    bool? isWishlisted;
+    if (json['wishlisted'] is bool) {
+      isWishlisted = json['wishlisted'] as bool;
+    } else if (json['isWishlisted'] is bool) {
+      isWishlisted = json['isWishlisted'] as bool;
+    } else if (json['is_wishlisted'] is bool) {
+      isWishlisted = json['is_wishlisted'] as bool;
     }
 
     return HomeCoupon(
@@ -59,6 +70,7 @@ class HomeCoupon {
       imageUrl: imgUrl,
       slug: json['slug']?.toString() ?? '',
       vendorId: json['vendorId']?.toString() ?? json['vendor_id']?.toString() ?? '',
+      wishlisted: isWishlisted,
     );
   }
 

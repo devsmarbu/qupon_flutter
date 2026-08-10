@@ -45,7 +45,7 @@ class ProductDetailBloc extends Bloc<ProductDetailEvent, ProductDetailState> {
       offer: offer,
       options: options,
       selectedOptionIndex: 0,
-      isFavorite: false,
+      isFavorite: offer.wishlisted ?? false,
       isBookmarked: false,
     ));
 
@@ -61,6 +61,7 @@ class ProductDetailBloc extends Bloc<ProductDetailEvent, ProductDetailState> {
         emit(state.copyWith(
           offer: detailedOffer,
           options: newOptions,
+          isFavorite: detailedOffer.wishlisted ?? state.isFavorite,
         ));
       } catch (_) {
         // Keep showing the initial offer if fetch fails

@@ -24,6 +24,7 @@ class Offer with _$Offer {
     String? vendorId,
     String? validity,
     String? slug,
+    bool? wishlisted,
     @JsonKey(includeFromJson: false, includeToJson: false)
     @Default([])
     List<OfferOption> variants,

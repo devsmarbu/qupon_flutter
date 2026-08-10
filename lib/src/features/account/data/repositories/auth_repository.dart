@@ -283,20 +283,41 @@ class AuthRepositoryImpl implements AuthRepository {
       }
 
       final List<HomeCoupon> items = [];
+      HomeCoupon createWishlistCoupon(Map<String, dynamic> couponMap) {
+        final coupon = HomeCoupon.fromJson(couponMap);
+        return HomeCoupon(
+          id: coupon.id,
+          name: coupon.name,
+          nameAr: coupon.nameAr,
+          vendor: coupon.vendor,
+          discount: coupon.discount,
+          price: coupon.price,
+          actualPrice: coupon.actualPrice,
+          validity: coupon.validity,
+          category: coupon.category,
+          description: coupon.description,
+          descriptionAr: coupon.descriptionAr,
+          imageUrl: coupon.imageUrl,
+          slug: coupon.slug,
+          vendorId: coupon.vendorId,
+          wishlisted: coupon.wishlisted ?? true,
+        );
+      }
+
       if (responseData is Map && responseData['items'] is List) {
         for (var item in responseData['items']) {
           if (item is Map && item['coupon'] is Map<String, dynamic>) {
-            items.add(HomeCoupon.fromJson(item['coupon'] as Map<String, dynamic>));
+            items.add(createWishlistCoupon(item['coupon'] as Map<String, dynamic>));
           } else if (item is Map) {
-            items.add(HomeCoupon.fromJson(Map<String, dynamic>.from(item)));
+            items.add(createWishlistCoupon(Map<String, dynamic>.from(item)));
           }
         }
       } else if (responseData is List) {
         for (var item in responseData) {
           if (item is Map && item['coupon'] is Map<String, dynamic>) {
-            items.add(HomeCoupon.fromJson(item['coupon'] as Map<String, dynamic>));
+            items.add(createWishlistCoupon(item['coupon'] as Map<String, dynamic>));
           } else if (item is Map) {
-            items.add(HomeCoupon.fromJson(Map<String, dynamic>.from(item)));
+            items.add(createWishlistCoupon(Map<String, dynamic>.from(item)));
           }
         }
       }

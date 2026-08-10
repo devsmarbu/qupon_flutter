@@ -74,6 +74,15 @@ class OffersRepositoryImpl implements OffersRepository {
           );
         }).toList();
 
+        bool? wishlistedVal;
+        if (couponMap['wishlisted'] is bool) {
+          wishlistedVal = couponMap['wishlisted'] as bool;
+        } else if (couponMap['isWishlisted'] is bool) {
+          wishlistedVal = couponMap['isWishlisted'] as bool;
+        } else if (couponMap['is_wishlisted'] is bool) {
+          wishlistedVal = couponMap['is_wishlisted'] as bool;
+        }
+
         return Offer(
           id: couponMap['id']?.toString() ?? '',
           title: couponMap['name']?.toString() ?? '',
@@ -91,6 +100,7 @@ class OffersRepositoryImpl implements OffersRepository {
           vendor: couponMap['vendor']?.toString(),
           vendorId: couponMap['vendorId']?.toString() ?? couponMap['vendor_id']?.toString() ?? '',
           validity: '${daysLeft}d${hoursLeft}h${minutesLeft}m left',
+          wishlisted: wishlistedVal,
           variants: variants,
         );
       }).toList();
@@ -243,6 +253,15 @@ class OffersRepositoryImpl implements OffersRepository {
         );
       }).toList();
 
+      bool? wishlistedVal;
+      if (couponMap['wishlisted'] is bool) {
+        wishlistedVal = couponMap['wishlisted'] as bool;
+      } else if (couponMap['isWishlisted'] is bool) {
+        wishlistedVal = couponMap['isWishlisted'] as bool;
+      } else if (couponMap['is_wishlisted'] is bool) {
+        wishlistedVal = couponMap['is_wishlisted'] as bool;
+      }
+
       return Offer(
         id: couponMap['id']?.toString() ?? '',
         title: couponMap['name']?.toString() ?? '',
@@ -261,6 +280,7 @@ class OffersRepositoryImpl implements OffersRepository {
         vendorId: couponMap['vendorId']?.toString() ?? couponMap['vendor_id']?.toString() ?? '',
         validity: '${daysLeft}d${hoursLeft}h${minutesLeft}m left',
         slug: couponMap['slug']?.toString() ?? slug,
+        wishlisted: wishlistedVal,
         variants: variants,
       );
     } on DioException catch (e) {

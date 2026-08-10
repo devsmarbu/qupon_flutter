@@ -22,22 +22,41 @@ Offer _$OfferFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$Offer {
   String get id => throw _privateConstructorUsedError;
+
   String get title => throw _privateConstructorUsedError;
+
   String get category => throw _privateConstructorUsedError;
+
   String get imageUrl => throw _privateConstructorUsedError;
+
   int get daysLeft => throw _privateConstructorUsedError;
+
   int get hoursLeft => throw _privateConstructorUsedError;
+
   int get minutesLeft => throw _privateConstructorUsedError;
+
   String get location => throw _privateConstructorUsedError;
+
   String get description => throw _privateConstructorUsedError;
+
   double get price => throw _privateConstructorUsedError;
+
   String get currency => throw _privateConstructorUsedError;
+
   String? get titleAr => throw _privateConstructorUsedError;
+
   String? get descriptionAr => throw _privateConstructorUsedError;
+
   String? get vendor => throw _privateConstructorUsedError;
+
   String? get vendorId => throw _privateConstructorUsedError;
+
   String? get validity => throw _privateConstructorUsedError;
+
   String? get slug => throw _privateConstructorUsedError;
+
+  bool? get wishlisted => throw _privateConstructorUsedError;
+
   @JsonKey(includeFromJson: false, includeToJson: false)
   List<OfferOption> get variants => throw _privateConstructorUsedError;
 
@@ -54,6 +73,7 @@ mixin _$Offer {
 abstract class $OfferCopyWith<$Res> {
   factory $OfferCopyWith(Offer value, $Res Function(Offer) then) =
       _$OfferCopyWithImpl<$Res, Offer>;
+
   @useResult
   $Res call({
     String id,
@@ -73,6 +93,7 @@ abstract class $OfferCopyWith<$Res> {
     String? vendorId,
     String? validity,
     String? slug,
+    bool? wishlisted,
     @JsonKey(includeFromJson: false, includeToJson: false)
     List<OfferOption> variants,
   });
@@ -85,6 +106,7 @@ class _$OfferCopyWithImpl<$Res, $Val extends Offer>
 
   // ignore: unused_field
   final $Val _value;
+
   // ignore: unused_field
   final $Res Function($Val) _then;
 
@@ -110,6 +132,7 @@ class _$OfferCopyWithImpl<$Res, $Val extends Offer>
     Object? vendorId = freezed,
     Object? validity = freezed,
     Object? slug = freezed,
+    Object? wishlisted = freezed,
     Object? variants = null,
   }) {
     return _then(
@@ -182,6 +205,10 @@ class _$OfferCopyWithImpl<$Res, $Val extends Offer>
                 ? _value.slug
                 : slug // ignore: cast_nullable_to_non_nullable
                       as String?,
+            wishlisted: freezed == wishlisted
+                ? _value.wishlisted
+                : wishlisted // ignore: cast_nullable_to_non_nullable
+                      as bool?,
             variants: null == variants
                 ? _value.variants
                 : variants // ignore: cast_nullable_to_non_nullable
@@ -198,6 +225,7 @@ abstract class _$$OfferImplCopyWith<$Res> implements $OfferCopyWith<$Res> {
     _$OfferImpl value,
     $Res Function(_$OfferImpl) then,
   ) = __$$OfferImplCopyWithImpl<$Res>;
+
   @override
   @useResult
   $Res call({
@@ -218,6 +246,7 @@ abstract class _$$OfferImplCopyWith<$Res> implements $OfferCopyWith<$Res> {
     String? vendorId,
     String? validity,
     String? slug,
+    bool? wishlisted,
     @JsonKey(includeFromJson: false, includeToJson: false)
     List<OfferOption> variants,
   });
@@ -254,6 +283,7 @@ class __$$OfferImplCopyWithImpl<$Res>
     Object? vendorId = freezed,
     Object? validity = freezed,
     Object? slug = freezed,
+    Object? wishlisted = freezed,
     Object? variants = null,
   }) {
     return _then(
@@ -326,6 +356,10 @@ class __$$OfferImplCopyWithImpl<$Res>
             ? _value.slug
             : slug // ignore: cast_nullable_to_non_nullable
                   as String?,
+        wishlisted: freezed == slug
+            ? _value.wishlisted
+            : wishlisted // ignore: cast_nullable_to_non_nullable
+                  as bool?,
         variants: null == variants
             ? _value._variants
             : variants // ignore: cast_nullable_to_non_nullable
@@ -356,6 +390,7 @@ class _$OfferImpl implements _Offer {
     this.vendorId,
     this.validity,
     this.slug,
+    this.wishlisted,
     @JsonKey(includeFromJson: false, includeToJson: false)
     final List<OfferOption> variants = const [],
   }) : _variants = variants;
@@ -397,7 +432,10 @@ class _$OfferImpl implements _Offer {
   final String? validity;
   @override
   final String? slug;
+  @override
+  final bool? wishlisted;
   final List<OfferOption> _variants;
+
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   List<OfferOption> get variants {
@@ -408,7 +446,7 @@ class _$OfferImpl implements _Offer {
 
   @override
   String toString() {
-    return 'Offer(id: $id, title: $title, category: $category, imageUrl: $imageUrl, daysLeft: $daysLeft, hoursLeft: $hoursLeft, minutesLeft: $minutesLeft, location: $location, description: $description, price: $price, currency: $currency, titleAr: $titleAr, descriptionAr: $descriptionAr, vendor: $vendor, vendorId: $vendorId, validity: $validity, slug: $slug, variants: $variants)';
+    return 'Offer(id: $id, title: $title, category: $category, imageUrl: $imageUrl, daysLeft: $daysLeft, hoursLeft: $hoursLeft, minutesLeft: $minutesLeft, location: $location, description: $description, price: $price, currency: $currency, titleAr: $titleAr, descriptionAr: $descriptionAr, vendor: $vendor, vendorId: $vendorId, validity: $validity, slug: $slug,wishlisted: $wishlisted, variants: $variants)';
   }
 
   @override
@@ -444,6 +482,8 @@ class _$OfferImpl implements _Offer {
             (identical(other.validity, validity) ||
                 other.validity == validity) &&
             (identical(other.slug, slug) || other.slug == slug) &&
+            (identical(other.wishlisted, wishlisted) ||
+                other.wishlisted == wishlisted) &&
             const DeepCollectionEquality().equals(other._variants, _variants));
   }
 
@@ -468,6 +508,7 @@ class _$OfferImpl implements _Offer {
     vendorId,
     validity,
     slug,
+    wishlisted,
     const DeepCollectionEquality().hash(_variants),
   );
 
@@ -504,6 +545,7 @@ abstract class _Offer implements Offer {
     final String? vendorId,
     final String? validity,
     final String? slug,
+    final bool? wishlisted,
     @JsonKey(includeFromJson: false, includeToJson: false)
     final List<OfferOption> variants,
   }) = _$OfferImpl;
@@ -512,38 +554,58 @@ abstract class _Offer implements Offer {
 
   @override
   String get id;
+
   @override
   String get title;
+
   @override
   String get category;
+
   @override
   String get imageUrl;
+
   @override
   int get daysLeft;
+
   @override
   int get hoursLeft;
+
   @override
   int get minutesLeft;
+
   @override
   String get location;
+
   @override
   String get description;
+
   @override
   double get price;
+
   @override
   String get currency;
+
   @override
   String? get titleAr;
+
   @override
   String? get descriptionAr;
+
   @override
   String? get vendor;
+
   @override
   String? get vendorId;
+
   @override
   String? get validity;
+
   @override
   String? get slug;
+
+  @override
+  bool? get wishlisted;
+
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   List<OfferOption> get variants;

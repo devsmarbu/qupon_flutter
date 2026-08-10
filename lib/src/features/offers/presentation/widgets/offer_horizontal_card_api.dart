@@ -33,6 +33,7 @@ class OfferHorizontalCardApi extends StatelessWidget {
           price: coupon.price,
           currency: 'QAR',
           slug: coupon.slug,
+          wishlisted: coupon.wishlisted,
         );
         final viewCart = await Navigator.of(context).push<bool>(
           MaterialPageRoute(
