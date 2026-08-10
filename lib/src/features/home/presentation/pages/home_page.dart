@@ -12,6 +12,7 @@ import '../widgets/home_category_section_api.dart';
 import '../../../offers/data/models/offer.dart';
 import '../../../offers/presentation/pages/product_detail_page.dart';
 import '../../../main/presentation/pages/main_page.dart';
+import 'collection_coupons_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -128,6 +129,50 @@ class _HomePageState extends State<HomePage> {
       child: CustomScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         slivers: [
+          // ── Search Bar ─────────────────────────────────────────────────────
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+              child: GestureDetector(
+                onTap: () {
+                  // Navigate to search (future feature) or show search
+                },
+                child: Container(
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.03),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      const SizedBox(width: 14),
+                      const Icon(Icons.search, color: Color(0xFF94A3B8), size: 20),
+                      const SizedBox(width: 10),
+                      Text(
+                        isArabic
+                            ? 'البحث عن كوبونات، موردين...'
+                            : 'Search for coupons, vendors...',
+                        style: const TextStyle(
+                          color: Color(0xFF94A3B8),
+                          fontSize: 14,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+
           // ── Promotional Slider ──────────────────────────────────────────────
           SliverToBoxAdapter(
             child: HomePromoSliderApi(banners: data.banners),
@@ -281,7 +326,15 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
                 InkWell(
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => CollectionCouponsPage(
+                          collection: collection,
+                        ),
+                      ),
+                    );
+                  },
                   borderRadius: BorderRadius.circular(8),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(

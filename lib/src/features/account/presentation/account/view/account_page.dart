@@ -251,7 +251,6 @@ class _AccountPageState extends State<AccountPage> {
       body: SafeArea(
         bottom: false,
         child: SingleChildScrollView(
-
           physics: const BouncingScrollPhysics(),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -261,10 +260,10 @@ class _AccountPageState extends State<AccountPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // ── Title & Subtitle ──────────────────────────────────────────
+                    // ── Title & Filters Row ──────────────────────────────────────
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Expanded(
                           child: Column(
@@ -278,86 +277,23 @@ class _AccountPageState extends State<AccountPage> {
                                   color: Color(0xFF0F172A),
                                 ),
                               ),
-                              const SizedBox(height: 4),
-                              Text(
-                                l10n.dashboardSubtitle(
-                                  transactions.length,
-                                  couponsUsed,
-                                  _selectedPeriod == 'All time' ? l10n.periodAllTime : _selectedPeriod,
-                                ),
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  color: Color(0xFF64748B),
-                                ),
-                              ),
                             ],
                           ),
                         ),
-                        // Sign out icon next to title
-                        IconButton(
-                          icon: const Icon(Icons.logout, color: Color(0xFF64748B)),
-                          onPressed: () => _confirmSignOut(context),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-
-                    // ── Search & Filter Row ──────────────────────────────────────
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Container(
-                            height: 48,
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: const Color(0xFFE2E8F0)),
-                            ),
-                            child: Row(
-                              children: [
-                                const Icon(Icons.search, color: Color(0xFF94A3B8), size: 20),
-                                const SizedBox(width: 8),
-                                Text(
-                                  l10n.searchHint,
-                                  style: const TextStyle(
-                                    color: Color(0xFF94A3B8),
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
+                        // ── Filters Button ─────────────────────────
+                        _buildFiltersButton(context, vendors),
+                        const SizedBox(width: 4),
+                        // Sign out icon
                         GestureDetector(
-                          onTap: () => _showFilterBottomSheet(context, vendors),
-                          child: Container(
-                            height: 48,
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(12),
-                              // border: Border.all(color: AppColors.primary, width: 1.5),
-                            ),
-                            child: Row(
-                              children: [
-                                const Icon(Icons.tune_outlined, color: AppColors.primary, size: 18),
-                                const SizedBox(width: 6),
-                                Text(
-                                  l10n.filtersBtn,
-                                  style: const TextStyle(
-                                    color: AppColors.primary,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+                          onTap: () => _confirmSignOut(context),
+                          child: const Icon(Icons.logout, color: Color(0xFF94A3B8), size: 20),
                         ),
                       ],
                     ),
+                    const SizedBox(height: 10),
+
+                    // ── Active Filter Chips Row ───────────────────────────
+                    _buildActiveFilterChips(l10n, isArabic),
                     const SizedBox(height: 20),
 
                     // ── Total Spent Card ──────────────────────────────────────────
@@ -655,6 +591,159 @@ class _AccountPageState extends State<AccountPage> {
               fontSize: 12,
               color: Color(0xFF64748B),
               fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Count of active (non-default) filters — always shown in the badge.
+  int get _activeFilterCount {
+    int count = 0;
+    // Date/period filter
+    if (_selectedPeriod != 'All time' || _fromCtrl.text.isNotEmpty || _toCtrl.text.isNotEmpty) count++;
+    // Status filter
+    if (_selectedStatus != 'all') count++;
+    // Vendor filter
+    if (_selectedVendor != 'all') count++;
+    return count;
+  }
+
+  Widget _buildFiltersButton(BuildContext context, List<String> vendors) {
+    final count = _activeFilterCount;
+    return GestureDetector(
+      onTap: () => _showFilterBottomSheet(context, vendors),
+      child: Container(
+        height: 38,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 4,
+              offset: const Offset(0, 1),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.tune_rounded,
+              color: Color(0xFFFF6B35),
+              size: 17,
+            ),
+            const SizedBox(width: 6),
+            const Text(
+              'Filters',
+              style: TextStyle(
+                color: Color(0xFFFF6B35),
+                fontWeight: FontWeight.w700,
+                fontSize: 14,
+              ),
+            ),
+            const SizedBox(width: 8),
+            // Count badge — only shown when filters are active
+            if (count > 0)
+              Container(
+                width: 22,
+                height: 22,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFFF6B35),
+                  shape: BoxShape.circle,
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  '$count',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                    height: 1,
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActiveFilterChips(dynamic l10n, bool isArabic) {
+    // ── Date label ─────────────────────────────────────────────────────────
+    String dateValue;
+    if (_fromCtrl.text.isNotEmpty || _toCtrl.text.isNotEmpty) {
+      final from = _fromCtrl.text.isNotEmpty ? _fromCtrl.text : '...';
+      final to   = _toCtrl.text.isNotEmpty   ? _toCtrl.text   : '...';
+      dateValue = '$from – $to';
+    } else if (_selectedPeriod == 'All time') {
+      dateValue = isArabic ? 'كل الوقت' : 'All time';
+    } else {
+      dateValue = _selectedPeriod;
+    }
+
+    // ── Status label ───────────────────────────────────────────────────────
+    final String statusValue;
+    switch (_selectedStatus) {
+      case 'active':
+        statusValue = isArabic ? 'نشط' : 'Active';
+        break;
+      case 'expired':
+        statusValue = isArabic ? 'منتهي' : 'Expired';
+        break;
+      case 'pending':
+        statusValue = isArabic ? 'معلق' : 'Pending';
+        break;
+      default:
+        statusValue = isArabic ? 'الكل' : 'All';
+    }
+
+    // ── Vendor label ───────────────────────────────────────────────────────
+    final String vendorValue = _selectedVendor == 'all'
+        ? (isArabic ? 'الكل' : 'All')
+        : _selectedVendor;
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: [
+          _filterChip(label: isArabic ? 'التاريخ: ' : 'Date: ', value: dateValue),
+          const SizedBox(width: 8),
+          _filterChip(label: isArabic ? 'الحالة: ' : 'Status: ', value: statusValue),
+          const SizedBox(width: 8),
+          _filterChip(label: isArabic ? 'المورد: ' : 'Vendor: ', value: vendorValue),
+        ],
+      ),
+    );
+  }
+
+  Widget _filterChip({required String label, required String value}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 11,
+              color: Color(0xFF94A3B8),
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 11,
+              color: Color(0xFF0F172A),
+              fontWeight: FontWeight.w700,
             ),
           ),
         ],
