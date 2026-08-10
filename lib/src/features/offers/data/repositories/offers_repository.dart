@@ -3,6 +3,7 @@ import '../../../../core/network/api_client.dart';
 import '../../../../core/network/api_endpoints.dart';
 import '../models/offer.dart';
 import '../models/offer_option.dart';
+import '../models/vendor_details.dart';
 
 abstract class OffersRepository {
   Future<List<Offer>> getOffers();
@@ -101,7 +102,11 @@ class OffersRepositoryImpl implements OffersRepository {
           vendorId: couponMap['vendorId']?.toString() ?? couponMap['vendor_id']?.toString() ?? '',
           validity: '${daysLeft}d${hoursLeft}h${minutesLeft}m left',
           wishlisted: wishlistedVal,
+          slug: couponMap['slug']?.toString() ?? '',
           variants: variants,
+          vendorDetails: couponMap['vendorDetails'] != null
+              ? VendorDetails.fromJson(couponMap['vendorDetails'] as Map<String, dynamic>)
+              : null,
         );
       }).toList();
     } on DioException catch (e) {
@@ -282,6 +287,9 @@ class OffersRepositoryImpl implements OffersRepository {
         slug: couponMap['slug']?.toString() ?? slug,
         wishlisted: wishlistedVal,
         variants: variants,
+        vendorDetails: couponMap['vendorDetails'] != null
+            ? VendorDetails.fromJson(couponMap['vendorDetails'] as Map<String, dynamic>)
+            : null,
       );
     } on DioException catch (e) {
       final msg = e.response?.data?['message'] ??

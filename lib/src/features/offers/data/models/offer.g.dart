@@ -24,6 +24,9 @@ _$OfferImpl _$$OfferImplFromJson(Map<String, dynamic> json) => _$OfferImpl(
   vendorId: json['vendorId'] as String?,
   validity: json['validity'] as String?,
   slug: json['slug'] as String?,
+  vendorDetails: json['vendorDetails'] == null
+      ? null
+      : VendorDetails.fromJson(json['vendorDetails'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$$OfferImplToJson(_$OfferImpl instance) =>
@@ -45,4 +48,5 @@ Map<String, dynamic> _$$OfferImplToJson(_$OfferImpl instance) =>
       'vendorId': instance.vendorId,
       'validity': instance.validity,
       'slug': instance.slug,
+      'vendorDetails': instance.vendorDetails,
     };

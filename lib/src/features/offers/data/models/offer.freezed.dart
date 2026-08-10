@@ -59,6 +59,7 @@ mixin _$Offer {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   List<OfferOption> get variants => throw _privateConstructorUsedError;
+  VendorDetails? get vendorDetails => throw _privateConstructorUsedError;
 
   /// Serializes this Offer to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -96,6 +97,7 @@ abstract class $OfferCopyWith<$Res> {
     bool? wishlisted,
     @JsonKey(includeFromJson: false, includeToJson: false)
     List<OfferOption> variants,
+    VendorDetails? vendorDetails,
   });
 }
 
@@ -134,6 +136,7 @@ class _$OfferCopyWithImpl<$Res, $Val extends Offer>
     Object? slug = freezed,
     Object? wishlisted = freezed,
     Object? variants = null,
+    Object? vendorDetails = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -213,6 +216,10 @@ class _$OfferCopyWithImpl<$Res, $Val extends Offer>
                 ? _value.variants
                 : variants // ignore: cast_nullable_to_non_nullable
                       as List<OfferOption>,
+            vendorDetails: freezed == vendorDetails
+                ? _value.vendorDetails
+                : vendorDetails // ignore: cast_nullable_to_non_nullable
+                      as VendorDetails?,
           )
           as $Val,
     );
@@ -249,6 +256,7 @@ abstract class _$$OfferImplCopyWith<$Res> implements $OfferCopyWith<$Res> {
     bool? wishlisted,
     @JsonKey(includeFromJson: false, includeToJson: false)
     List<OfferOption> variants,
+    VendorDetails? vendorDetails,
   });
 }
 
@@ -285,6 +293,7 @@ class __$$OfferImplCopyWithImpl<$Res>
     Object? slug = freezed,
     Object? wishlisted = freezed,
     Object? variants = null,
+    Object? vendorDetails = freezed,
   }) {
     return _then(
       _$OfferImpl(
@@ -364,6 +373,10 @@ class __$$OfferImplCopyWithImpl<$Res>
             ? _value._variants
             : variants // ignore: cast_nullable_to_non_nullable
                   as List<OfferOption>,
+        vendorDetails: freezed == vendorDetails
+            ? _value.vendorDetails
+            : vendorDetails // ignore: cast_nullable_to_non_nullable
+                  as VendorDetails?,
       ),
     );
   }
@@ -393,6 +406,7 @@ class _$OfferImpl implements _Offer {
     this.wishlisted,
     @JsonKey(includeFromJson: false, includeToJson: false)
     final List<OfferOption> variants = const [],
+    this.vendorDetails,
   }) : _variants = variants;
 
   factory _$OfferImpl.fromJson(Map<String, dynamic> json) =>
@@ -445,8 +459,11 @@ class _$OfferImpl implements _Offer {
   }
 
   @override
+  final VendorDetails? vendorDetails;
+
+  @override
   String toString() {
-    return 'Offer(id: $id, title: $title, category: $category, imageUrl: $imageUrl, daysLeft: $daysLeft, hoursLeft: $hoursLeft, minutesLeft: $minutesLeft, location: $location, description: $description, price: $price, currency: $currency, titleAr: $titleAr, descriptionAr: $descriptionAr, vendor: $vendor, vendorId: $vendorId, validity: $validity, slug: $slug,wishlisted: $wishlisted, variants: $variants)';
+    return 'Offer(id: $id, title: $title, category: $category, imageUrl: $imageUrl, daysLeft: $daysLeft, hoursLeft: $hoursLeft, minutesLeft: $minutesLeft, location: $location, description: $description, price: $price, currency: $currency, titleAr: $titleAr, descriptionAr: $descriptionAr, vendor: $vendor, vendorId: $vendorId, validity: $validity, slug: $slug,wishlisted: $wishlisted, variants: $variants, vendorDetails: $vendorDetails)';
   }
 
   @override
@@ -484,12 +501,14 @@ class _$OfferImpl implements _Offer {
             (identical(other.slug, slug) || other.slug == slug) &&
             (identical(other.wishlisted, wishlisted) ||
                 other.wishlisted == wishlisted) &&
-            const DeepCollectionEquality().equals(other._variants, _variants));
+            const DeepCollectionEquality().equals(other._variants, _variants)) &&
+            (identical(other.vendorDetails, vendorDetails) ||
+                other.vendorDetails == vendorDetails);
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     runtimeType,
     id,
     title,
@@ -510,7 +529,8 @@ class _$OfferImpl implements _Offer {
     slug,
     wishlisted,
     const DeepCollectionEquality().hash(_variants),
-  );
+    vendorDetails,
+  ]);
 
   /// Create a copy of Offer
   /// with the given fields replaced by the non-null parameter values.
@@ -548,6 +568,7 @@ abstract class _Offer implements Offer {
     final bool? wishlisted,
     @JsonKey(includeFromJson: false, includeToJson: false)
     final List<OfferOption> variants,
+    final VendorDetails? vendorDetails,
   }) = _$OfferImpl;
 
   factory _Offer.fromJson(Map<String, dynamic> json) = _$OfferImpl.fromJson;
@@ -609,6 +630,8 @@ abstract class _Offer implements Offer {
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   List<OfferOption> get variants;
+  @override
+  VendorDetails? get vendorDetails;
 
   /// Create a copy of Offer
   /// with the given fields replaced by the non-null parameter values.

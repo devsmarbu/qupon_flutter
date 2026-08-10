@@ -8,7 +8,7 @@ plugins {
 android {
     namespace = "com.example.qupon"
     // webview_flutter_android v4.x requires compileSdk >= 35
-    compileSdk = 35
+    compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
