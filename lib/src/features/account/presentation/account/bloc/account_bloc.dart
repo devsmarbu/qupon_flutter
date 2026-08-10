@@ -40,6 +40,7 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
       name: event.name,
       role: event.role,
     ));
+    add(const LoadDashboard());
   }
 
   Future<void> _onSignOutRequested(
@@ -63,6 +64,7 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
         name: profile?.name ?? '',
         role: profile?.role ?? '',
       ));
+      add(const LoadDashboard());
     } else {
       emit(const AccountUnauthenticated());
     }
