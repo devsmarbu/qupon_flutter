@@ -1,6 +1,10 @@
 import 'dart:async';
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import '../../data/models/home_banner.dart';
+import '../../../offers/data/models/offer.dart';
+import '../../../offers/presentation/pages/product_detail_page.dart';
+import '../../../main/presentation/pages/main_page.dart';
 
 /// Promotional banner slider driven by real API data.
 class HomePromoSliderApi extends StatefulWidget {
@@ -41,8 +45,6 @@ class _HomePromoSliderApiState extends State<HomePromoSliderApi> {
     super.dispose();
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     if (widget.banners.isEmpty) return const SizedBox.shrink();
@@ -72,95 +74,162 @@ class _HomePromoSliderApiState extends State<HomePromoSliderApi> {
               itemCount: widget.banners.length,
               itemBuilder: (context, index) {
                 final b = widget.banners[index];
-                return Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    Image.network(
-                      b.imageUrl,
-                      fit: BoxFit.cover,
-                      width: double.infinity,
-                      height: double.infinity,
-                      loadingBuilder: (ctx, child, progress) {
-                        if (progress == null) return child;
-                        return Container(
+                return GestureDetector(
+                  onTap: () async {
+                    // Try to guess/map to a category for nicer fallback UI
+                    final category = b.title.toLowerCase().contains('smile')
+                        ? (isArabic ? 'صحة وجمال' : 'Health & Wellness')
+                        : b.title.toLowerCase().contains('zubara')
+                            ? (isArabic ? 'سياحة وسفر' : 'Travel & Tourism')
+                            : b.title.toLowerCase().contains('foodie')
+                                ? (isArabic ? 'مطاعم ومأكولات' : 'Food & Drinks')
+                                : b.title.toLowerCase().contains('gaming')
+                                    ? (isArabic ? 'ترفيه' : 'Entertainment')
+                                    : (isArabic ? 'الجمال' : 'Beauty');
+
+                    final offer = Offer(
+                      id: b.id,
+                      title: b.title,
+                      titleAr: b.titleAr,
+                      category: category,
+                      imageUrl: b.imageUrl,
+                      daysLeft: 30,
+                      hoursLeft: 12,
+                      minutesLeft: 0,
+                      location: 'Doha, Qatar',
+                      description: b.subtitle,
+                      descriptionAr: b.subtitleAr,
+                      price: 99.0, // Default premium dummy price
+                      currency: 'QAR',
+                      vendor: b.title.toLowerCase().contains('smile')
+                          ? 'Smile Dental Clinic'
+                          : b.title.toLowerCase().contains('zubara')
+                              ? 'Qatar Adventures'
+                              : b.title.toLowerCase().contains('foodie')
+                                  ? 'Foodie Festival'
+                                  : b.title.toLowerCase().contains('gaming')
+                                      ? 'Tactical Gaming'
+                                      : 'Laser Treatment Center',
+                    );
+
+                    final viewCart = await Navigator.of(context).push<bool>(
+                      MaterialPageRoute(
+                        builder: (context) => ProductDetailPage(offer: offer),
+                      ),
+                    );
+                    if (viewCart == true && context.mounted) {
+                      final mainPageState = context.findAncestorStateOfType<MainPageState>();
+                      if (mainPageState != null) {
+                        mainPageState.setSelectedIndex(3); // Cart is index 3
+                      }
+                    }
+                  },
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      // Blurred background image
+                      ImageFiltered(
+                        imageFilter: ui.ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+                        child: Image.network(
+                          b.imageUrl,
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          height: double.infinity,
+                          errorBuilder: (ctx, _, __) => const SizedBox.shrink(),
+                        ),
+                      ),
+                      // Subtle dark tint overlay over the blurred background
+                      Container(
+                        color: Colors.black.withValues(alpha: 0.15),
+                      ),
+                      // Foreground contained image
+                      Image.network(
+                        b.imageUrl,
+                        fit: BoxFit.contain,
+                        width: double.infinity,
+                        height: double.infinity,
+                        loadingBuilder: (ctx, child, progress) {
+                          if (progress == null) return child;
+                          return Container(
+                            color: const Color(0xFFF1F5F9),
+                            child: const Center(
+                              child: CircularProgressIndicator(
+                                color: Color(0xFFFF6B35),
+                                strokeWidth: 2,
+                              ),
+                            ),
+                          );
+                        },
+                        errorBuilder: (ctx, _, __) => Container(
                           color: const Color(0xFFF1F5F9),
                           child: const Center(
-                            child: CircularProgressIndicator(
-                              color: Color(0xFFFF6B35),
-                              strokeWidth: 2,
+                            child: Icon(
+                              Icons.image_not_supported_outlined,
+                              size: 40,
+                              color: Color(0xFF94A3B8),
                             ),
-                          ),
-                        );
-                      },
-                      errorBuilder: (ctx, _, __) => Container(
-                        color: const Color(0xFFF1F5F9),
-                        child: const Center(
-                          child: Icon(
-                            Icons.image_not_supported_outlined,
-                            size: 40,
-                            color: Color(0xFF94A3B8),
                           ),
                         ),
                       ),
-                    ),
-                    // Gradient overlay
-                    Positioned(
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      child: Container(
-                        height: 100,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              Colors.transparent,
-                              Colors.black.withValues(alpha: 0.8),
-                            ],
+                      // Gradient overlay
+                      Positioned(
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        child: Container(
+                          height: 100,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Colors.transparent,
+                                Colors.black.withValues(alpha: 0.8),
+                              ],
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    // Title and subtitle overlay
-                    Positioned(
-                      bottom: 16,
-                      left: 16,
-                      right: 16,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            isArabic && b.titleAr.isNotEmpty ? b.titleAr : b.title,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: -0.2,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 4),
-                          Row(
-                            children: [
-                              Text(
-                                isArabic && b.subtitleAr.isNotEmpty ? b.subtitleAr : b.subtitle,
-                                style: const TextStyle(
-                                  color: Color(0xFFFF6B35),
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w900,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                      // Title and subtitle overlay
+                      Positioned(
+                        bottom: 16,
+                        left: 16,
+                        right: 16,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              isArabic && b.titleAr.isNotEmpty ? b.titleAr : b.title,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: -0.2,
                               ),
-                            ],
-                          ),
-                        ],
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 4),
+                            Row(
+                              children: [
+                                Text(
+                                  isArabic && b.subtitleAr.isNotEmpty ? b.subtitleAr : b.subtitle,
+                                  style: const TextStyle(
+                                    color: Color(0xFFFF6B35),
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w900,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 );
               },
             ),
