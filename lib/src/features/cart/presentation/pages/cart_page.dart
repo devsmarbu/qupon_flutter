@@ -398,20 +398,35 @@ class _CartPageState extends State<CartPage> {
                 ),
                 const SizedBox(height: 12),
 
-                // Delete Button (Align bottom-left)
+                // Delete Button
                 Align(
                   alignment: isArabic ? Alignment.centerRight : Alignment.centerLeft,
                   child: InkWell(
                     onTap: () {
-                      context.read<CartBloc>().add(RemoveFromCart(key: item.key));
+                      final deleteKey = item.key.isNotEmpty ? item.key : item.couponId;
+                      context.read<CartBloc>().add(RemoveFromCart(key: deleteKey));
                     },
-                    borderRadius: BorderRadius.circular(4),
-                    child: const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 4, horizontal: 4),
-                      child: Icon(
-                        Icons.delete_outline,
-                        color: Color(0xFF94A3B8),
-                        size: 20,
+                    borderRadius: BorderRadius.circular(6),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.delete_outline,
+                            color: Color(0xFFEF4444),
+                            size: 18,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            isArabic ? 'حذف' : 'Delete',
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFFEF4444),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
