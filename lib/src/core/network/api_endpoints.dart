@@ -15,5 +15,7 @@ class ApiEndpoints {
   static const String categories = '/api/categories';
   static const String dashboard = '/api/me/dashboard';
   static const String wishlist = '/api/me/wishlist';
+  static const String orders = '/api/me/orders';
+  static const String search = '/api/storefront/search';
 }
 

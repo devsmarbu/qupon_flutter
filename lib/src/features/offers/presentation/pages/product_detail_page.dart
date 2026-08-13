@@ -279,15 +279,8 @@ class ProductDetailView extends StatelessWidget {
             elevation: 0,
             scrolledUnderElevation: 0,
             automaticallyImplyLeading: false,
-            leading: IconButton(
-              icon: Icon(
-                isArabic ? Icons.arrow_forward : Icons.arrow_back,
-                color: const Color(0xFF0F172A),
-              ),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
             centerTitle: false,
-            titleSpacing: 0,
+            titleSpacing: 16.0,
             title: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
@@ -346,31 +339,31 @@ class ProductDetailView extends StatelessWidget {
 
                       SizedBox(height: 20),
                       // "Back to Listings" Row
-                      // InkWell(
-                      //   onTap: () => Navigator.of(context).pop(),
-                      //   child: Padding(
-                      //     padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
-                      //     child: Row(
-                      //       mainAxisSize: MainAxisSize.min,
-                      //       children: [
-                      //         Icon(
-                      //           isArabic ? Icons.arrow_forward : Icons.arrow_back,
-                      //           size: 18,
-                      //           color: const Color(0xFF64748B),
-                      //         ),
-                      //         const SizedBox(width: 8),
-                      //         Text(
-                      //           _Localizations.get(context, 'backToListings'),
-                      //           style: const TextStyle(
-                      //             color: Color(0xFF64748B),
-                      //             fontSize: 15,
-                      //             fontWeight: FontWeight.bold,
-                      //           ),
-                      //         ),
-                      //       ],
-                      //     ),
-                      //   ),
-                      // ),
+                      InkWell(
+                        onTap: () => Navigator.of(context).pop(),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                isArabic ? Icons.arrow_forward : Icons.arrow_back,
+                                size: 16,
+                                color: const Color(0xFF64748B),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                _Localizations.get(context, 'backToListings'),
+                                style: const TextStyle(
+                                  color: Color(0xFF64748B),
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
 
                       // Image Area Card with Center placeholder 'E' tilted, and overlay actions
                       Padding(
@@ -384,8 +377,7 @@ class ProductDetailView extends StatelessWidget {
                                 color: const Color(0xFFF8FAFC),
                                 borderRadius: BorderRadius.circular(24),
                                 border: Border.all(
-                                  color: const Color(0xFFE2E8F0),
-                                  width: 1,
+                                  color: Colors.white,
                                 ),
                                 boxShadow: [
                                   BoxShadow(
@@ -427,65 +419,71 @@ class ProductDetailView extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            // Category Tag on top-left of image
-                            PositionedDirectional(
-                              top: 16,
-                              start: 16,
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(20),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.05),
-                                      blurRadius: 4,
-                                      offset: const Offset(0, 2),
+                              // Time Left Badge on top-left of image
+                              if (!isExpired)
+                                PositionedDirectional(
+                                  top: 16,
+                                  start: 16,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFE8FDF5),
+                                      borderRadius: BorderRadius.circular(20),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.05),
+                                          blurRadius: 4,
+                                          offset: const Offset(0, 2),
+                                        ),
+                                      ],
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Icon(
+                                          Icons.access_time_filled,
+                                          size: 14,
+                                          color: Color(0xFF047857),
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          isArabic
+                                              ? 'متبقي ${offer.daysLeft} يوم و ${offer.hoursLeft} ساعة و ${offer.minutesLeft} دقيقة'
+                                              : '${offer.daysLeft}d ${offer.hoursLeft}h ${offer.minutesLeft}m left',
+                                          style: const TextStyle(
+                                            color: Color(0xFF047857),
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 11,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              // Row of action buttons on the top-right of image
+                              PositionedDirectional(
+                                top: 16,
+                                end: 16,
+                                child: Row(
+                                  children: [
+                                    _ImageCircularButton(
+                                      icon: state.isFavorite ? Icons.favorite : Icons.favorite_border_outlined,
+                                      iconColor: state.isFavorite ? Colors.red : const Color(0xFF64748B),
+                                      onTap: () async {
+                                        final loggedIn = await _ensureLoggedIn(context);
+                                        if (loggedIn && context.mounted) {
+                                          context.read<ProductDetailBloc>().add(const ToggleFavorite());
+                                        }
+                                      },
+                                    ),
+                                    const SizedBox(width: 8),
+                                    _ImageCircularButton(
+                                      icon: Icons.share_outlined,
+                                      onTap: () => _shareOffer(context, offer),
                                     ),
                                   ],
                                 ),
-                                child: Text(
-                                  offer.category == 'Electronics'
-                                      ? _Localizations.get(context, 'electronics')
-                                      : offer.category,
-                                  style: const TextStyle(
-                                    color: Color(0xFF0F172A),
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 13,
-                                  ),
-                                ),
                               ),
-                            ),
-                            // Column of action buttons on the right edge of image
-                            PositionedDirectional(
-                              top: 16,
-                              end: 16,
-                              child: Column(
-                                children: [
-                                  _ImageCircularButton(
-                                    icon: state.isFavorite ? Icons.favorite : Icons.favorite_border_outlined,
-                                    iconColor: state.isFavorite ? Colors.red : const Color(0xFF64748B),
-                                    onTap: () async {
-                                      final loggedIn = await _ensureLoggedIn(context);
-                                      if (loggedIn && context.mounted) {
-                                        context.read<ProductDetailBloc>().add(const ToggleFavorite());
-                                      }
-                                    },
-                                  ),
-                                  const SizedBox(height: 12),
-                                  _ImageCircularButton(
-                                    icon: state.isBookmarked ? Icons.bookmark : Icons.bookmark_border_outlined,
-                                    iconColor: state.isBookmarked ? const Color(0xFFFF6B35) : const Color(0xFF64748B),
-                                    onTap: () => context.read<ProductDetailBloc>().add(const ToggleBookmark()),
-                                  ),
-                                  const SizedBox(height: 12),
-                                  _ImageCircularButton(
-                                    icon: Icons.share_outlined,
-                                    onTap: () => _shareOffer(context, offer),
-                                  ),
-                                ],
-                              ),
-                            ),
                           ],
                         ),
                       ),
@@ -548,7 +546,7 @@ class ProductDetailView extends StatelessWidget {
                                     ),
                                   ),
                                 ),
-                                if (isExpired) ...[
+                            if (isExpired) ...[
                                   const SizedBox(width: 8),
                                   Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -580,47 +578,10 @@ class ProductDetailView extends StatelessWidget {
                                 ],
                               ],
                             ),
-                            if (!isExpired) ...[
-                              const SizedBox(height: 16),
-                              // Time Left Badge
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFE8FDF5),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Icon(
-                                      Icons.access_time_filled,
-                                      size: 15,
-                                      color: Color(0xFF047857),
-                                    ),
-                                    const SizedBox(width: 6),
-                                    Text(
-                                      isArabic
-                                          ? 'متبقي ${offer.daysLeft} يوم و ${offer.hoursLeft} ساعة و ${offer.minutesLeft} دقيقة'
-                                          : '${offer.daysLeft}d ${offer.hoursLeft}h ${offer.minutesLeft}m left',
-                                      style: const TextStyle(
-                                        color: Color(0xFF047857),
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 12,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
                           ],
                         ),
                       ),
-                      const SizedBox(height: 20),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        child: Container(height: 1, color: const Color(0xFFF1F5F9)),
-                      ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 24),
 
                       // Select Option
                       Padding(
@@ -661,45 +622,63 @@ class ProductDetailView extends StatelessWidget {
                                       ),
                                     ),
                                     child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
+                                        // Custom Radio indicator
+                                        Container(
+                                          width: 22,
+                                          height: 22,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            border: Border.all(
+                                              color: isSelected ? const Color(0xFFFF6B35) : const Color(0xFFCBD5E1),
+                                              width: 2,
+                                            ),
+                                          ),
+                                          child: isSelected
+                                              ? Center(
+                                                  child: Container(
+                                                    width: 10,
+                                                    height: 10,
+                                                    decoration: const BoxDecoration(
+                                                      color: Color(0xFFFF6B35),
+                                                      shape: BoxShape.circle,
+                                                    ),
+                                                  ),
+                                                )
+                                              : null,
+                                        ),
+                                        const SizedBox(width: 12),
                                         Expanded(
                                           child: Text(
                                             option.name,
                                             style: const TextStyle(
-                                              fontSize: 18,
+                                              fontSize: 16,
                                               fontWeight: FontWeight.w800,
                                               color: Color(0xFF0F172A),
                                             ),
                                           ),
                                         ),
                                         const SizedBox(width: 16),
-                                        Column(
-                                          crossAxisAlignment: CrossAxisAlignment.end,
+                                        Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          crossAxisAlignment: CrossAxisAlignment.baseline,
+                                          textBaseline: TextBaseline.alphabetic,
                                           children: [
                                             Text(
                                               'QAR ${option.originalPrice.toInt()}',
                                               style: const TextStyle(
-                                                fontSize: 14,
+                                                fontSize: 12,
                                                 color: Color(0xFF94A3B8),
                                                 decoration: TextDecoration.lineThrough,
                                               ),
                                             ),
-                                            const SizedBox(height: 2),
-                                            Text(
-                                              _Localizations.get(context, 'youPay'),
-                                              style: const TextStyle(
-                                                fontSize: 10,
-                                                fontWeight: FontWeight.bold,
-                                                color: Color(0xFF64748B),
-                                              ),
-                                            ),
+                                            const SizedBox(width: 8),
                                             Text(
                                               'QAR ${option.price.toInt()}',
-                                              style: const TextStyle(
-                                                fontSize: 22,
-                                                fontWeight: FontWeight.w900,
-                                                color: Color(0xFFFF6B35),
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w800,
+                                                color: isSelected ? const Color(0xFF0F172A) : const Color(0xFF475569),
                                               ),
                                             ),
                                           ],
@@ -714,6 +693,234 @@ class ProductDetailView extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 16),
+
+                      // YOU PAY summary section
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Column(
+                          children: [
+                            if (isExpired) ...[
+                              Container(
+                                margin: const EdgeInsets.only(bottom: 16),
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFFEF2F2),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(color: const Color(0xFFFEE2E2), width: 1),
+                                ),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Icon(
+                                      Icons.error_outline,
+                                      color: Color(0xFFEF4444),
+                                      size: 20,
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            isArabic ? 'انتهى هذا العرض' : 'This offer has expired',
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              color: Color(0xFF0F172A),
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            isArabic
+                                                ? 'هذا الكوبون لم يعد متاحاً للشراء. يمكنك طلبه من الصفقات السابقة وسنقوم بإخطار البائع.'
+                                                : 'This coupon is no longer available for purchase. You can request it from Past Deals and we will notify the vendor.',
+                                            style: const TextStyle(
+                                              color: Color(0xFF64748B),
+                                              fontSize: 12,
+                                              height: 1.3,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  _Localizations.get(context, 'youPay'),
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF64748B),
+                                  ),
+                                ),
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                                  textBaseline: TextBaseline.alphabetic,
+                                  children: [
+                                    Text(
+                                      'QAR ${selectedOption.originalPrice.toInt()}',
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        color: Color(0xFF94A3B8),
+                                        decoration: TextDecoration.lineThrough,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'QAR ${selectedOption.price.toInt()}',
+                                      style: const TextStyle(
+                                        fontSize: 28,
+                                        fontWeight: FontWeight.w900,
+                                        color: Color(0xFFFF6B35),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 20),
+
+                            // Action Buttons Stack (Get Deal Now, Buy as Gift, Cart/Share Row)
+                            if (isExpired) ...[
+                              SizedBox(
+                                width: double.infinity,
+                                child: ElevatedButton(
+                                  onPressed: () => _handleRequestCoupon(context, offer: offer, isArabic: isArabic),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFFFF6B35),
+                                    foregroundColor: Colors.white,
+                                    elevation: 0,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    padding: const EdgeInsets.symmetric(vertical: 14),
+                                  ),
+                                  child: Text(
+                                    isArabic ? 'طلب كوبون' : 'Request Coupon',
+                                    style: const TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ] else ...[
+                              SizedBox(
+                                width: double.infinity,
+                                child: ElevatedButton(
+                                  onPressed: () async {
+                                    if (!await _ensureLoggedIn(context)) return;
+                                    if (!context.mounted) return;
+                                    DirectCheckoutSheet.show(
+                                      context,
+                                      offer: offer,
+                                      option: selectedOption,
+                                      isGift: false,
+                                    );
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFFFF6B35),
+                                    foregroundColor: Colors.white,
+                                    elevation: 0,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    padding: const EdgeInsets.symmetric(vertical: 14),
+                                  ),
+                                  child: Text(
+                                    _Localizations.get(context, 'getDealNow'),
+                                    style: const TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              SizedBox(
+                                width: double.infinity,
+                                child: OutlinedButton(
+                                  onPressed: () async {
+                                    if (!await _ensureLoggedIn(context)) return;
+                                    if (!context.mounted) return;
+                                    DirectCheckoutSheet.show(
+                                      context,
+                                      offer: offer,
+                                      option: selectedOption,
+                                      isGift: true,
+                                    );
+                                  },
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: const Color(0xFF0F172A),
+                                    backgroundColor: Colors.white,
+                                    side: const BorderSide(color: Color(0xFFE2E8F0)),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    padding: const EdgeInsets.symmetric(vertical: 14),
+                                  ),
+                                  child: Text(
+                                    _Localizations.get(context, 'buyAsGift'),
+                                    style: const TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: OutlinedButton(
+                                      onPressed: isExpired
+                                          ? null
+                                          : () {
+                                              context.read<CartBloc>().add(
+                                                AddToCart(offer: offer, option: selectedOption),
+                                              );
+                                              _showAddedToCartSnackBar(context);
+                                            },
+                                      style: OutlinedButton.styleFrom(
+                                        side: const BorderSide(color: Color(0xFFE2E8F0)),
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                        padding: const EdgeInsets.symmetric(vertical: 14),
+                                      ),
+                                      child: Icon(
+                                        Icons.shopping_cart_outlined,
+                                        color: isExpired ? const Color(0xFFCBD5E1) : const Color(0xFF64748B),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: OutlinedButton(
+                                      onPressed: () => _shareOffer(context, offer),
+                                      style: OutlinedButton.styleFrom(
+                                        side: const BorderSide(color: Color(0xFFE2E8F0)),
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                        padding: const EdgeInsets.symmetric(vertical: 14),
+                                      ),
+                                      child: const Icon(
+                                        Icons.ios_share,
+                                        color: Color(0xFF64748B),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 32),
 
                       // Offer Description
                       Padding(
@@ -790,298 +997,6 @@ class ProductDetailView extends StatelessWidget {
                                     ),
                                   ],
                                 ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 32),
-
-                      // Mid-page summary details card
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        child: Container(
-                          padding: const EdgeInsets.all(20),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(color: const Color(0xFFF1F5F9)),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.04),
-                                blurRadius: 12,
-                                offset: const Offset(0, 6),
-                              ),
-                            ],
-                          ),
-                          child: Column(
-                            children: [
-                              if (isExpired) ...[
-                                Container(
-                                  margin: const EdgeInsets.only(bottom: 16),
-                                  padding: const EdgeInsets.all(12),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFFEF2F2),
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(color: const Color(0xFFFEE2E2), width: 1),
-                                  ),
-                                  child: Row(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      const Icon(
-                                        Icons.error_outline,
-                                        color: Color(0xFFEF4444),
-                                        size: 20,
-                                      ),
-                                      const SizedBox(width: 12),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              isArabic ? 'انتهى هذا العرض' : 'This offer has expired',
-                                              style: const TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                color: Color(0xFF0F172A),
-                                                fontSize: 14,
-                                              ),
-                                            ),
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              isArabic
-                                                  ? 'هذا الكوبون لم يعد متاحاً للشراء. يمكنك طلبه من الصفقات السابقة وسنقوم بإخطار البائع.'
-                                                  : 'This coupon is no longer available for purchase. You can request it from Past Deals and we will notify the vendor.',
-                                              style: const TextStyle(
-                                                color: Color(0xFF64748B),
-                                                fontSize: 12,
-                                                height: 1.3,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                              
-                              // Price Layout - Stacked vertically (as per mockup Screenshot 2)
-                              Align(
-                                alignment: Alignment.centerLeft,
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'QAR ${selectedOption.originalPrice.toInt()}',
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        color: Color(0xFF94A3B8),
-                                        decoration: TextDecoration.lineThrough,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      _Localizations.get(context, 'youPay'),
-                                      style: const TextStyle(
-                                        fontSize: 11,
-                                        color: Color(0xFF64748B),
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    Text(
-                                      'QAR ${selectedOption.price.toInt()}',
-                                      style: const TextStyle(
-                                        fontSize: 28,
-                                        fontWeight: FontWeight.w900,
-                                        color: Color(0xFFFF6B35),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(height: 12),
-                              
-                              // 7d validity badge
-                              Align(
-                                alignment: Alignment.centerLeft,
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFEFF6FF),
-                                    borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(color: const Color(0xFFDBEAFE), width: 1),
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      const Icon(
-                                        Icons.access_time,
-                                        size: 16,
-                                        color: Color(0xFF2563EB),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        isArabic
-                                            ? '٧ أيام للاسترداد بعد الشراء'
-                                            : '7d to redeem after purchase',
-                                        style: const TextStyle(
-                                          fontSize: 13,
-                                          color: Color(0xFF2563EB),
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 16),
-                              
-                              // Action Button(s)
-                              if (isExpired) ...[
-                                SizedBox(
-                                  width: double.infinity,
-                                  child: ElevatedButton(
-                                    onPressed: () => _handleRequestCoupon(context, offer: offer, isArabic: isArabic),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: const Color(0xFFFF6B35),
-                                      foregroundColor: const Color(0xFF0F172A),
-                                      elevation: 0,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      padding: const EdgeInsets.symmetric(vertical: 14),
-                                    ),
-                                    child: Text(
-                                      isArabic ? 'طلب كوبون' : 'Request Coupon',
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ] else ...[
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      flex: 4,
-                                      child: ElevatedButton(
-                                        onPressed: () async {
-                                          if (!await _ensureLoggedIn(context)) return;
-                                          if (!context.mounted) return;
-                                          DirectCheckoutSheet.show(
-                                            context,
-                                            offer: offer,
-                                            option: selectedOption,
-                                            isGift: false,
-                                          );
-                                        },
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: const Color(0xFFFF6B35),
-                                          foregroundColor: Colors.white,
-                                          elevation: 0,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(12),
-                                          ),
-                                          padding: const EdgeInsets.symmetric(vertical: 14),
-                                        ),
-                                        child: Text(
-                                          _Localizations.get(context, 'getDealNow'),
-                                          style: const TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Expanded(
-                                      flex: 4,
-                                      child: OutlinedButton(
-                                        onPressed: () async {
-                                          if (!await _ensureLoggedIn(context)) return;
-                                          if (!context.mounted) return;
-                                          DirectCheckoutSheet.show(
-                                            context,
-                                            offer: offer,
-                                            option: selectedOption,
-                                            isGift: true,
-                                          );
-                                        },
-                                        style: OutlinedButton.styleFrom(
-                                          foregroundColor: Colors.black,
-                                          side: const BorderSide(color: Color(0xFFE2E8F0)),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(12),
-                                          ),
-                                          padding: const EdgeInsets.symmetric(vertical: 14),
-                                        ),
-                                        child: Text(
-                                          _Localizations.get(context, 'buyAsGift'),
-                                          style: const TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                              const SizedBox(height: 16),
-                              
-                              // Three action buttons
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: OutlinedButton(
-                                      onPressed: () => context.read<ProductDetailBloc>().add(const ToggleBookmark()),
-                                      style: OutlinedButton.styleFrom(
-                                        side: const BorderSide(color: Color(0xFFE2E8F0)),
-                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                        padding: const EdgeInsets.symmetric(vertical: 12),
-                                      ),
-                                      child: Icon(
-                                        state.isBookmarked ? Icons.bookmark : Icons.bookmark_border,
-                                        color: state.isBookmarked ? const Color(0xFFFF6B35) : const Color(0xFF64748B),
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: OutlinedButton(
-                                      onPressed: isExpired
-                                          ? null // Disable cart for expired offers
-                                          : () {
-                                              context.read<CartBloc>().add(
-                                                AddToCart(offer: offer, option: selectedOption),
-                                              );
-                                              _showAddedToCartSnackBar(context);
-                                            },
-                                      style: OutlinedButton.styleFrom(
-                                        side: const BorderSide(color: Color(0xFFE2E8F0)),
-                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                        padding: const EdgeInsets.symmetric(vertical: 12),
-                                      ),
-                                      child: Icon(
-                                        Icons.shopping_cart_outlined,
-                                        color: isExpired ? const Color(0xFFCBD5E1) : const Color(0xFF64748B),
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: OutlinedButton(
-                                      onPressed: () => _shareOffer(context, offer),
-                                      style: OutlinedButton.styleFrom(
-                                        side: const BorderSide(color: Color(0xFFE2E8F0)),
-                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                        padding: const EdgeInsets.symmetric(vertical: 12),
-                                      ),
-                                      child: const Icon(Icons.share_outlined, color: Color(0xFF64748B)),
-                                    ),
-                                  ),
-                                ],
                               ),
                             ],
                           ),
@@ -1217,10 +1132,22 @@ class ProductDetailView extends StatelessWidget {
                                     builder: (context) {
                                       final details = offer.vendorDetails;
                                       final locationName = details?.locationEn ?? details?.locationAr ?? offer.location;
-                                      final embedUrl = details?.mapsEmbedUrl ?? 
-                                          (locationName.isNotEmpty 
-                                              ? 'https://www.google.com/maps?q=${Uri.encodeComponent(locationName)}&output=embed'
-                                              : '');
+                                      
+                                      String embedUrl = '';
+                                      if (details?.mapsEmbedUrl != null && details!.mapsEmbedUrl!.isNotEmpty) {
+                                        embedUrl = details.mapsEmbedUrl!;
+                                      } else if (details?.mapsOpenUrl != null && details!.mapsOpenUrl!.isNotEmpty) {
+                                        final openUrlStr = details.mapsOpenUrl!;
+                                        if (openUrlStr.contains('output=embed')) {
+                                          embedUrl = openUrlStr;
+                                        } else {
+                                          final separator = openUrlStr.contains('?') ? '&' : '?';
+                                          embedUrl = '$openUrlStr${separator}output=embed';
+                                        }
+                                      } else if (locationName.isNotEmpty) {
+                                        embedUrl = 'https://www.google.com/maps?q=${Uri.encodeComponent(locationName)}&output=embed';
+                                      }
+
                                       final openUrl = details?.mapsOpenUrl ?? details?.locationLink ?? 
                                           (locationName.isNotEmpty
                                               ? 'https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(locationName)}'
@@ -1244,6 +1171,61 @@ class ProductDetailView extends StatelessWidget {
                                             children: [
                                               Positioned.fill(
                                                 child: CustomPaint(painter: _MapPainter()),
+                                              ),
+                                              const Center(
+                                                child: Icon(
+                                                  Icons.location_pin,
+                                                  color: Colors.red,
+                                                  size: 36,
+                                                ),
+                                              ),
+                                              // Open in maps button overlay
+                                              PositionedDirectional(
+                                                top: 12,
+                                                start: 12,
+                                                child: GestureDetector(
+                                                  onTap: () async {
+                                                    final urlStr = openUrl.isNotEmpty ? openUrl : 'https://www.google.com/maps';
+                                                    final uri = Uri.parse(urlStr);
+                                                    try {
+                                                      await launchUrl(uri, mode: LaunchMode.externalApplication);
+                                                    } catch (e) {
+                                                      debugPrint('Could not launch map URL: $e');
+                                                    }
+                                                  },
+                                                  child: Container(
+                                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                                    decoration: BoxDecoration(
+                                                      color: Colors.white,
+                                                      borderRadius: BorderRadius.circular(8),
+                                                      boxShadow: [
+                                                        BoxShadow(
+                                                          color: Colors.black.withOpacity(0.1),
+                                                          blurRadius: 4,
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    child: Row(
+                                                      mainAxisSize: MainAxisSize.min,
+                                                      children: [
+                                                        Text(
+                                                          isArabic ? 'افتح في الخرائط' : 'Open in Maps',
+                                                          style: const TextStyle(
+                                                            color: Color(0xFFFF6B35),
+                                                            fontSize: 12,
+                                                            fontWeight: FontWeight.bold,
+                                                          ),
+                                                        ),
+                                                        const SizedBox(width: 4),
+                                                        const Icon(
+                                                          Icons.open_in_new,
+                                                          size: 12,
+                                                          color: Color(0xFFFF6B35),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
                                               ),
                                             ],
                                           ),
@@ -1427,6 +1409,36 @@ class ProductDetailView extends StatelessWidget {
                                 ),
                               ),
                             ] else ...[
+                              // Buy as Gift
+                              Expanded(
+                                flex: 4,
+                                child: OutlinedButton(
+                                  onPressed: () {
+                                    DirectCheckoutSheet.show(
+                                      context,
+                                      offer: offer,
+                                      option: selectedOption,
+                                      isGift: true,
+                                    );
+                                  },
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: const Color(0xFF0F172A),
+                                    side: const BorderSide(color: Color(0xFFE2E8F0)),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    padding: const EdgeInsets.symmetric(vertical: 14),
+                                  ),
+                                  child: Text(
+                                    _Localizations.get(context, 'buyAsGift'),
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
                               // Get Deal Now
                               Expanded(
                                 flex: 4,
@@ -1450,36 +1462,6 @@ class ProductDetailView extends StatelessWidget {
                                   ),
                                   child: Text(
                                     _Localizations.get(context, 'getDealNow'),
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              // Buy as Gift
-                              Expanded(
-                                flex: 4,
-                                child: OutlinedButton(
-                                  onPressed: () {
-                                    DirectCheckoutSheet.show(
-                                      context,
-                                      offer: offer,
-                                      option: selectedOption,
-                                      isGift: true,
-                                    );
-                                  },
-                                  style: OutlinedButton.styleFrom(
-                                    foregroundColor: Colors.black,
-                                    side: const BorderSide(color: Color(0xFFE2E8F0)),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    padding: const EdgeInsets.symmetric(vertical: 14),
-                                  ),
-                                  child: Text(
-                                    _Localizations.get(context, 'buyAsGift'),
                                     style: const TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.bold,
@@ -1642,8 +1624,10 @@ class _VendorMapWidgetState extends State<VendorMapWidget> {
               child: GestureDetector(
                 onTap: () async {
                   final uri = Uri.parse(widget.openUrl);
-                  if (await canLaunchUrl(uri)) {
+                  try {
                     await launchUrl(uri, mode: LaunchMode.externalApplication);
+                  } catch (e) {
+                    debugPrint('Could not launch map URL: $e');
                   }
                 },
                 child: Container(

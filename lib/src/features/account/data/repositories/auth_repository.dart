@@ -43,6 +43,14 @@ abstract class AuthRepository {
   Future<DashboardData> getDashboard({required String token});
 
   Future<List<HomeCoupon>> getWishlist({required String token});
+
+  Future<List<DashboardTransaction>> getFilteredOrders({
+    required String token,
+    String? status,
+    String? from,
+    String? to,
+    String? vendor,
+  });
 }
 
 class AuthRepositoryImpl implements AuthRepository {
@@ -324,6 +332,78 @@ class AuthRepositoryImpl implements AuthRepository {
       return items;
     } catch (_) {
       return [];
+    }
+  }
+
+  @override
+  Future<List<DashboardTransaction>> getFilteredOrders({
+    required String token,
+    String? status,
+    String? from,
+    String? to,
+    String? vendor,
+  }) async {
+    try {
+      final Map<String, dynamic> queryParameters = {};
+      if (status != null && status != 'all' && status.isNotEmpty) {
+        queryParameters['status'] = status;
+      }
+      if (from != null && from.isNotEmpty) {
+        queryParameters['from'] = from;
+      }
+      if (to != null && to.isNotEmpty) {
+        queryParameters['to'] = to;
+      }
+      if (vendor != null && vendor != 'all' && vendor.isNotEmpty) {
+        queryParameters['vendor'] = vendor;
+      }
+
+      final response = await _apiClient.dio.get(
+        ApiEndpoints.orders,
+        queryParameters: queryParameters,
+      );
+
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        throw DioException(
+          requestOptions: response.requestOptions,
+          response: response,
+          message: 'Failed to fetch filtered orders. Status: ${response.statusCode}',
+        );
+      }
+
+      final responseData = response.data;
+      if (responseData == null) {
+        return [];
+      }
+
+      final List<dynamic> rawOrders;
+      if (responseData is List) {
+        rawOrders = responseData;
+      } else if (responseData is Map) {
+        final data = responseData['data'] ?? responseData['orders'] ?? responseData['transactions'] ?? responseData;
+        if (data is List) {
+          rawOrders = data;
+        } else if (data is Map && data['orders'] is List) {
+          rawOrders = data['orders'] as List;
+        } else if (data is Map && data['transactions'] is List) {
+          rawOrders = data['transactions'] as List;
+        } else {
+          rawOrders = [];
+        }
+      } else {
+        rawOrders = [];
+      }
+
+      return rawOrders
+          .whereType<Map<String, dynamic>>()
+          .map((t) => DashboardTransaction.fromJson(t))
+          .toList();
+    } on DioException catch (e) {
+      final data = e.response?.data;
+      final errorMessage = (data is Map ? data['message'] : null) ?? e.message ?? 'Unknown network error occurred';
+      throw Exception(errorMessage);
+    } catch (e) {
+      throw Exception(e.toString());
     }
   }
 }

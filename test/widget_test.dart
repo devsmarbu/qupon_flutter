@@ -51,6 +51,11 @@ class FakeHomeRepository implements HomeRepository {
       ],
     );
   }
+
+  @override
+  Future<List<HomeCoupon>> searchCoupons(String query, {int limit = 8}) async {
+    return [];
+  }
 }
 
 class FakeOffersRepository implements OffersRepository {
@@ -203,6 +208,17 @@ class FakeAuthRepository implements AuthRepository {
 
   @override
   Future<List<HomeCoupon>> getWishlist({required String token}) async {
+    return [];
+  }
+
+  @override
+  Future<List<DashboardTransaction>> getFilteredOrders({
+    required String token,
+    String? status,
+    String? from,
+    String? to,
+    String? vendor,
+  }) async {
     return [];
   }
 }

@@ -12,6 +12,7 @@ import '../widgets/home_category_section_api.dart';
 import '../../../offers/data/models/offer.dart';
 import '../../../offers/presentation/pages/product_detail_page.dart';
 import '../../../main/presentation/pages/main_page.dart';
+import '../../data/repositories/home_repository.dart';
 import 'collection_coupons_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -129,46 +130,235 @@ class _HomePageState extends State<HomePage> {
       child: CustomScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         slivers: [
-          // ── Search Bar ─────────────────────────────────────────────────────
+          // ── Search Bar (Autocomplete) ──────────────────────────────────────
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-              child: GestureDetector(
-                onTap: () {
-                  // Navigate to search (future feature) or show search
+              child: RawAutocomplete<HomeCoupon>(
+                optionsBuilder: (TextEditingValue textEditingValue) async {
+                  final query = textEditingValue.text.trim();
+                  if (query.isEmpty) {
+                    return const Iterable<HomeCoupon>.empty();
+                  }
+                  try {
+                    final repo = context.read<HomeRepository>();
+                    final results = await repo.searchCoupons(query, limit: 8);
+                    return results;
+                  } catch (e) {
+                    debugPrint('Search error: $e');
+                    return const Iterable<HomeCoupon>.empty();
+                  }
                 },
-                child: Container(
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: const Color(0xFFE2E8F0)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.03),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
+                displayStringForOption: (HomeCoupon option) => option.name,
+                onSelected: (HomeCoupon selection) async {
+                  final offer = Offer(
+                    id: selection.id,
+                    title: selection.name,
+                    titleAr: selection.nameAr,
+                    category: selection.category,
+                    imageUrl: selection.imageUrl,
+                    daysLeft: selection.daysLeft,
+                    hoursLeft: selection.hoursLeft,
+                    minutesLeft: selection.minutesLeft,
+                    location: '123 Tech Avenue, Silicon Valley, CA 94025',
+                    description: selection.description,
+                    descriptionAr: selection.descriptionAr,
+                    price: selection.price,
+                    currency: 'QAR',
+                    slug: selection.slug,
+                    vendor: selection.vendor,
+                    vendorId: selection.vendorId,
+                    validity: selection.validity,
+                    wishlisted: selection.wishlisted,
+                  );
+                  final viewCart = await Navigator.of(context).push<bool>(
+                    MaterialPageRoute(
+                      builder: (context) => ProductDetailPage(offer: offer),
+                    ),
+                  );
+                  if (viewCart == true && context.mounted) {
+                    final mainPageState = context.findAncestorStateOfType<MainPageState>();
+                    if (mainPageState != null) {
+                      mainPageState.setSelectedIndex(3); // Cart is index 3
+                    }
+                  }
+                },
+                fieldViewBuilder: (BuildContext context, TextEditingController textEditingController, FocusNode focusNode, VoidCallback onFieldSubmitted) {
+                  return Container(
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.03),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: TextField(
+                      controller: textEditingController,
+                      focusNode: focusNode,
+                      textInputAction: TextInputAction.search,
+                      onSubmitted: (_) => onFieldSubmitted(),
+                      style: const TextStyle(
+                        color: Color(0xFF0F172A),
+                        fontSize: 14,
                       ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      const SizedBox(width: 14),
-                      const Icon(Icons.search, color: Color(0xFF94A3B8), size: 20),
-                      const SizedBox(width: 10),
-                      Text(
-                        isArabic
+                      decoration: InputDecoration(
+                        border: InputBorder.none,
+                        contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                        prefixIcon: const Icon(Icons.search, color: Color(0xFF94A3B8), size: 20),
+                        hintText: isArabic
                             ? 'البحث عن كوبونات، موردين...'
                             : 'Search for coupons, vendors...',
-                        style: const TextStyle(
+                        hintStyle: const TextStyle(
                           color: Color(0xFF94A3B8),
                           fontSize: 14,
                           fontWeight: FontWeight.w400,
                         ),
+                        suffixIcon: ValueListenableBuilder<TextEditingValue>(
+                          valueListenable: textEditingController,
+                          builder: (context, value, child) {
+                            return value.text.isNotEmpty
+                                ? IconButton(
+                                    icon: const Icon(Icons.clear, color: Color(0xFF94A3B8), size: 16),
+                                    onPressed: () {
+                                      textEditingController.clear();
+                                    },
+                                  )
+                                : const SizedBox.shrink();
+                          },
+                        ),
                       ),
-                    ],
-                  ),
-                ),
+                    ),
+                  );
+                },
+                optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<HomeCoupon> onSelected, Iterable<HomeCoupon> options) {
+                  final width = MediaQuery.of(context).size.width - 32;
+                  return Align(
+                    alignment: Alignment.topLeft,
+                    child: Material(
+                      color: Colors.transparent,
+                      child: Container(
+                        width: width,
+                        constraints: const BoxConstraints(maxHeight: 280),
+                        margin: const EdgeInsets.only(top: 8),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: const Color(0xFFE2E8F0)),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.08),
+                              blurRadius: 16,
+                              offset: const Offset(0, 8),
+                            ),
+                          ],
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: ListView.separated(
+                            padding: EdgeInsets.zero,
+                            shrinkWrap: true,
+                            itemCount: options.length,
+                            separatorBuilder: (context, index) => Container(
+                              height: 1,
+                              color: const Color(0xFFF1F5F9),
+                            ),
+                            itemBuilder: (BuildContext context, int index) {
+                              final option = options.elementAt(index);
+                              return InkWell(
+                                onTap: () {
+                                  onSelected(option);
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        width: 36,
+                                        height: 36,
+                                        decoration: const BoxDecoration(
+                                          color: Color(0xFFFFF2EC),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Center(
+                                          child: Icon(
+                                            option.category.toLowerCase().contains('electronics')
+                                                ? Icons.devices
+                                                : Icons.storefront_outlined,
+                                            color: const Color(0xFFFF6B35),
+                                            size: 18,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(
+                                              isArabic && option.nameAr.isNotEmpty ? option.nameAr : option.name,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: const TextStyle(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.bold,
+                                                color: Color(0xFF0F172A),
+                                              ),
+                                            ),
+                                            const SizedBox(height: 2),
+                                            Text(
+                                              '${option.vendor} • ${option.category}',
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: const TextStyle(
+                                                fontSize: 12,
+                                                color: Color(0xFF64748B),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.end,
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            'QAR ${option.price.toInt()}',
+                                            style: const TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w900,
+                                              color: Color(0xFFFF6B35),
+                                            ),
+                                          ),
+                                          if (option.actualPrice > option.price)
+                                            Text(
+                                              'QAR ${option.actualPrice.toInt()}',
+                                              style: const TextStyle(
+                                                fontSize: 11,
+                                                color: Color(0xFF94A3B8),
+                                                decoration: TextDecoration.lineThrough,
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
           ),
