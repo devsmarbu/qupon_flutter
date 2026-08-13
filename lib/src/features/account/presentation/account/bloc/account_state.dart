@@ -21,6 +21,7 @@ class AccountAuthenticated extends AccountState {
   final List<HomeCoupon> wishlist;
   final bool isLoadingDashboard;
   final String? error;
+  final List<DashboardTransaction>? filteredTransactions;
 
   const AccountAuthenticated({
     required this.email,
@@ -30,6 +31,7 @@ class AccountAuthenticated extends AccountState {
     this.wishlist = const [],
     this.isLoadingDashboard = false,
     this.error,
+    this.filteredTransactions,
   });
 
   AccountAuthenticated copyWith({
@@ -40,6 +42,8 @@ class AccountAuthenticated extends AccountState {
     List<HomeCoupon>? wishlist,
     bool? isLoadingDashboard,
     String? error,
+    List<DashboardTransaction>? filteredTransactions,
+    bool clearFilteredTransactions = false,
   }) {
     return AccountAuthenticated(
       email: email ?? this.email,
@@ -49,6 +53,7 @@ class AccountAuthenticated extends AccountState {
       wishlist: wishlist ?? this.wishlist,
       isLoadingDashboard: isLoadingDashboard ?? this.isLoadingDashboard,
       error: error ?? this.error,
+      filteredTransactions: clearFilteredTransactions ? null : (filteredTransactions ?? this.filteredTransactions),
     );
   }
 }

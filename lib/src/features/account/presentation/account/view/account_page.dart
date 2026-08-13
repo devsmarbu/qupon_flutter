@@ -81,7 +81,7 @@ class _AccountPageState extends State<AccountPage> {
   Widget _buildDashboard(BuildContext context, AccountAuthenticated state) {
     final l10n = AppLocalizations.of(context)!;
 
-    if ((state.isLoadingDashboard || state.dashboardData == null) && state.error == null) {
+    if (state.dashboardData == null && state.isLoadingDashboard && state.error == null) {
       return const Scaffold(
         backgroundColor: Colors.transparent,
         body: Center(
@@ -142,109 +142,16 @@ class _AccountPageState extends State<AccountPage> {
     final totalSaved = data?.totalSaved ?? 0.0;
     final activeCoupons = data?.activeCoupons ?? 0;
     final wallet = data?.wallet ?? 0.0;
-    final transactions = data?.transactions ?? [];
+    final transactions = state.filteredTransactions ?? data?.transactions ?? [];
 
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
 
-    final vendors = transactions.map((t) => t.vendor).where((v) => v.isNotEmpty).toSet().toList();
+    final vendors = (data?.transactions ?? []).map((t) => t.vendor).where((v) => v.isNotEmpty).toSet().toList();
     if (_selectedVendor != 'all' && !vendors.contains(_selectedVendor)) {
       _selectedVendor = 'all';
     }
 
-    final filteredTransactions = transactions.where((tx) {
-      if (_selectedStatus != 'all') {
-        final lowerStatus = tx.status.toLowerCase();
-        if (_selectedStatus == 'active' && !lowerStatus.contains('active') && !lowerStatus.contains('awaiting')) {
-          return false;
-        }
-        if (_selectedStatus == 'expired' && !lowerStatus.contains('expired')) {
-          return false;
-        }
-        if (_selectedStatus == 'pending' && !lowerStatus.contains('pending')) {
-          return false;
-        }
-      }
-      
-      if (_selectedVendor != 'all') {
-        if (tx.vendor.toLowerCase() != _selectedVendor.toLowerCase()) {
-          return false;
-        }
-      }
-      
-      if (_selectedPeriod != 'All time') {
-        try {
-          DateTime? txDate;
-          if (tx.date.contains('-') || tx.date.contains('/')) {
-            txDate = DateTime.tryParse(tx.date);
-          }
-          if (txDate != null) {
-            final now = DateTime.now();
-            if (_selectedPeriod == 'Today') {
-              if (txDate.year != now.year || txDate.month != now.month || txDate.day != now.day) {
-                return false;
-              }
-            } else if (_selectedPeriod == 'Last 7 days') {
-              if (now.difference(txDate).inDays > 7) {
-                return false;
-              }
-            } else if (_selectedPeriod == 'Last 30 days') {
-              if (now.difference(txDate).inDays > 30) {
-                return false;
-              }
-            } else if (_selectedPeriod == 'Last 90 days') {
-              if (now.difference(txDate).inDays > 90) {
-                return false;
-              }
-            } else if (_selectedPeriod == 'This month') {
-              if (txDate.year != now.year || txDate.month != now.month) {
-                return false;
-              }
-            } else if (_selectedPeriod == 'This year') {
-              if (txDate.year != now.year) {
-                return false;
-              }
-            }
-          }
-        } catch (_) {}
-      }
-
-      if (_fromCtrl.text.isNotEmpty || _toCtrl.text.isNotEmpty) {
-        try {
-          DateTime? txDate;
-          if (tx.date.contains('-') || tx.date.contains('/')) {
-            txDate = DateTime.tryParse(tx.date);
-          }
-          if (txDate != null) {
-            DateTime? parseCustomDate(String s) {
-              final parts = s.split('/');
-              if (parts.length == 3) {
-                final day = int.tryParse(parts[0]);
-                final month = int.tryParse(parts[1]);
-                final year = int.tryParse(parts[2]);
-                if (day != null && month != null && year != null) {
-                  return DateTime(year, month, day);
-                }
-              }
-              return null;
-            }
-            if (_fromCtrl.text.isNotEmpty) {
-              final fromDate = parseCustomDate(_fromCtrl.text);
-              if (fromDate != null && txDate.isBefore(fromDate)) {
-                return false;
-              }
-            }
-            if (_toCtrl.text.isNotEmpty) {
-              final toDate = parseCustomDate(_toCtrl.text);
-              if (toDate != null && txDate.isAfter(toDate)) {
-                return false;
-              }
-            }
-          }
-        } catch (_) {}
-      }
-      
-      return true;
-    }).toList();
+    final filteredTransactions = transactions;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -424,7 +331,14 @@ class _AccountPageState extends State<AccountPage> {
                     const SizedBox(height: 12),
 
                     // Transaction Items
-                    if (filteredTransactions.isEmpty)
+                    if (state.isLoadingDashboard)
+                      const Center(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 40),
+                          child: CircularProgressIndicator(color: AppColors.primary),
+                        ),
+                      )
+                    else if (filteredTransactions.isEmpty)
                       const Center(
                         child: Padding(
                           padding: EdgeInsets.symmetric(vertical: 24),
@@ -751,6 +665,65 @@ class _AccountPageState extends State<AccountPage> {
     );
   }
 
+  void _triggerFilter() {
+    String? fromDate;
+    String? toDate;
+
+    if (_fromCtrl.text.isNotEmpty) {
+      fromDate = _formatToYyyyMmDd(_fromCtrl.text);
+    }
+    if (_toCtrl.text.isNotEmpty) {
+      toDate = _formatToYyyyMmDd(_toCtrl.text);
+    }
+
+    if (fromDate == null && toDate == null && _selectedPeriod != 'All time') {
+      final now = DateTime.now();
+      final yyyymmdd = (DateTime dt) => "${dt.year}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')}";
+      
+      if (_selectedPeriod == 'Today') {
+        fromDate = yyyymmdd(now);
+        toDate = yyyymmdd(now);
+      } else if (_selectedPeriod == 'Last 7 days') {
+        fromDate = yyyymmdd(now.subtract(const Duration(days: 7)));
+        toDate = yyyymmdd(now);
+      } else if (_selectedPeriod == 'Last 30 days') {
+        fromDate = yyyymmdd(now.subtract(const Duration(days: 30)));
+        toDate = yyyymmdd(now);
+      } else if (_selectedPeriod == 'Last 90 days') {
+        fromDate = yyyymmdd(now.subtract(const Duration(days: 90)));
+        toDate = yyyymmdd(now);
+      } else if (_selectedPeriod == 'This month') {
+        fromDate = yyyymmdd(DateTime(now.year, now.month, 1));
+        toDate = yyyymmdd(DateTime(now.year, now.month + 1, 0));
+      } else if (_selectedPeriod == 'This year') {
+        fromDate = yyyymmdd(DateTime(now.year, 1, 1));
+        toDate = yyyymmdd(DateTime(now.year, 12, 31));
+      }
+    }
+
+    context.read<AccountBloc>().add(LoadDashboard(
+      status: _selectedStatus,
+      from: fromDate,
+      to: toDate,
+      vendor: _selectedVendor,
+    ));
+  }
+
+  String _formatToYyyyMmDd(String input) {
+    if (input.isEmpty) return '';
+    if (RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(input)) {
+      return input;
+    }
+    final parts = input.split('/');
+    if (parts.length == 3) {
+      final day = parts[0];
+      final month = parts[1];
+      final year = parts[2];
+      return '$year-$month-$day';
+    }
+    return input;
+  }
+
   void _showFilterBottomSheet(BuildContext context, List<String> vendors) {
     showModalBottomSheet(
       context: context,
@@ -772,6 +745,7 @@ class _AccountPageState extends State<AccountPage> {
             _fromCtrl.text = from;
             _toCtrl.text = to;
           });
+          _triggerFilter();
         },
       ),
     );

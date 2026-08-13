@@ -23,5 +23,15 @@ class AppStarted extends AccountEvent {
 }
 
 class LoadDashboard extends AccountEvent {
-  const LoadDashboard();
+  final String? status;
+  final String? from;
+  final String? to;
+  final String? vendor;
+
+  const LoadDashboard({
+    this.status,
+    this.from,
+    this.to,
+    this.vendor,
+  });
 }

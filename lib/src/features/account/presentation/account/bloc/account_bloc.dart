@@ -87,14 +87,38 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
       if (token == null || token.isEmpty) {
         throw Exception('Token not found. Please log in again.');
       }
-      final data = await _authRepository.getDashboard(token: token);
-      final wishlist = await _authRepository.getWishlist(token: token);
-      emit(currentState.copyWith(
-        isLoadingDashboard: false,
-        dashboardData: data,
-        wishlist: wishlist,
-        error: null,
-      ));
+
+      final hasStatus = event.status != null && event.status != 'all' && event.status!.isNotEmpty;
+      final hasVendor = event.vendor != null && event.vendor != 'all' && event.vendor!.isNotEmpty;
+      final hasFrom = event.from != null && event.from!.isNotEmpty;
+      final hasTo = event.to != null && event.to!.isNotEmpty;
+      final hasFilters = hasStatus || hasVendor || hasFrom || hasTo;
+
+      if (hasFilters) {
+        final filtered = await _authRepository.getFilteredOrders(
+          token: token,
+          status: event.status,
+          from: event.from,
+          to: event.to,
+          vendor: event.vendor,
+        );
+
+        emit(currentState.copyWith(
+          isLoadingDashboard: false,
+          filteredTransactions: filtered,
+          error: null,
+        ));
+      } else {
+        final data = await _authRepository.getDashboard(token: token);
+        final wishlist = await _authRepository.getWishlist(token: token);
+        emit(currentState.copyWith(
+          isLoadingDashboard: false,
+          dashboardData: data,
+          wishlist: wishlist,
+          clearFilteredTransactions: true,
+          error: null,
+        ));
+      }
     } catch (e) {
       emit(currentState.copyWith(
         isLoadingDashboard: false,

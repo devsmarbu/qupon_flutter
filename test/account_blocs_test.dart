@@ -140,6 +140,46 @@ class FakeAuthRepository implements AuthRepository {
     if (throwError) throw Exception(errorMessage);
     return [];
   }
+
+  bool getFilteredOrdersCalled = false;
+  String? lastStatus;
+  String? lastFrom;
+  String? lastTo;
+  String? lastVendor;
+
+  @override
+  Future<List<DashboardTransaction>> getFilteredOrders({
+    required String token,
+    String? status,
+    String? from,
+    String? to,
+    String? vendor,
+  }) async {
+    getFilteredOrdersCalled = true;
+    lastStatus = status;
+    lastFrom = from;
+    lastTo = to;
+    lastVendor = vendor;
+    if (throwError) throw Exception(errorMessage);
+    return [
+      DashboardTransaction(
+        id: '123',
+        orderDisplayRef: 'REF123',
+        title: 'Filtered Order',
+        date: '2026-08-14',
+        price: 'QAR 100',
+        type: 'other',
+        couponsCount: 1,
+        vendor: vendor ?? 'ElectroWorld',
+        offer: 'Offer 1',
+        code: 'CODE1',
+        couponUrl: '',
+        status: status ?? 'pending',
+        redeemBy: '',
+        coupons: [],
+      ),
+    ];
+  }
 }
 
 void main() {
@@ -484,6 +524,53 @@ void main() {
             predicate<AccountState>((state) => state is AccountAuthenticated && !state.isLoadingDashboard && state.error == 'Exception: Network error'),
           ]),
         );
+        bloc.close();
+      });
+
+      test('LoadDashboard with filter parameters calls getFilteredOrders and emits state with filteredTransactions', () async {
+        final bloc = AccountBloc(authRepository: authRepository);
+
+        // Wait for constructor AppStarted to complete
+        await expectLater(
+          bloc.stream,
+          emitsThrough(isA<AccountUnauthenticated>()),
+        );
+
+        await PrefStore().saveString(AppStrings.keyToken, 'mock_token');
+        authRepository.getFilteredOrdersCalled = false;
+
+        // Emit AccountAuthenticated manually
+        bloc.emit(const AccountAuthenticated(email: 'test@example.com'));
+
+        // Trigger LoadDashboard with filters
+        bloc.add(const LoadDashboard(
+          status: 'pending',
+          from: '2026-08-01',
+          to: '2026-08-31',
+          vendor: 'ElectroWorld',
+        ));
+
+        await expectLater(
+          bloc.stream,
+          emitsInOrder([
+            predicate<AccountState>((state) => state is AccountAuthenticated && state.isLoadingDashboard),
+            predicate<AccountState>((state) => 
+                state is AccountAuthenticated && 
+                !state.isLoadingDashboard && 
+                state.filteredTransactions != null && 
+                state.filteredTransactions!.isNotEmpty && 
+                state.filteredTransactions!.first.vendor == 'ElectroWorld' &&
+                state.filteredTransactions!.first.status == 'pending'
+            ),
+          ]),
+        );
+
+        expect(authRepository.getFilteredOrdersCalled, isTrue);
+        expect(authRepository.lastStatus, 'pending');
+        expect(authRepository.lastFrom, '2026-08-01');
+        expect(authRepository.lastTo, '2026-08-31');
+        expect(authRepository.lastVendor, 'ElectroWorld');
+
         bloc.close();
       });
     });
