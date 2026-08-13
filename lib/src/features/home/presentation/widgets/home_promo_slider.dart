@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 
 class HomePromoSlider extends StatefulWidget {
@@ -108,22 +109,44 @@ class _HomePromoSliderState extends State<HomePromoSlider> {
               },
               itemCount: _banners.length,
               itemBuilder: (context, index) {
-                return Image.asset(
-                  _banners[index].assetPath,
-                  fit: BoxFit.cover,
-                  width: double.infinity,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      color: const Color(0xFFF1F5F9),
-                      child: const Center(
-                        child: Icon(
-                          Icons.image_not_supported_outlined,
-                          size: 40,
-                          color: Color(0xFF94A3B8),
-                        ),
+                return Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    // Blurred background image
+                    ImageFiltered(
+                      imageFilter: ui.ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+                      child: Image.asset(
+                        _banners[index].assetPath,
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        height: double.infinity,
+                        errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
                       ),
-                    );
-                  },
+                    ),
+                    // Subtle dark tint overlay over the blurred background
+                    Container(
+                      color: Colors.black.withValues(alpha: 0.15),
+                    ),
+                    // Foreground contained image
+                    Image.asset(
+                      _banners[index].assetPath,
+                      fit: BoxFit.contain,
+                      width: double.infinity,
+                      height: double.infinity,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          color: const Color(0xFFF1F5F9),
+                          child: const Center(
+                            child: Icon(
+                              Icons.image_not_supported_outlined,
+                              size: 40,
+                              color: Color(0xFF94A3B8),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
                 );
               },
             ),
