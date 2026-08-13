@@ -258,6 +258,17 @@ class _CategoryOffersPageState extends State<CategoryOffersPage> {
     );
   }
 
+  Future<void> _navigateToDetail(BuildContext context, Offer offer) async {
+    final viewCart = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (context) => ProductDetailPage(offer: offer),
+      ),
+    );
+    if (viewCart == true && context.mounted) {
+      Navigator.of(context).pop(true);
+    }
+  }
+
   Widget _buildOfferCard(BuildContext context, Offer offer, AppLocalizations l10n, bool isArabic) {
     final vendorName = offer.vendor ?? (offer.category == 'Electronics' ? 'ElectroWorld' : offer.title);
     final initialLetter = offer.category.isNotEmpty ? offer.category[0].toUpperCase() : '?';
@@ -287,258 +298,257 @@ class _CategoryOffersPageState extends State<CategoryOffersPage> {
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // ── Image Section (Stack) ────────────────────────────────────────
-          Stack(
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () => _navigateToDetail(context, offer),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Cover Image or Initial Letter Fallback
-              ClipRRect(
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(16),
-                  topRight: Radius.circular(16),
-                ),
-                child: Container(
-                  height: 180,
-                  width: double.infinity,
-                  color: const Color(0xFFEFF6FF), // soft premium blue tint
-                  child: offer.imageUrl.isNotEmpty
-                      ? Image.network(
-                          offer.imageUrl,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => Center(
-                            child: Text(
-                              initialLetter,
-                              style: const TextStyle(
-                                fontSize: 64,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF3B82F6),
+              // ── Image Section (Stack) ────────────────────────────────────────
+              Stack(
+                children: [
+                  // Cover Image or Initial Letter Fallback
+                  ClipRRect(
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(16),
+                      topRight: Radius.circular(16),
+                    ),
+                    child: Container(
+                      height: 180,
+                      width: double.infinity,
+                      color: const Color(0xFFEFF6FF), // soft premium blue tint
+                      child: offer.imageUrl.isNotEmpty
+                          ? Image.network(
+                              offer.imageUrl,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) => Center(
+                                child: Text(
+                                  initialLetter,
+                                  style: const TextStyle(
+                                    fontSize: 64,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF3B82F6),
+                                  ),
+                                ),
+                              ),
+                            )
+                          : Center(
+                              child: Text(
+                                initialLetter,
+                                style: const TextStyle(
+                                  fontSize: 64,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF3B82F6),
+                                ),
                               ),
                             ),
-                          ),
-                        )
-                      : Center(
-                          child: Text(
-                            initialLetter,
-                            style: const TextStyle(
-                              fontSize: 64,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF3B82F6),
-                            ),
-                          ),
-                        ),
-                ),
-              ),
-
-              // Gradient Overlay at bottom of image
-              Positioned(
-                bottom: 0,
-                left: 0,
-                right: 0,
-                child: Container(
-                  height: 70,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        Colors.transparent,
-                        Colors.black.withValues(alpha: 0.8),
-                      ],
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
                     ),
                   ),
-                ),
-              ),
 
-              // Title text over the image bottom gradient
-              Positioned(
-                bottom: 14,
-                left: 16,
-                right: 16,
-                child: Text(
-                  (isArabic && offer.titleAr != null && offer.titleAr!.isNotEmpty)
-                      ? offer.titleAr!
-                      : offer.title,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-
-              // Time Left countdown badge
-              PositionedDirectional(
-                top: 12,
-                end: 12,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: const Color(0xE6E8FDF5), // Soft green tint
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: const Color(0xFFA7F3D0),
-                      width: 0.5,
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(
-                        Icons.access_time,
-                        size: 14,
-                        color: Color(0xFF047857),
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        l10n.timeLeft(offer.daysLeft, offer.hoursLeft, offer.minutesLeft),
-                        style: const TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w800,
-                          color: Color(0xFF047857),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-
-          // ── Details Area ──────────────────────────────────────────────────
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Vendor and Category Badge
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        vendorName,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF0F172A),
-                        ),
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  // Gradient Overlay at bottom of image
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: Container(
+                      height: 70,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF1F5F9),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Text(
-                        offer.category.toUpperCase(),
-                        style: const TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF64748B),
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.transparent,
+                            Colors.black.withValues(alpha: 0.8),
+                          ],
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
                         ),
                       ),
                     ),
-                  ],
-                ),
-                const SizedBox(height: 6),
+                  ),
 
-                // Location row
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.location_on_outlined,
-                      size: 14,
-                      color: Color(0xFF94A3B8),
-                    ),
-                    const SizedBox(width: 4),
-                    Expanded(
-                      child: Text(
-                        offer.location,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Color(0xFF64748B),
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                  // Title text over the image bottom gradient
+                  Positioned(
+                    bottom: 14,
+                    left: 16,
+                    right: 16,
+                    child: Text(
+                      (isArabic && offer.titleAr != null && offer.titleAr!.isNotEmpty)
+                          ? offer.titleAr!
+                          : offer.title,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
                       ),
                     ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                const Divider(color: Color(0xFFF1F5F9), height: 1),
-                const SizedBox(height: 16),
+                  ),
 
-                // Prices & View Details Row
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          optionName,
-                          style: const TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF94A3B8),
-                            letterSpacing: 0.5,
-                          ),
+                  // Time Left countdown badge
+                  PositionedDirectional(
+                    top: 12,
+                    end: 12,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: const Color(0xE6E8FDF5), // Soft green tint
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: const Color(0xFFA7F3D0),
+                          width: 0.5,
                         ),
-                        const SizedBox(height: 2),
-                        Text(
-                          'QAR ${offer.price.toStringAsFixed(0)}',
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w900,
-                            color: Color(0xFFFF6B35),
-                          ),
-                        ),
-                      ],
-                    ),
-                    ElevatedButton(
-                      onPressed: () async {
-                        final viewCart = await Navigator.of(context).push<bool>(
-                          MaterialPageRoute(
-                            builder: (context) => ProductDetailPage(offer: offer),
-                          ),
-                        );
-                        if (viewCart == true && context.mounted) {
-                          Navigator.of(context).pop(true);
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFFF6B35),
-                        foregroundColor: Colors.white,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(
-                            isArabic ? 'عرض التفاصيل' : 'View Details',
-                            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                          const Icon(
+                            Icons.access_time,
+                            size: 14,
+                            color: Color(0xFF047857),
                           ),
                           const SizedBox(width: 6),
-                          Icon(
-                            isArabic ? Icons.arrow_back : Icons.arrow_forward,
-                            size: 14,
+                          Text(
+                            l10n.timeLeft(offer.daysLeft, offer.hoursLeft, offer.minutesLeft),
+                            style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w800,
+                              color: Color(0xFF047857),
+                            ),
                           ),
                         ],
                       ),
                     ),
+                  ),
+                ],
+              ),
+
+              // ── Details Area ──────────────────────────────────────────────────
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Vendor and Category Badge
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            vendorName,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF0F172A),
+                            ),
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF1F5F9),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text(
+                            offer.category.toUpperCase(),
+                            style: const TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF64748B),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+
+                    // Location row
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.location_on_outlined,
+                          size: 14,
+                          color: Color(0xFF94A3B8),
+                        ),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            offer.location,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Color(0xFF64748B),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    const Divider(color: Color(0xFFF1F5F9), height: 1),
+                    const SizedBox(height: 16),
+
+                    // Prices & View Details Row
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              optionName,
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF94A3B8),
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'QAR ${offer.price.toStringAsFixed(0)}',
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w900,
+                                color: Color(0xFFFF6B35),
+                              ),
+                            ),
+                          ],
+                        ),
+                        ElevatedButton(
+                          onPressed: () => _navigateToDetail(context, offer),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFFF6B35),
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                isArabic ? 'عرض التفاصيل' : 'View Details',
+                                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(width: 6),
+                              Icon(
+                                isArabic ? Icons.arrow_back : Icons.arrow_forward,
+                                size: 14,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
