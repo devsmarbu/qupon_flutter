@@ -25,6 +25,8 @@ class Offer {
   final String? mapsOpenUrl;
   final List<OfferOption> variants;
   final VendorDetails? vendorDetails;
+  final String? shareLink;
+  final String? vendorProfileLink;
 
   const Offer({
     required this.id,
@@ -50,6 +52,8 @@ class Offer {
     this.mapsOpenUrl,
     this.variants = const [],
     this.vendorDetails,
+    this.shareLink,
+    this.vendorProfileLink,
   });
 
   factory Offer.fromJson(Map<String, dynamic> json) {
@@ -109,6 +113,8 @@ class Offer {
           ? VendorDetails.fromJson(
               json['vendorDetails'] as Map<String, dynamic>)
           : null,
+      shareLink: json['shareLink']?.toString(),
+      vendorProfileLink: json['vendorProfileLink']?.toString(),
     );
   }
 
@@ -136,6 +142,8 @@ class Offer {
     String? mapsOpenUrl,
     List<OfferOption>? variants,
     VendorDetails? vendorDetails,
+    String? shareLink,
+    String? vendorProfileLink,
   }) {
     return Offer(
       id: id ?? this.id,
@@ -161,6 +169,8 @@ class Offer {
       mapsOpenUrl: mapsOpenUrl ?? this.mapsOpenUrl,
       variants: variants ?? this.variants,
       vendorDetails: vendorDetails ?? this.vendorDetails,
+      shareLink: shareLink ?? this.shareLink,
+      vendorProfileLink: vendorProfileLink ?? this.vendorProfileLink,
     );
   }
 }

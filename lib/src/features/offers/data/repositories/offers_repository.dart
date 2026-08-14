@@ -63,7 +63,9 @@ class OffersRepositoryImpl implements OffersRepository {
           ..['daysLeft'] = daysLeft
           ..['hoursLeft'] = hoursLeft
           ..['minutesLeft'] = minutesLeft
-          ..['validity'] = '${daysLeft}d${hoursLeft}h${minutesLeft}m left';
+          ..['validity'] = '${daysLeft}d${hoursLeft}h${minutesLeft}m left'
+          ..['shareLink'] = couponMap['shareLink']?.toString()
+          ..['vendorProfileLink'] = couponMap['vendorProfileLink']?.toString();
 
         return Offer.fromJson(enriched);
       }).toList();
@@ -206,7 +208,9 @@ class OffersRepositoryImpl implements OffersRepository {
         ..['hoursLeft'] = hoursLeft
         ..['minutesLeft'] = minutesLeft
         ..['validity'] = '${daysLeft}d${hoursLeft}h${minutesLeft}m left'
-        ..['slug'] = couponMap['slug']?.toString() ?? slug;
+        ..['slug'] = couponMap['slug']?.toString() ?? slug
+        ..['shareLink'] = couponMap['shareLink']?.toString()
+        ..['vendorProfileLink'] = couponMap['vendorProfileLink']?.toString();
 
       return Offer.fromJson(enriched);
     } on DioException catch (e) {
