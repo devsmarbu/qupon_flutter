@@ -145,7 +145,7 @@ class _HomePromoSliderApiState extends State<HomePromoSliderApi> {
                       // Foreground contained image
                       Image.network(
                         b.imageUrl,
-                        fit: BoxFit.contain,
+                        fit: BoxFit.cover,
                         width: double.infinity,
                         height: double.infinity,
                         loadingBuilder: (ctx, child, progress) {

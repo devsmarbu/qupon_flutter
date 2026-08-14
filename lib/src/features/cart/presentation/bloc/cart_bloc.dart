@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'cart_event.dart';
 import 'cart_state.dart';
+import '../../data/models/api_cart_model.dart';
 import '../../data/models/checkout_model.dart';
 import '../../data/repositories/cart_repository.dart';
 
@@ -77,18 +78,71 @@ class CartBloc extends Bloc<CartEvent, CartState> {
   Future<void> _onRemoveFromCart(RemoveFromCart event, Emitter<CartState> emit) async {
     emit(state.copyWith(isLoading: true));
     try {
-      final cartData = await _cartRepository.removeFromCart(event.key);
-      // Also remove from localItems by matching the key format "couponId:variantId"
-      final updatedItems = state.localItems
-          .where((item) => '${item['couponId']}:${item['variantId']}' != event.key)
-          .toList();
+      // Remove matching item from localItems by key or couponId
+      final updatedLocalItems = state.localItems.where((item) {
+        final itemKey = '${item['couponId']}:${item['variantId']}';
+        return itemKey != event.key &&
+            item['couponId'] != event.key &&
+            item['variantId'] != event.key;
+      }).toList();
+
+      ApiCartData cartData;
+      try {
+        cartData = await _cartRepository.removeFromCart(event.key);
+      } catch (_) {
+        cartData = await _cartRepository.getCart(updatedLocalItems);
+      }
+
+      final filteredItems = cartData.items.where((i) {
+        final itemKey = i.key.isNotEmpty ? i.key : '${i.couponId}:${i.variantId}';
+        return itemKey != event.key && i.couponId != event.key && i.key != event.key;
+      }).toList();
+
+      final subtotal = filteredItems.fold<double>(0, (sum, i) => sum + i.payable);
+      final totalListPrice = filteredItems.fold<double>(0, (sum, i) => sum + i.listPrice);
+      final totalSavings = totalListPrice - subtotal;
+
+      final updatedCartData = ApiCartData(
+        items: filteredItems,
+        unavailable: cartData.unavailable,
+        totals: ApiCartTotals(
+          itemCount: filteredItems.length,
+          subtotal: subtotal,
+          totalListPrice: totalListPrice,
+          totalSavings: totalSavings,
+        ),
+      );
+
       emit(state.copyWith(
-        cartData: cartData,
-        localItems: updatedItems,
+        cartData: updatedCartData,
+        localItems: updatedLocalItems,
         isLoading: false,
       ));
     } catch (e) {
-      emit(state.copyWith(error: e.toString(), isLoading: false));
+      final remainingItems = state.items.where((i) => i.key != event.key && i.couponId != event.key).toList();
+      final subtotal = remainingItems.fold<double>(0, (sum, i) => sum + i.payable);
+      final totalListPrice = remainingItems.fold<double>(0, (sum, i) => sum + i.listPrice);
+      final totalSavings = totalListPrice - subtotal;
+
+      final updatedLocalItems = state.localItems.where((item) {
+        final itemKey = '${item['couponId']}:${item['variantId']}';
+        return itemKey != event.key && item['couponId'] != event.key;
+      }).toList();
+
+      emit(state.copyWith(
+        cartData: ApiCartData(
+          items: remainingItems,
+          unavailable: state.cartData?.unavailable ?? [],
+          totals: ApiCartTotals(
+            itemCount: remainingItems.length,
+            subtotal: subtotal,
+            totalListPrice: totalListPrice,
+            totalSavings: totalSavings,
+          ),
+        ),
+        localItems: updatedLocalItems,
+        isLoading: false,
+      ));
     }
   }
 

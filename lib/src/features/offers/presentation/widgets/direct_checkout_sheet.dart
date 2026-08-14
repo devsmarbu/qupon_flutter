@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../cart/data/models/checkout_model.dart';
 import '../../../cart/data/models/payment_gateway.dart';
@@ -21,8 +22,7 @@ class DirectCheckoutSheet extends StatefulWidget {
     this.isGift = false,
   });
 
-  static Future<void> show(
-    BuildContext context, {
+  static Future<void> show(BuildContext context, {
     required Offer offer,
     required OfferOption option,
     bool isGift = false,
@@ -34,11 +34,12 @@ class DirectCheckoutSheet extends StatefulWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (_) => DirectCheckoutSheet(
-        offer: offer,
-        option: option,
-        isGift: isGift,
-      ),
+      builder: (_) =>
+          DirectCheckoutSheet(
+            offer: offer,
+            option: option,
+            isGift: isGift,
+          ),
     );
   }
 
@@ -108,7 +109,9 @@ class _DirectCheckoutSheetState extends State<DirectCheckoutSheet> {
       return;
     }
 
-    if (widget.isGift && _phoneController.text.trim().isEmpty) {
+    if (widget.isGift && _phoneController.text
+        .trim()
+        .isEmpty) {
       setState(() => _checkoutError = 'Please enter recipient mobile number.');
       return;
     }
@@ -142,11 +145,12 @@ class _DirectCheckoutSheetState extends State<DirectCheckoutSheet> {
           final result = await Navigator.of(context).push<PaymentResult>(
             MaterialPageRoute(
               fullscreenDialog: true,
-              builder: (_) => PaymentWebViewPage(
-                redirectUrl: response.redirectUrl!,
-                sessionId: response.checkoutSessionId,
-                provider: _selectedGatewayId,
-              ),
+              builder: (_) =>
+                  PaymentWebViewPage(
+                    redirectUrl: response.redirectUrl!,
+                    sessionId: response.checkoutSessionId,
+                    provider: _selectedGatewayId,
+                  ),
             ),
           );
 
@@ -155,7 +159,7 @@ class _DirectCheckoutSheetState extends State<DirectCheckoutSheet> {
           if (result == PaymentResult.success) {
             Navigator.of(context).pop(); // Close sheet
             final mainPageState =
-                context.findAncestorStateOfType<MainPageState>();
+            context.findAncestorStateOfType<MainPageState>();
             if (mainPageState != null) {
               mainPageState.showCheckoutSuccess(context);
             }
@@ -165,7 +169,7 @@ class _DirectCheckoutSheetState extends State<DirectCheckoutSheet> {
         } else {
           Navigator.of(context).pop(); // Close sheet
           final mainPageState =
-              context.findAncestorStateOfType<MainPageState>();
+          context.findAncestorStateOfType<MainPageState>();
           if (mainPageState != null) {
             mainPageState.showCheckoutSuccess(context);
           }
@@ -190,7 +194,8 @@ class _DirectCheckoutSheetState extends State<DirectCheckoutSheet> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: isError ? const Color(0xFFDC2626) : const Color(0xFF64748B),
+        backgroundColor: isError ? const Color(0xFFDC2626) : const Color(
+            0xFF64748B),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         margin: const EdgeInsets.all(16),
@@ -223,11 +228,17 @@ class _DirectCheckoutSheetState extends State<DirectCheckoutSheet> {
 
     return Padding(
       padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
+        bottom: MediaQuery
+            .of(context)
+            .viewInsets
+            .bottom,
       ),
       child: Container(
         constraints: BoxConstraints(
-          maxHeight: MediaQuery.of(context).size.height * 0.9,
+          maxHeight: MediaQuery
+              .of(context)
+              .size
+              .height * 0.9,
         ),
         child: SingleChildScrollView(
           child: Column(
@@ -255,8 +266,10 @@ class _DirectCheckoutSheetState extends State<DirectCheckoutSheet> {
                           const SizedBox(height: 6),
                           Text(
                             widget.isGift
-                                ? 'Enter the recipient\'s mobile number and pay for ${widget.offer.title}.'
-                                : 'Select a payment method to complete your purchase of ${widget.offer.title}.',
+                                ? 'Enter the recipient\'s mobile number and pay for ${widget
+                                .offer.title}.'
+                                : 'Select a payment method to complete your purchase of ${widget
+                                .offer.title}.',
                             style: const TextStyle(
                               fontSize: 13,
                               color: Color(0xFF64748B),
@@ -285,31 +298,50 @@ class _DirectCheckoutSheetState extends State<DirectCheckoutSheet> {
                     // ── YOU PAY Box ─────────────────────────────────────────
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.symmetric(vertical: 20),
+                      padding: const EdgeInsets.symmetric(vertical: 10),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF8FAFC),
+                        color: const Color(0xFFFF6B35),
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child: Column(
                         children: [
-                          const Text(
-                            'YOU PAY',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF64748B),
-                              letterSpacing: 0.5,
+                          const SizedBox(height: 10),
+                          Stack(alignment: Alignment.center, children: [
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: SvgPicture.asset(
+                                'assets/Subtract.svg',
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'QAR ${price.toStringAsFixed(0)}',
-                            style: const TextStyle(
-                              fontSize: 34,
-                              fontWeight: FontWeight.w900,
-                              color: Color(0xFFFF6B35),
-                            ),
-                          ),
+                            Column(
+                              children: [
+                                const Text(
+                                  'GIFT COUPON',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.normal,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                                const Text(
+                                  'Tech Gadgets',
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w800,
+                                    color: Colors.black54,
+                                  ),
+                                ),
+                                const Text(
+                                  '15% OFF ',
+                                  style: TextStyle(
+                                    fontSize: 30,
+                                    fontWeight: FontWeight.w900,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ],
+                            )
+                          ])
                         ],
                       ),
                     ),
@@ -434,55 +466,65 @@ class _DirectCheckoutSheetState extends State<DirectCheckoutSheet> {
                           ),
                         ),
                       )
-                    else if (_gatewaysError != null)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        child: Text(
-                          _gatewaysError!,
-                          style: const TextStyle(fontSize: 13, color: Colors.red),
-                        ),
-                      )
-                    else if (activeGateways.isEmpty)
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 12),
-                        child: Text(
-                          'No payment methods available.',
-                          style: TextStyle(fontSize: 13, color: Color(0xFF94A3B8)),
-                        ),
-                      )
                     else
-                      ...activeGateways.asMap().entries.map((entry) {
-                        final index = entry.key;
-                        final gateway = entry.value;
+                      if (_gatewaysError != null)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          child: Text(
+                            _gatewaysError!,
+                            style: const TextStyle(fontSize: 13,
+                                color: Colors.red),
+                          ),
+                        )
+                      else
+                        if (activeGateways.isEmpty)
+                          const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 12),
+                            child: Text(
+                              'No payment methods available.',
+                              style: TextStyle(
+                                  fontSize: 13, color: Color(0xFF94A3B8)),
+                            ),
+                          )
+                        else
+                          ...activeGateways
+                              .asMap()
+                              .entries
+                              .map((entry) {
+                            final index = entry.key;
+                            final gateway = entry.value;
 
-                        String? subtitle = gateway.description.isNotEmpty
-                            ? gateway.description
-                            : null;
-                        bool isDisabled = false;
+                            String? subtitle = gateway.description.isNotEmpty
+                                ? gateway.description
+                                : null;
+                            bool isDisabled = false;
 
-                        if (gateway.identifier == 'wallet') {
-                          final walletBalance =
-                              gateway.walletSettings?.minBalance ?? 0.0;
-                          final isInsufficient = walletBalance < price;
-                          isDisabled = walletBalance <= 0 || isInsufficient;
+                            if (gateway.identifier == 'wallet') {
+                              final walletBalance =
+                                  gateway.walletSettings?.minBalance ?? 0.0;
+                              final isInsufficient = walletBalance < price;
+                              isDisabled = walletBalance <= 0 || isInsufficient;
 
-                          subtitle =
+                              subtitle =
                               'Balance: QAR ${walletBalance.toStringAsFixed(0)}'
-                              '${isInsufficient ? ' · Insufficient' : ''}';
-                        }
+                                  '${isInsufficient ? ' · Insufficient' : ''}';
+                            }
 
-                        return Padding(
-                          padding: EdgeInsets.only(
-                            bottom: index < activeGateways.length - 1 ? 12 : 0,
-                          ),
-                          child: _buildPaymentTile(
-                            gateway: gateway,
-                            subtitle: subtitle,
-                            isSelected: _selectedGatewayId == gateway.identifier,
-                            isDisabled: isDisabled,
-                          ),
-                        );
-                      }),
+                            return Padding(
+                              padding: EdgeInsets.only(
+                                bottom: index < activeGateways.length - 1
+                                    ? 12
+                                    : 0,
+                              ),
+                              child: _buildPaymentTile(
+                                gateway: gateway,
+                                subtitle: subtitle,
+                                isSelected: _selectedGatewayId ==
+                                    gateway.identifier,
+                                isDisabled: isDisabled,
+                              ),
+                            );
+                          }),
 
                     if (_checkoutError != null) ...[
                       const SizedBox(height: 16),
@@ -532,7 +574,7 @@ class _DirectCheckoutSheetState extends State<DirectCheckoutSheet> {
                           backgroundColor: const Color(0xFFFF6B35),
                           foregroundColor: Colors.white,
                           disabledBackgroundColor:
-                              const Color(0xFFFF6B35).withValues(alpha: 0.6),
+                          const Color(0xFFFF6B35).withValues(alpha: 0.6),
                           elevation: 0,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -540,23 +582,24 @@ class _DirectCheckoutSheetState extends State<DirectCheckoutSheet> {
                         ),
                         child: _isCheckingOut
                             ? const SizedBox(
-                                width: 22,
-                                height: 22,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2.5,
-                                  valueColor:
-                                      AlwaysStoppedAnimation<Color>(Colors.white),
-                                ),
-                              )
+                          width: 22,
+                          height: 22,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.5,
+                            valueColor:
+                            AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        )
                             : Text(
-                                selectedGatewayName.isNotEmpty
-                                    ? 'Pay QAR ${price.toStringAsFixed(0)} via $selectedGatewayName'
-                                    : 'Pay QAR ${price.toStringAsFixed(0)}',
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
+                          selectedGatewayName.isNotEmpty
+                              ? 'Pay QAR ${price.toStringAsFixed(
+                              0)} via $selectedGatewayName'
+                              : 'Pay QAR ${price.toStringAsFixed(0)}',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ),
                   ],
@@ -576,9 +619,9 @@ class _DirectCheckoutSheetState extends State<DirectCheckoutSheet> {
     bool isDisabled = false,
   }) {
     final Color textColor =
-        isDisabled ? const Color(0xFF94A3B8) : const Color(0xFF0F172A);
+    isDisabled ? const Color(0xFF94A3B8) : const Color(0xFF0F172A);
     final Color iconColor =
-        isDisabled ? const Color(0xFFCBD5E1) : const Color(0xFF64748B);
+    isDisabled ? const Color(0xFFCBD5E1) : const Color(0xFF64748B);
     final Color borderColor = isSelected && !isDisabled
         ? const Color(0xFFFF6B35)
         : const Color(0xFFE2E8F0);
@@ -587,10 +630,11 @@ class _DirectCheckoutSheetState extends State<DirectCheckoutSheet> {
     return InkWell(
       onTap: isDisabled
           ? null
-          : () => setState(() {
-                _selectedGatewayId = gateway.identifier;
-                _checkoutError = null;
-              }),
+          : () =>
+          setState(() {
+            _selectedGatewayId = gateway.identifier;
+            _checkoutError = null;
+          }),
       borderRadius: BorderRadius.circular(12),
       child: Opacity(
         opacity: isDisabled ? 0.6 : 1.0,

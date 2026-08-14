@@ -75,10 +75,12 @@ flutter:
   uses-material-design: true
 
   assets:
+    - assets/
     - assets/drawer_header_bg.png
     - assets/banner_cats.png
     - assets/banner_brunch.jpg
     - assets/banner_other.jpg
+    - assets/Subtract.svg
     - assets/appIcons/ic_splash_logo.svg
     - assets/appIcons/ic_google.svg
     - assets/appIcons/ic_facebook.svg

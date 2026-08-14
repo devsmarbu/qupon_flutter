@@ -192,6 +192,38 @@ class _CollectionCouponsPageState extends State<CollectionCouponsPage> {
     );
   }
 
+  Future<void> _navigateToDetail(BuildContext context, HomeCoupon coupon) async {
+    final offer = Offer(
+      id: coupon.id,
+      title: coupon.name,
+      titleAr: coupon.nameAr,
+      category: coupon.category,
+      imageUrl: coupon.imageUrl,
+      daysLeft: coupon.daysLeft,
+      hoursLeft: coupon.hoursLeft,
+      minutesLeft: coupon.minutesLeft,
+      location: '123 Tech Avenue, Silicon Valley, CA 94025',
+      description: coupon.description,
+      descriptionAr: coupon.descriptionAr,
+      price: coupon.price,
+      currency: 'QAR',
+      slug: coupon.slug,
+      wishlisted: coupon.wishlisted,
+    );
+    final viewCart = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (context) => ProductDetailPage(offer: offer),
+      ),
+    );
+    if (viewCart == true && context.mounted) {
+      final mainPageState =
+          context.findAncestorStateOfType<MainPageState>();
+      if (mainPageState != null) {
+        mainPageState.setSelectedIndex(3);
+      }
+    }
+  }
+
   Widget _buildOfferCard(
     BuildContext context,
     HomeCoupon coupon,
@@ -230,6 +262,7 @@ class _CollectionCouponsPageState extends State<CollectionCouponsPage> {
           MaterialPageRoute(
             builder: (context) => ProductDetailPage(offer: offer),
           ),
+
         );
         if (viewCart == true && context.mounted) {
           final mainPageState =
@@ -284,6 +317,7 @@ class _CollectionCouponsPageState extends State<CollectionCouponsPage> {
                                   fontWeight: FontWeight.bold,
                                   color: Color(0xFF3B82F6),
                                 ),
+
                               ),
                             ),
                           )
@@ -468,6 +502,7 @@ class _CollectionCouponsPageState extends State<CollectionCouponsPage> {
                           ),
                         ],
                       ),
+
                       ElevatedButton(
                         onPressed: () async {
                           final offer = Offer(

@@ -258,6 +258,17 @@ class _CategoryOffersPageState extends State<CategoryOffersPage> {
     );
   }
 
+  Future<void> _navigateToDetail(BuildContext context, Offer offer) async {
+    final viewCart = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (context) => ProductDetailPage(offer: offer),
+      ),
+    );
+    if (viewCart == true && context.mounted) {
+      Navigator.of(context).pop(true);
+    }
+  }
+
   Widget _buildOfferCard(BuildContext context, Offer offer, AppLocalizations l10n, bool isArabic) {
     final vendorName = offer.vendor ?? (offer.category == 'Electronics' ? 'ElectroWorld' : offer.title);
     final initialLetter = offer.category.isNotEmpty ? offer.category[0].toUpperCase() : '?';
@@ -276,6 +287,7 @@ class _CategoryOffersPageState extends State<CategoryOffersPage> {
           MaterialPageRoute(
             builder: (context) => ProductDetailPage(offer: offer),
           ),
+
         );
         if (viewCart == true && context.mounted) {
           Navigator.of(context).pop(true);
@@ -509,6 +521,7 @@ class _CategoryOffersPageState extends State<CategoryOffersPage> {
                           ),
                         ],
                       ),
+
                       ElevatedButton(
                         onPressed: () async {
                           final viewCart = await Navigator.of(context).push<bool>(
