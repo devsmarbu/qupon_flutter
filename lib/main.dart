@@ -81,6 +81,7 @@ class MyApp extends StatelessWidget {
             ),
           ),
           BlocProvider<AccountBloc>(
+            lazy: false,
             create: (context) => AccountBloc(
               authRepository: authRepository ?? AuthRepositoryImpl(
                 apiClient: ApiClient(),
@@ -130,3 +131,4 @@ class AppView extends StatelessWidget {
     );
   }
 }
+

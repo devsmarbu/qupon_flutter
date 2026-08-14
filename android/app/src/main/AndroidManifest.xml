@@ -38,8 +38,12 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="https" android:host="qupon.marbu.in" />
-                <data android:scheme="http" android:host="qupon.marbu.in" />
+                <!-- Specify pathPrefix so the app only intercepts these specific routes, 
+                     allowing other URLs (like external web pages) to open in the browser. -->
+                <data android:scheme="https" android:host="qupon.marbu.in" android:pathPrefix="/coupon" />
+                <data android:scheme="https" android:host="qupon.marbu.in" android:pathPrefix="/collection" />
+                <data android:scheme="https" android:host="qupon.marbu.in" android:pathPrefix="/offers" />
+                <data android:scheme="https" android:host="qupon.marbu.in" android:pathPrefix="/categories" />
             </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.

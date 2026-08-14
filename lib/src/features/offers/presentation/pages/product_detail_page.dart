@@ -1496,7 +1496,7 @@ class VendorMapWidget extends StatefulWidget {
 }
 
 class _VendorMapWidgetState extends State<VendorMapWidget> {
-  late final WebViewController _controller;
+  WebViewController? _controller;
   bool _isLoading = true;
   bool _hasError = false;
 
@@ -1571,34 +1571,52 @@ class _VendorMapWidgetState extends State<VendorMapWidget> {
     return 'https://maps.google.com/maps?q=${Uri.encodeComponent(widget.openUrl)}&output=embed';
   }
 
+  void _initOrUpdateController() {
+    final embedUrl = _getEmbedUrl();
+    if (embedUrl.isNotEmpty) {
+      if (_controller == null) {
+        _controller = WebViewController()
+          ..setJavaScriptMode(JavaScriptMode.unrestricted)
+          ..setNavigationDelegate(
+            NavigationDelegate(
+              onPageFinished: (_) {
+                if (mounted) {
+                  setState(() {
+                    _isLoading = false;
+                  });
+                }
+              },
+              onWebResourceError: (error) {
+                debugPrint('WebView Resource Error: ${error.description}');
+                if (mounted) {
+                  setState(() {
+                    _hasError = true;
+                    _isLoading = false;
+                  });
+                }
+              },
+            ),
+          );
+      }
+      _isLoading = true;
+      _hasError = false;
+      _controller!.loadRequest(Uri.parse(embedUrl));
+    }
+  }
+
   @override
   void initState() {
     super.initState();
-    final embedUrl = _getEmbedUrl();
-    if (embedUrl.isNotEmpty) {
-      _controller = WebViewController()
-        ..setJavaScriptMode(JavaScriptMode.unrestricted)
-        ..setNavigationDelegate(
-          NavigationDelegate(
-            onPageFinished: (_) {
-              if (mounted) {
-                setState(() {
-                  _isLoading = false;
-                });
-              }
-            },
-            onWebResourceError: (error) {
-              debugPrint('WebView Resource Error: ${error.description}');
-              if (mounted) {
-                setState(() {
-                  _hasError = true;
-                  _isLoading = false;
-                });
-              }
-            },
-          ),
-        )
-        ..loadRequest(Uri.parse(embedUrl));
+    _initOrUpdateController();
+  }
+
+  @override
+  void didUpdateWidget(covariant VendorMapWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.openUrl != oldWidget.openUrl ||
+        widget.latitude != oldWidget.latitude ||
+        widget.longitude != oldWidget.longitude) {
+      _initOrUpdateController();
     }
   }
 
@@ -1608,10 +1626,10 @@ class _VendorMapWidgetState extends State<VendorMapWidget> {
     final embedUrl = _getEmbedUrl();
 
     Widget mapContent;
-    if (embedUrl.isNotEmpty && !_hasError) {
+    if (embedUrl.isNotEmpty && !_hasError && _controller != null) {
       mapContent = Stack(
         children: [
-          WebViewWidget(controller: _controller),
+          WebViewWidget(controller: _controller!),
           if (_isLoading)
             const Center(
               child: CircularProgressIndicator(color: Color(0xFFFF6B35)),
