@@ -44,7 +44,8 @@ class OffersRepositoryImpl implements OffersRepository {
       final couponsList = data['coupons'] as List<dynamic>? ?? [];
       return couponsList.map((c) {
         final couponMap = c as Map<String, dynamic>;
-        
+
+        // Calculate time left from validity date
         final validityStr = couponMap['validity']?.toString() ?? '';
         int daysLeft = 0;
         int hoursLeft = 0;
@@ -57,57 +58,14 @@ class OffersRepositoryImpl implements OffersRepository {
           minutesLeft = (diff.inMinutes % 60).clamp(0, 59);
         } catch (_) {}
 
-        final catName = couponMap['category']?.toString() ?? '';
-        final images = couponMap['images'] as List<dynamic>? ?? [];
-        final imageUrl = images.isNotEmpty ? images[0].toString() : '';
+        // Inject computed time fields before calling fromJson
+        final enriched = Map<String, dynamic>.from(couponMap)
+          ..['daysLeft'] = daysLeft
+          ..['hoursLeft'] = hoursLeft
+          ..['minutesLeft'] = minutesLeft
+          ..['validity'] = '${daysLeft}d${hoursLeft}h${minutesLeft}m left';
 
-        // Parse variants from the API response.
-        // Expected shape: [{ "id": "1", "name": "Basic", "price": 20, "originalPrice": 40 }, ...]
-        final variantsList = couponMap['variants'] as List<dynamic>? ?? [];
-        final variants = variantsList.map((v) {
-          final vMap = v as Map<String, dynamic>;
-          return OfferOption(
-            id: vMap['id']?.toString() ?? '',
-            name: vMap['name']?.toString() ?? '',
-            originalPrice: (vMap['originalPrice'] as num?)?.toDouble() ??
-                (couponMap['price'] as num?)?.toDouble() ?? 0.0,
-            price: (vMap['price'] as num?)?.toDouble() ?? 0.0,
-          );
-        }).toList();
-
-        bool? wishlistedVal;
-        if (couponMap['wishlisted'] is bool) {
-          wishlistedVal = couponMap['wishlisted'] as bool;
-        } else if (couponMap['isWishlisted'] is bool) {
-          wishlistedVal = couponMap['isWishlisted'] as bool;
-        } else if (couponMap['is_wishlisted'] is bool) {
-          wishlistedVal = couponMap['is_wishlisted'] as bool;
-        }
-
-        return Offer(
-          id: couponMap['id']?.toString() ?? '',
-          title: couponMap['name']?.toString() ?? '',
-          titleAr: couponMap['nameAr']?.toString() ?? '',
-          category: catName,
-          imageUrl: imageUrl,
-          daysLeft: daysLeft,
-          hoursLeft: hoursLeft,
-          minutesLeft: minutesLeft,
-          location: '',
-          description: couponMap['description']?.toString() ?? '',
-          descriptionAr: couponMap['descriptionAr']?.toString() ?? '',
-          price: (couponMap['price'] as num?)?.toDouble() ?? 0.0,
-          currency: 'QAR',
-          vendor: couponMap['vendor']?.toString(),
-          vendorId: couponMap['vendorId']?.toString() ?? couponMap['vendor_id']?.toString() ?? '',
-          validity: '${daysLeft}d${hoursLeft}h${minutesLeft}m left',
-          wishlisted: wishlistedVal,
-          slug: couponMap['slug']?.toString() ?? '',
-          variants: variants,
-          vendorDetails: couponMap['vendorDetails'] != null
-              ? VendorDetails.fromJson(couponMap['vendorDetails'] as Map<String, dynamic>)
-              : null,
-        );
+        return Offer.fromJson(enriched);
       }).toList();
     } on DioException catch (e) {
       final msg = e.response?.data?['message'] ??
@@ -230,6 +188,7 @@ class OffersRepositoryImpl implements OffersRepository {
         couponMap = responseData as Map<String, dynamic>;
       }
 
+      // Calculate time left from validity date
       final validityStr = couponMap['validity']?.toString() ?? '';
       int daysLeft = 0;
       int hoursLeft = 0;
@@ -242,55 +201,14 @@ class OffersRepositoryImpl implements OffersRepository {
         minutesLeft = (diff.inMinutes % 60).clamp(0, 59);
       } catch (_) {}
 
-      final catName = couponMap['category']?.toString() ?? '';
-      final images = couponMap['images'] as List<dynamic>? ?? [];
-      final imageUrl = images.isNotEmpty ? images[0].toString() : '';
+      final enriched = Map<String, dynamic>.from(couponMap)
+        ..['daysLeft'] = daysLeft
+        ..['hoursLeft'] = hoursLeft
+        ..['minutesLeft'] = minutesLeft
+        ..['validity'] = '${daysLeft}d${hoursLeft}h${minutesLeft}m left'
+        ..['slug'] = couponMap['slug']?.toString() ?? slug;
 
-      final variantsList = couponMap['variants'] as List<dynamic>? ?? [];
-      final variants = variantsList.map((v) {
-        final vMap = v as Map<String, dynamic>;
-        return OfferOption(
-          id: vMap['id']?.toString() ?? '',
-          name: vMap['name']?.toString() ?? '',
-          originalPrice: (vMap['originalPrice'] as num?)?.toDouble() ??
-              (couponMap['price'] as num?)?.toDouble() ?? 0.0,
-          price: (vMap['price'] as num?)?.toDouble() ?? 0.0,
-        );
-      }).toList();
-
-      bool? wishlistedVal;
-      if (couponMap['wishlisted'] is bool) {
-        wishlistedVal = couponMap['wishlisted'] as bool;
-      } else if (couponMap['isWishlisted'] is bool) {
-        wishlistedVal = couponMap['isWishlisted'] as bool;
-      } else if (couponMap['is_wishlisted'] is bool) {
-        wishlistedVal = couponMap['is_wishlisted'] as bool;
-      }
-
-      return Offer(
-        id: couponMap['id']?.toString() ?? '',
-        title: couponMap['name']?.toString() ?? '',
-        titleAr: couponMap['nameAr']?.toString() ?? '',
-        category: catName,
-        imageUrl: imageUrl,
-        daysLeft: daysLeft,
-        hoursLeft: hoursLeft,
-        minutesLeft: minutesLeft,
-        location: couponMap['location']?.toString() ?? 'Doha, Qatar',
-        description: couponMap['description']?.toString() ?? '',
-        descriptionAr: couponMap['descriptionAr']?.toString() ?? '',
-        price: (couponMap['price'] as num?)?.toDouble() ?? 0.0,
-        currency: 'QAR',
-        vendor: couponMap['vendor']?.toString(),
-        vendorId: couponMap['vendorId']?.toString() ?? couponMap['vendor_id']?.toString() ?? '',
-        validity: '${daysLeft}d${hoursLeft}h${minutesLeft}m left',
-        slug: couponMap['slug']?.toString() ?? slug,
-        wishlisted: wishlistedVal,
-        variants: variants,
-        vendorDetails: couponMap['vendorDetails'] != null
-            ? VendorDetails.fromJson(couponMap['vendorDetails'] as Map<String, dynamic>)
-            : null,
-      );
+      return Offer.fromJson(enriched);
     } on DioException catch (e) {
       final msg = e.response?.data?['message'] ??
           e.message ??

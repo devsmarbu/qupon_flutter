@@ -1114,7 +1114,7 @@ class ProductDetailView extends StatelessWidget {
                                         const SizedBox(width: 8),
                                         Expanded(
                                           child: Text(
-                                            '123 Tech Avenue, Silicon Valley, CA 94025',
+                                            (isArabic && offer.locationAr.isNotEmpty) ? offer.locationAr : (offer.locationEn.isNotEmpty ? offer.locationEn : offer.location),
                                             style: TextStyle(
                                               color: Color(0xFF475569),
                                               fontSize: 13,

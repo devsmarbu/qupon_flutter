@@ -1,9 +1,23 @@
 part of 'offers_bloc.dart';
 
-@freezed
-class OffersState with _$OffersState {
-  const factory OffersState.initial() = OffersInitial;
-  const factory OffersState.loading() = OffersLoading;
-  const factory OffersState.loaded(List<Offer> offers) = OffersLoaded;
-  const factory OffersState.error(String message) = OffersError;
+abstract class OffersState {
+  const OffersState();
+}
+
+class OffersInitial extends OffersState {
+  const OffersInitial();
+}
+
+class OffersLoading extends OffersState {
+  const OffersLoading();
+}
+
+class OffersLoaded extends OffersState {
+  final List<Offer> offers;
+  const OffersLoaded(this.offers);
+}
+
+class OffersError extends OffersState {
+  final String message;
+  const OffersError(this.message);
 }

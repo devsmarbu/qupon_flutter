@@ -15,6 +15,7 @@ class OfferListTileApi extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () async {
+        final isArabic = Localizations.localeOf(context).languageCode == 'ar';
         final offer = Offer(
           id: coupon.id,
           title: coupon.name,
@@ -23,7 +24,7 @@ class OfferListTileApi extends StatelessWidget {
           daysLeft: coupon.daysLeft,
           hoursLeft: coupon.hoursLeft,
           minutesLeft: coupon.minutesLeft,
-          location: '123 Tech Avenue, Silicon Valley, CA 94025',
+          location: coupon.location(isArabic),
           description: coupon.description,
           price: coupon.price,
           currency: 'QAR',

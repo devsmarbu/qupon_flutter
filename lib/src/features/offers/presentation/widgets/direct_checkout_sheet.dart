@@ -311,6 +311,7 @@ class _DirectCheckoutSheetState extends State<DirectCheckoutSheet> {
                               padding: const EdgeInsets.all(8.0),
                               child: SvgPicture.asset(
                                 'assets/Subtract.svg',
+                                fit: BoxFit.cover,
                               ),
                             ),
                             Column(

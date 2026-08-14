@@ -20,15 +20,26 @@ import '../../../cart/presentation/bloc/cart_event.dart';
 import '../../../../../l10n/app_localizations.dart';
 
 class MainPage extends StatefulWidget {
-  const MainPage({super.key});
+  final int initialIndex;
+
+  const MainPage({
+    super.key,
+    this.initialIndex = 0,
+  });
 
   @override
   State<MainPage> createState() => MainPageState();
 }
 
 class MainPageState extends State<MainPage> {
-  // Track the currently active page index (0 = Home by default)
-  int _selectedIndex = 0;
+  // Track the currently active page index
+  late int _selectedIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedIndex = widget.initialIndex;
+  }
 
   void setSelectedIndex(int index) {
     setState(() {

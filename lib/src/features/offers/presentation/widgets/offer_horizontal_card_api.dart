@@ -27,7 +27,7 @@ class OfferHorizontalCardApi extends StatelessWidget {
           daysLeft: coupon.daysLeft,
           hoursLeft: coupon.hoursLeft,
           minutesLeft: coupon.minutesLeft,
-          location: '123 Tech Avenue, Silicon Valley, CA 94025',
+          location: coupon.location(isArabic),
           description: coupon.description,
           descriptionAr: coupon.descriptionAr,
           price: coupon.price,
@@ -199,7 +199,7 @@ class OfferHorizontalCardApi extends StatelessWidget {
                       const SizedBox(width: 2),
                       Expanded(
                         child: Text(
-                          isArabic ? '١٢٣ شارع التكنولوجيا، وادي السيليكون' : '123 Tech Avenue, Silicon Valley, CA',
+                          coupon.location(isArabic),
                           style: const TextStyle(
                             fontSize: 11,
                             color: Color(0xFF94A3B8),

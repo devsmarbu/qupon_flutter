@@ -15,6 +15,8 @@ class HomeCoupon {
   final String slug;
   final String vendorId;
   final bool? wishlisted;
+  final String locationEn;
+  final String locationAr;
 
   const HomeCoupon({
     required this.id,
@@ -32,6 +34,8 @@ class HomeCoupon {
     required this.slug,
     required this.vendorId,
     this.wishlisted,
+    this.locationEn = '',
+    this.locationAr = '',
   });
 
   factory HomeCoupon.fromJson(Map<String, dynamic> json) {
@@ -71,6 +75,8 @@ class HomeCoupon {
       slug: json['slug']?.toString() ?? '',
       vendorId: json['vendorId']?.toString() ?? json['vendor_id']?.toString() ?? '',
       wishlisted: isWishlisted,
+      locationEn: json['locationEn']?.toString() ?? json['location']?.toString() ?? '',
+      locationAr: json['locationAr']?.toString() ?? '',
     );
   }
 
@@ -108,4 +114,10 @@ class HomeCoupon {
   /// Formatted price string (drops .0 for whole numbers).
   String get priceString =>
       price % 1 == 0 ? price.toInt().toString() : price.toStringAsFixed(2);
+
+  /// Returns the localised location string based on the current locale.
+  String location(bool isArabic) {
+    if (isArabic && locationAr.isNotEmpty) return locationAr;
+    return locationEn;
+  }
 }

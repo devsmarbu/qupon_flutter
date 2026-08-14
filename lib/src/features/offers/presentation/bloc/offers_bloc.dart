@@ -1,11 +1,9 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
 import '../../data/models/offer.dart';
 import '../../data/repositories/offers_repository.dart';
 
 part 'offers_event.dart';
 part 'offers_state.dart';
-part 'offers_bloc.freezed.dart';
 
 class OffersBloc extends Bloc<OffersEvent, OffersState> {
   final OffersRepository _offersRepository;

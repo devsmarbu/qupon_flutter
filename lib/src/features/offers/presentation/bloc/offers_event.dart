@@ -1,6 +1,10 @@
 part of 'offers_bloc.dart';
 
-@freezed
-class OffersEvent with _$OffersEvent {
-  const factory OffersEvent.fetchOffers({String? categoryId}) = FetchOffers;
+abstract class OffersEvent {
+  const OffersEvent();
+}
+
+class FetchOffers extends OffersEvent {
+  final String? categoryId;
+  const FetchOffers({this.categoryId});
 }

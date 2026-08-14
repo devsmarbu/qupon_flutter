@@ -479,7 +479,7 @@ class _CategoryOffersPageState extends State<CategoryOffersPage> {
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
-                          offer.location,
+                          (isArabic && offer.locationAr.isNotEmpty) ? offer.locationAr : offer.locationEn,
                           style: const TextStyle(
                             fontSize: 12,
                             color: Color(0xFF64748B),

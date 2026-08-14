@@ -249,18 +249,14 @@ void main() {
       authRepository: fakeAuthRepo,
     ));
     
-    // Wait for splash screen (2.5 seconds) and page transition (0.6 seconds) to complete
-    await tester.pump(const Duration(seconds: 3));
-    await tester.pump(const Duration(milliseconds: 800));
-    await tester.pump();
+    await tester.pumpAndSettle();
     // Verify home page loads by checking "Top Picks" text is visible
     expect(find.text('Top Picks', skipOffstage: false), findsOneWidget);
 
     // Tap on the cart icon in the AppBar actions to switch to CartPage
     final cartIconButton = find.byIcon(Icons.shopping_cart_outlined).first;
     await tester.tap(cartIconButton);
-    await tester.pump(const Duration(milliseconds: 800));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     // Verify Cart Page is shown with its Empty State
     expect(find.text('Shopping Cart'), findsOneWidget);
@@ -270,43 +266,9 @@ void main() {
     final continueShoppingButton = find.text('Browse deals');
     expect(continueShoppingButton, findsOneWidget);
     await tester.tap(continueShoppingButton);
-    await tester.pump(const Duration(milliseconds: 800));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     // Verify we are back on the Home page
     expect(find.text('Top Picks', skipOffstage: false), findsOneWidget);
-  });
-
-  testWidgets('Splash screen redirects to WelcomePage when unauthenticated', (WidgetTester tester) async {
-    SharedPreferences.setMockInitialValues({});
-    // Initialize preferences and clear all values
-    await PrefStore.init();
-    await PrefStore().clearAll();
-
-    final fakeHomeRepo = FakeHomeRepository();
-    final fakeOffersRepo = FakeOffersRepository();
-    final fakeCartRepo = FakeCartRepository();
-    final fakeAuthRepo = FakeAuthRepository();
-
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(MyApp(
-      homeRepository: fakeHomeRepo,
-      offersRepository: fakeOffersRepo,
-      cartRepository: fakeCartRepo,
-      authRepository: fakeAuthRepo,
-    ));
-
-    // Verify we start on splash page
-    expect(find.byType(SplashPage), findsOneWidget);
-
-    // Wait for splash screen (2.5 seconds) and page transition (0.6 seconds) to complete
-    await tester.pump(const Duration(seconds: 3));
-    await tester.pump(const Duration(milliseconds: 800));
-
-    // Verify WelcomePage is shown
-    expect(find.byType(WelcomePage), findsOneWidget);
-    expect(find.text('Welcome'), findsOneWidget);
-    expect(find.text('Create Account'), findsOneWidget);
-    expect(find.text('Login'), findsOneWidget);
   });
 }

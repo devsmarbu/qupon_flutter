@@ -18,10 +18,15 @@ import 'src/features/cart/data/repositories/cart_repository.dart';
 import 'src/features/cart/presentation/bloc/cart_bloc.dart';
 import 'src/features/cart/presentation/bloc/cart_event.dart';
 
+import 'src/core/routing/app_router.dart';
+import 'src/core/services/deep_link_service.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await PrefStore.init();
-  runApp(const MyApp());
+  final deepLinkService = DeepLinkService();
+  await deepLinkService.init();
+  runApp(MyApp(deepLinkService: deepLinkService));
 }
 
 class MyApp extends StatelessWidget {
@@ -29,6 +34,7 @@ class MyApp extends StatelessWidget {
   final OffersRepository? offersRepository;
   final CartRepository? cartRepository;
   final AuthRepository? authRepository;
+  final DeepLinkService? deepLinkService;
 
   const MyApp({
     super.key,
@@ -36,6 +42,7 @@ class MyApp extends StatelessWidget {
     this.offersRepository,
     this.cartRepository,
     this.authRepository,
+    this.deepLinkService,
   });
 
   @override
@@ -95,7 +102,8 @@ class AppView extends StatelessWidget {
     // Watch LocaleCubit to rebuild app when locale changes
     final locale = context.watch<LocaleCubit>().state;
 
-    return MaterialApp(
+    return MaterialApp.router(
+      routerConfig: AppRouter.router,
       title: 'Qupon',
       debugShowCheckedModeBanner: false,
       locale: locale,
@@ -119,7 +127,6 @@ class AppView extends StatelessWidget {
         ),
         fontFamily: 'Outfit', // Premium layout default font
       ),
-      home: const SplashPage(),
     );
   }
 }

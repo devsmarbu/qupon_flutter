@@ -193,6 +193,7 @@ class _CollectionCouponsPageState extends State<CollectionCouponsPage> {
   }
 
   Future<void> _navigateToDetail(BuildContext context, HomeCoupon coupon) async {
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
     final offer = Offer(
       id: coupon.id,
       title: coupon.name,
@@ -202,7 +203,7 @@ class _CollectionCouponsPageState extends State<CollectionCouponsPage> {
       daysLeft: coupon.daysLeft,
       hoursLeft: coupon.hoursLeft,
       minutesLeft: coupon.minutesLeft,
-      location: '123 Tech Avenue, Silicon Valley, CA 94025',
+      location: coupon.location(isArabic),
       description: coupon.description,
       descriptionAr: coupon.descriptionAr,
       price: coupon.price,
@@ -241,6 +242,7 @@ class _CollectionCouponsPageState extends State<CollectionCouponsPage> {
 
     return GestureDetector(
       onTap: () async {
+        final isArabic = Localizations.localeOf(context).languageCode == 'ar';
         final offer = Offer(
           id: coupon.id,
           title: coupon.name,
@@ -250,7 +252,7 @@ class _CollectionCouponsPageState extends State<CollectionCouponsPage> {
           daysLeft: coupon.daysLeft,
           hoursLeft: coupon.hoursLeft,
           minutesLeft: coupon.minutesLeft,
-          location: '123 Tech Avenue, Silicon Valley, CA 94025',
+          location: coupon.location(isArabic),
           description: coupon.description,
           descriptionAr: coupon.descriptionAr,
           price: coupon.price,
@@ -450,18 +452,18 @@ class _CollectionCouponsPageState extends State<CollectionCouponsPage> {
                   const SizedBox(height: 6),
   
                   // Location row
-                  const Row(
+                  Row(
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.location_on_outlined,
                         size: 14,
                         color: Color(0xFF94A3B8),
                       ),
-                      SizedBox(width: 4),
+                      const SizedBox(width: 4),
                       Expanded(
                         child: Text(
-                          '123 Tech Avenue, Silicon Valley, CA',
-                          style: TextStyle(
+                          coupon.location(isArabic),
+                          style: const TextStyle(
                             fontSize: 12,
                             color: Color(0xFF64748B),
                           ),
@@ -505,6 +507,7 @@ class _CollectionCouponsPageState extends State<CollectionCouponsPage> {
 
                       ElevatedButton(
                         onPressed: () async {
+                          final isArabic = Localizations.localeOf(context).languageCode == 'ar';
                           final offer = Offer(
                             id: coupon.id,
                             title: coupon.name,
@@ -514,7 +517,7 @@ class _CollectionCouponsPageState extends State<CollectionCouponsPage> {
                             daysLeft: coupon.daysLeft,
                             hoursLeft: coupon.hoursLeft,
                             minutesLeft: coupon.minutesLeft,
-                            location: '123 Tech Avenue, Silicon Valley, CA 94025',
+                            location: coupon.location(isArabic),
                             description: coupon.description,
                             descriptionAr: coupon.descriptionAr,
                             price: coupon.price,
