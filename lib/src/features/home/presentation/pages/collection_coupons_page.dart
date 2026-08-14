@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/network/api_client.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../l10n/app_localizations.dart';
@@ -21,6 +22,60 @@ class CollectionCouponsPage extends StatefulWidget {
 }
 
 class _CollectionCouponsPageState extends State<CollectionCouponsPage> {
+  List<HomeCoupon>? _coupons;
+  bool _isLoading = true;
+  String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchCollectionCoupons();
+  }
+
+  Future<void> _fetchCollectionCoupons() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final apiClient = ApiClient();
+      final slug = widget.collection.meta.slug;
+      final response = await apiClient.dio.get('/api/storefront/collections/$slug');
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final responseData = response.data;
+        if (responseData != null) {
+          Map<String, dynamic> collectionJson;
+          if (responseData is Map<String, dynamic> && responseData.containsKey('data')) {
+            collectionJson = responseData['data'] as Map<String, dynamic>? ?? responseData;
+          } else {
+            collectionJson = responseData as Map<String, dynamic>? ?? {};
+          }
+
+          final fetchedCollection = HomeCollection.fromJson(collectionJson);
+          if (mounted) {
+            setState(() {
+              _coupons = fetchedCollection.coupons;
+              _isLoading = false;
+            });
+          }
+        } else {
+          throw Exception('Empty response from collection API');
+        }
+      } else {
+        throw Exception('Failed to load collection coupons. Status: ${response.statusCode}');
+      }
+    } catch (e) {
+      debugPrint('Error fetching collection coupons: $e');
+      if (mounted) {
+        setState(() {
+          _errorMessage = e.toString();
+          _isLoading = false;
+        });
+      }
+    }
+  }
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -29,7 +84,7 @@ class _CollectionCouponsPageState extends State<CollectionCouponsPage> {
     final title = isArabic && widget.collection.meta.titleAr.isNotEmpty
         ? widget.collection.meta.titleAr
         : widget.collection.meta.title;
-    final coupons = widget.collection.coupons;
+    final coupons = _coupons ?? widget.collection.coupons;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -161,7 +216,41 @@ class _CollectionCouponsPageState extends State<CollectionCouponsPage> {
               ),
 
               // ── Offer Cards List ──────────────────────────────────────────
-              if (coupons.isEmpty)
+              if (_isLoading)
+                const Center(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 80),
+                    child: CircularProgressIndicator(color: Color(0xFFFF6B35)),
+                  ),
+                )
+              else if (_errorMessage != null)
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 60, horizontal: 24),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          isArabic
+                              ? 'فشل تحميل العروض. يرجى المحاولة مرة أخرى.'
+                              : 'Failed to load offers. Please try again.',
+                          style: const TextStyle(color: Colors.red),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: _fetchCollectionCoupons,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFFF6B35),
+                            foregroundColor: Colors.white,
+                          ),
+                          child: Text(isArabic ? 'إعادة المحاولة' : 'Retry'),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              else if (coupons.isEmpty)
                 Center(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 60, horizontal: 24),

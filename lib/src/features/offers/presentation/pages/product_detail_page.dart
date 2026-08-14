@@ -1479,7 +1479,7 @@ class _SocialCircleButton extends StatelessWidget {
   }
 }
 
-class VendorMapWidget extends StatelessWidget {
+class VendorMapWidget extends StatefulWidget {
   final String openUrl;
   final double? latitude;
   final double? longitude;
@@ -1491,8 +1491,16 @@ class VendorMapWidget extends StatelessWidget {
     this.longitude,
   });
 
+  @override
+  State<VendorMapWidget> createState() => _VendorMapWidgetState();
+}
+
+class _VendorMapWidgetState extends State<VendorMapWidget> {
+  late final WebViewController _controller;
+  bool _isLoading = true;
+  bool _hasError = false;
+
   Map<String, double>? _extractCoordinates(String url) {
-    // Try pattern like @25.3855588,51.5273574
     final atRegex = RegExp(r'@(-?\d+\.\d+),(-?\d+\.\d+)');
     final atMatch = atRegex.firstMatch(url);
     if (atMatch != null) {
@@ -1503,7 +1511,6 @@ class VendorMapWidget extends StatelessWidget {
       }
     }
 
-    // Try query parameters like q=lat,lon or query=lat,lon or ll=lon,lat
     try {
       final uri = Uri.parse(url);
       final queryParam = uri.queryParameters['query'] ?? uri.queryParameters['q'];
@@ -1534,47 +1541,82 @@ class VendorMapWidget extends StatelessWidget {
     return null;
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
-    
-    double? lat = latitude;
-    double? lon = longitude;
-    
+  String _getEmbedUrl() {
+    if (widget.openUrl.isEmpty) return '';
+
+    if (widget.openUrl.contains('output=embed')) {
+      return widget.openUrl;
+    }
+
+    double? lat = widget.latitude;
+    double? lon = widget.longitude;
+
     if (lat == null || lon == null) {
-      final coords = _extractCoordinates(openUrl);
+      final coords = _extractCoordinates(widget.openUrl);
       if (coords != null) {
         lat = coords['latitude'];
         lon = coords['longitude'];
       }
     }
 
-    print("latLongAre...."+lat.toString()+lon.toString());
+    if (lat != null && lon != null) {
+      return 'https://maps.google.com/maps?q=$lat,$lon&t=&z=13&ie=UTF8&iwloc=&output=embed';
+    }
+
+    if (widget.openUrl.contains('google.com/maps')) {
+      final separator = widget.openUrl.contains('?') ? '&' : '?';
+      return '${widget.openUrl}${separator}output=embed';
+    }
+
+    return 'https://maps.google.com/maps?q=${Uri.encodeComponent(widget.openUrl)}&output=embed';
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    final embedUrl = _getEmbedUrl();
+    if (embedUrl.isNotEmpty) {
+      _controller = WebViewController()
+        ..setJavaScriptMode(JavaScriptMode.unrestricted)
+        ..setNavigationDelegate(
+          NavigationDelegate(
+            onPageFinished: (_) {
+              if (mounted) {
+                setState(() {
+                  _isLoading = false;
+                });
+              }
+            },
+            onWebResourceError: (error) {
+              debugPrint('WebView Resource Error: ${error.description}');
+              if (mounted) {
+                setState(() {
+                  _hasError = true;
+                  _isLoading = false;
+                });
+              }
+            },
+          ),
+        )
+        ..loadRequest(Uri.parse(embedUrl));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
+    final embedUrl = _getEmbedUrl();
 
     Widget mapContent;
-    if (lat != null && lon != null) {
-      final staticMapUrl = 'https://static-maps.yandex.ru/1.x/?ll=$lon,$lat&z=5&l=map&size=600,200';
-      mapContent = Image.network(
-        staticMapUrl,
-        fit: BoxFit.cover,
-        loadingBuilder: (context, child, loadingProgress) {
-          if (loadingProgress == null) return child;
-          return const Center(
-            child: CircularProgressIndicator(color: Color(0xFFFF6B35)),
-          );
-        },
-        errorBuilder: (context, error, stackTrace) {
-          return CustomPaint(
-            painter: _MapPainter(),
-            child: const Center(
-              child: Icon(
-                Icons.location_pin,
-                color: Colors.red,
-                size: 36,
-              ),
+    if (embedUrl.isNotEmpty && !_hasError) {
+      mapContent = Stack(
+        children: [
+          WebViewWidget(controller: _controller),
+          if (_isLoading)
+            const Center(
+              child: CircularProgressIndicator(color: Color(0xFFFF6B35)),
             ),
-          );
-        },
+        ],
       );
     } else {
       mapContent = CustomPaint(
@@ -1589,35 +1631,35 @@ class VendorMapWidget extends StatelessWidget {
       );
     }
 
-    return GestureDetector(
-      onTap: () async {
-        final uri = Uri.parse(openUrl.isNotEmpty ? openUrl : 'https://www.google.com/maps');
-        try {
-          await launchUrl(uri, mode: LaunchMode.externalApplication);
-        } catch (e) {
-          debugPrint('Could not launch map URL: $e');
-          try {
-            await launchUrl(uri, mode: LaunchMode.platformDefault);
-          } catch (_) {}
-        }
-      },
-      child: Container(
-        height: 180,
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: const Color(0xFFF8FAFC),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFFE2E8F0)),
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(16),
-          child: Stack(
-            children: [
-              Positioned.fill(child: mapContent),
-              // Open in maps button overlay
-              PositionedDirectional(
-                top: 12,
-                start: 12,
+    return Container(
+      height: 180,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: Stack(
+          children: [
+            Positioned.fill(child: mapContent),
+            // Open in maps button overlay
+            PositionedDirectional(
+              top: 12,
+              start: 12,
+              child: GestureDetector(
+                onTap: () async {
+                  final uri = Uri.parse(widget.openUrl.isNotEmpty ? widget.openUrl : 'https://www.google.com/maps');
+                  try {
+                    await launchUrl(uri, mode: LaunchMode.externalApplication);
+                  } catch (e) {
+                    debugPrint('Could not launch map URL: $e');
+                    try {
+                      await launchUrl(uri, mode: LaunchMode.platformDefault);
+                    } catch (_) {}
+                  }
+                },
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
@@ -1651,8 +1693,8 @@ class VendorMapWidget extends StatelessWidget {
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
