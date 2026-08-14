@@ -24,9 +24,12 @@ _$OfferImpl _$$OfferImplFromJson(Map<String, dynamic> json) => _$OfferImpl(
   vendorId: json['vendorId'] as String?,
   validity: json['validity'] as String?,
   slug: json['slug'] as String?,
+  wishlisted: json['wishlisted'] as bool?,
   vendorDetails: json['vendorDetails'] == null
       ? null
       : VendorDetails.fromJson(json['vendorDetails'] as Map<String, dynamic>),
+  shareLink: json['shareLink'] as String?,
+  vendorProfileLink: json['vendorProfileLink'] as String?,
 );
 
 Map<String, dynamic> _$$OfferImplToJson(_$OfferImpl instance) =>
@@ -48,5 +51,8 @@ Map<String, dynamic> _$$OfferImplToJson(_$OfferImpl instance) =>
       'vendorId': instance.vendorId,
       'validity': instance.validity,
       'slug': instance.slug,
+      'wishlisted': instance.wishlisted,
       'vendorDetails': instance.vendorDetails,
+      'shareLink': instance.shareLink,
+      'vendorProfileLink': instance.vendorProfileLink,
     };

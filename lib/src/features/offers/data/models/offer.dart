@@ -30,6 +30,8 @@ class Offer with _$Offer {
     @Default([])
     List<OfferOption> variants,
     VendorDetails? vendorDetails,
+    String? shareLink,
+    String? vendorProfileLink,
   }) = _Offer;
 
   factory Offer.fromJson(Map<String, dynamic> json) => _$OfferFromJson(json);

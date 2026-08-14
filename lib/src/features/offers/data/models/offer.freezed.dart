@@ -22,44 +22,28 @@ Offer _$OfferFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$Offer {
   String get id => throw _privateConstructorUsedError;
-
   String get title => throw _privateConstructorUsedError;
-
   String get category => throw _privateConstructorUsedError;
-
   String get imageUrl => throw _privateConstructorUsedError;
-
   int get daysLeft => throw _privateConstructorUsedError;
-
   int get hoursLeft => throw _privateConstructorUsedError;
-
   int get minutesLeft => throw _privateConstructorUsedError;
-
   String get location => throw _privateConstructorUsedError;
-
   String get description => throw _privateConstructorUsedError;
-
   double get price => throw _privateConstructorUsedError;
-
   String get currency => throw _privateConstructorUsedError;
-
   String? get titleAr => throw _privateConstructorUsedError;
-
   String? get descriptionAr => throw _privateConstructorUsedError;
-
   String? get vendor => throw _privateConstructorUsedError;
-
   String? get vendorId => throw _privateConstructorUsedError;
-
   String? get validity => throw _privateConstructorUsedError;
-
   String? get slug => throw _privateConstructorUsedError;
-
   bool? get wishlisted => throw _privateConstructorUsedError;
-
   @JsonKey(includeFromJson: false, includeToJson: false)
   List<OfferOption> get variants => throw _privateConstructorUsedError;
   VendorDetails? get vendorDetails => throw _privateConstructorUsedError;
+  String? get shareLink => throw _privateConstructorUsedError;
+  String? get vendorProfileLink => throw _privateConstructorUsedError;
 
   /// Serializes this Offer to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -74,7 +58,6 @@ mixin _$Offer {
 abstract class $OfferCopyWith<$Res> {
   factory $OfferCopyWith(Offer value, $Res Function(Offer) then) =
       _$OfferCopyWithImpl<$Res, Offer>;
-
   @useResult
   $Res call({
     String id,
@@ -98,6 +81,8 @@ abstract class $OfferCopyWith<$Res> {
     @JsonKey(includeFromJson: false, includeToJson: false)
     List<OfferOption> variants,
     VendorDetails? vendorDetails,
+    String? shareLink,
+    String? vendorProfileLink,
   });
 }
 
@@ -108,7 +93,6 @@ class _$OfferCopyWithImpl<$Res, $Val extends Offer>
 
   // ignore: unused_field
   final $Val _value;
-
   // ignore: unused_field
   final $Res Function($Val) _then;
 
@@ -137,6 +121,8 @@ class _$OfferCopyWithImpl<$Res, $Val extends Offer>
     Object? wishlisted = freezed,
     Object? variants = null,
     Object? vendorDetails = freezed,
+    Object? shareLink = freezed,
+    Object? vendorProfileLink = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -220,6 +206,14 @@ class _$OfferCopyWithImpl<$Res, $Val extends Offer>
                 ? _value.vendorDetails
                 : vendorDetails // ignore: cast_nullable_to_non_nullable
                       as VendorDetails?,
+            shareLink: freezed == shareLink
+                ? _value.shareLink
+                : shareLink // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            vendorProfileLink: freezed == vendorProfileLink
+                ? _value.vendorProfileLink
+                : vendorProfileLink // ignore: cast_nullable_to_non_nullable
+                      as String?,
           )
           as $Val,
     );
@@ -232,7 +226,6 @@ abstract class _$$OfferImplCopyWith<$Res> implements $OfferCopyWith<$Res> {
     _$OfferImpl value,
     $Res Function(_$OfferImpl) then,
   ) = __$$OfferImplCopyWithImpl<$Res>;
-
   @override
   @useResult
   $Res call({
@@ -257,6 +250,8 @@ abstract class _$$OfferImplCopyWith<$Res> implements $OfferCopyWith<$Res> {
     @JsonKey(includeFromJson: false, includeToJson: false)
     List<OfferOption> variants,
     VendorDetails? vendorDetails,
+    String? shareLink,
+    String? vendorProfileLink,
   });
 }
 
@@ -294,6 +289,8 @@ class __$$OfferImplCopyWithImpl<$Res>
     Object? wishlisted = freezed,
     Object? variants = null,
     Object? vendorDetails = freezed,
+    Object? shareLink = freezed,
+    Object? vendorProfileLink = freezed,
   }) {
     return _then(
       _$OfferImpl(
@@ -365,7 +362,7 @@ class __$$OfferImplCopyWithImpl<$Res>
             ? _value.slug
             : slug // ignore: cast_nullable_to_non_nullable
                   as String?,
-        wishlisted: freezed == slug
+        wishlisted: freezed == wishlisted
             ? _value.wishlisted
             : wishlisted // ignore: cast_nullable_to_non_nullable
                   as bool?,
@@ -377,6 +374,14 @@ class __$$OfferImplCopyWithImpl<$Res>
             ? _value.vendorDetails
             : vendorDetails // ignore: cast_nullable_to_non_nullable
                   as VendorDetails?,
+        shareLink: freezed == shareLink
+            ? _value.shareLink
+            : shareLink // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        vendorProfileLink: freezed == vendorProfileLink
+            ? _value.vendorProfileLink
+            : vendorProfileLink // ignore: cast_nullable_to_non_nullable
+                  as String?,
       ),
     );
   }
@@ -407,6 +412,8 @@ class _$OfferImpl implements _Offer {
     @JsonKey(includeFromJson: false, includeToJson: false)
     final List<OfferOption> variants = const [],
     this.vendorDetails,
+    this.shareLink,
+    this.vendorProfileLink,
   }) : _variants = variants;
 
   factory _$OfferImpl.fromJson(Map<String, dynamic> json) =>
@@ -449,7 +456,6 @@ class _$OfferImpl implements _Offer {
   @override
   final bool? wishlisted;
   final List<OfferOption> _variants;
-
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   List<OfferOption> get variants {
@@ -460,10 +466,14 @@ class _$OfferImpl implements _Offer {
 
   @override
   final VendorDetails? vendorDetails;
+  @override
+  final String? shareLink;
+  @override
+  final String? vendorProfileLink;
 
   @override
   String toString() {
-    return 'Offer(id: $id, title: $title, category: $category, imageUrl: $imageUrl, daysLeft: $daysLeft, hoursLeft: $hoursLeft, minutesLeft: $minutesLeft, location: $location, description: $description, price: $price, currency: $currency, titleAr: $titleAr, descriptionAr: $descriptionAr, vendor: $vendor, vendorId: $vendorId, validity: $validity, slug: $slug,wishlisted: $wishlisted, variants: $variants, vendorDetails: $vendorDetails)';
+    return 'Offer(id: $id, title: $title, category: $category, imageUrl: $imageUrl, daysLeft: $daysLeft, hoursLeft: $hoursLeft, minutesLeft: $minutesLeft, location: $location, description: $description, price: $price, currency: $currency, titleAr: $titleAr, descriptionAr: $descriptionAr, vendor: $vendor, vendorId: $vendorId, validity: $validity, slug: $slug, wishlisted: $wishlisted, variants: $variants, vendorDetails: $vendorDetails, shareLink: $shareLink, vendorProfileLink: $vendorProfileLink)';
   }
 
   @override
@@ -501,9 +511,13 @@ class _$OfferImpl implements _Offer {
             (identical(other.slug, slug) || other.slug == slug) &&
             (identical(other.wishlisted, wishlisted) ||
                 other.wishlisted == wishlisted) &&
-            const DeepCollectionEquality().equals(other._variants, _variants)) &&
+            const DeepCollectionEquality().equals(other._variants, _variants) &&
             (identical(other.vendorDetails, vendorDetails) ||
-                other.vendorDetails == vendorDetails);
+                other.vendorDetails == vendorDetails) &&
+            (identical(other.shareLink, shareLink) ||
+                other.shareLink == shareLink) &&
+            (identical(other.vendorProfileLink, vendorProfileLink) ||
+                other.vendorProfileLink == vendorProfileLink));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -530,6 +544,8 @@ class _$OfferImpl implements _Offer {
     wishlisted,
     const DeepCollectionEquality().hash(_variants),
     vendorDetails,
+    shareLink,
+    vendorProfileLink,
   ]);
 
   /// Create a copy of Offer
@@ -569,69 +585,57 @@ abstract class _Offer implements Offer {
     @JsonKey(includeFromJson: false, includeToJson: false)
     final List<OfferOption> variants,
     final VendorDetails? vendorDetails,
+    final String? shareLink,
+    final String? vendorProfileLink,
   }) = _$OfferImpl;
 
   factory _Offer.fromJson(Map<String, dynamic> json) = _$OfferImpl.fromJson;
 
   @override
   String get id;
-
   @override
   String get title;
-
   @override
   String get category;
-
   @override
   String get imageUrl;
-
   @override
   int get daysLeft;
-
   @override
   int get hoursLeft;
-
   @override
   int get minutesLeft;
-
   @override
   String get location;
-
   @override
   String get description;
-
   @override
   double get price;
-
   @override
   String get currency;
-
   @override
   String? get titleAr;
-
   @override
   String? get descriptionAr;
-
   @override
   String? get vendor;
-
   @override
   String? get vendorId;
-
   @override
   String? get validity;
-
   @override
   String? get slug;
-
   @override
   bool? get wishlisted;
-
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   List<OfferOption> get variants;
   @override
   VendorDetails? get vendorDetails;
+  @override
+  String? get shareLink;
+  @override
+  String? get vendorProfileLink;
 
   /// Create a copy of Offer
   /// with the given fields replaced by the non-null parameter values.

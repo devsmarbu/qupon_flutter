@@ -107,6 +107,8 @@ class OffersRepositoryImpl implements OffersRepository {
           vendorDetails: couponMap['vendorDetails'] != null
               ? VendorDetails.fromJson(couponMap['vendorDetails'] as Map<String, dynamic>)
               : null,
+          shareLink: couponMap['shareLink']?.toString(),
+          vendorProfileLink: couponMap['vendorProfileLink']?.toString(),
         );
       }).toList();
     } on DioException catch (e) {
@@ -290,6 +292,8 @@ class OffersRepositoryImpl implements OffersRepository {
         vendorDetails: couponMap['vendorDetails'] != null
             ? VendorDetails.fromJson(couponMap['vendorDetails'] as Map<String, dynamic>)
             : null,
+        shareLink: couponMap['shareLink']?.toString(),
+        vendorProfileLink: couponMap['vendorProfileLink']?.toString(),
       );
     } on DioException catch (e) {
       final msg = e.response?.data?['message'] ??

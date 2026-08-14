@@ -241,7 +241,7 @@ class ProductDetailView extends StatelessWidget {
         ? offer.descriptionAr!
         : offer.description;
     
-    final shareLink = offer.vendorDetails?.websiteUrl ?? offer.vendorDetails?.mapsOpenUrl ?? 'https://qupon.marbu.in/vendor/${offer.vendorDetails?.slug ?? ''}';
+    final shareLink = offer.shareLink ?? offer.vendorDetails?.websiteUrl ?? offer.vendorDetails?.mapsOpenUrl ?? 'https://qupon.marbu.in/vendor/${offer.vendorDetails?.slug ?? ''}';
 
     final text = isArabic
         ? 'تحقق من هذا العرض الرائع من $vendorName!\n\n$title\n$desc\n\nلمزيد من التفاصيل: $shareLink'
@@ -1073,10 +1073,16 @@ class ProductDetailView extends StatelessWidget {
                                             const SizedBox(height: 2),
                                             InkWell(
                                               onTap: () async {
-                                                final profileLink = offer.vendorDetails?.websiteUrl ?? 'https://qupon.marbu.in/vendor/${offer.vendorDetails?.slug ?? ''}';
-                                                final uri = Uri.parse(profileLink);
-                                                if (await canLaunchUrl(uri)) {
+                                                final profileLink = offer.vendorProfileLink ?? offer.vendorDetails?.websiteUrl ?? 'https://qupon.marbu.in/vendor/${offer.vendorDetails?.slug ?? ''}';
+                                                try {
+                                                  final uri = Uri.parse(profileLink);
                                                   await launchUrl(uri, mode: LaunchMode.externalApplication);
+                                                } catch (e) {
+                                                  debugPrint('Could not launch vendor profile URL: $e');
+                                                  try {
+                                                    final uri = Uri.parse(profileLink);
+                                                    await launchUrl(uri, mode: LaunchMode.platformDefault);
+                                                  } catch (_) {}
                                                 }
                                               },
                                               child: Text(
