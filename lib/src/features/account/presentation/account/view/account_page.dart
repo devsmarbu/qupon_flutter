@@ -318,14 +318,14 @@ class _AccountPageState extends State<AccountPage> {
                             color: Color(0xFF0F172A),
                           ),
                         ),
-                        Text(
-                          l10n.seeAll,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.primary,
-                          ),
-                        ),
+                        // Text(
+                        //   l10n.seeAll,
+                        //   style: const TextStyle(
+                        //     fontSize: 14,
+                        //     fontWeight: FontWeight.bold,
+                        //     color: AppColors.primary,
+                        //   ),
+                        // ),
                       ],
                     ),
                     const SizedBox(height: 12),

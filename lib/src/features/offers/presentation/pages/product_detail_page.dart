@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:webview_flutter/webview_flutter.dart';
-
+import 'package:go_router/go_router.dart';
 import '../../../localization/presentation/cubit/locale_cubit.dart';
 import '../../../main/presentation/widgets/app_footer.dart';
 
@@ -104,10 +104,10 @@ class ProductDetailView extends StatelessWidget {
   const ProductDetailView({super.key});
 
   Future<void> _handleRequestCoupon(
-    BuildContext context, {
-    required Offer offer,
-    required bool isArabic,
-  }) async {
+      BuildContext context, {
+        required Offer offer,
+        required bool isArabic,
+      }) async {
     final result = await showDialog<String>(
       context: context,
       builder: (context) => RequestCouponDialog(
@@ -146,8 +146,8 @@ class ProductDetailView extends StatelessWidget {
                 (successMsg != null && successMsg.isNotEmpty)
                     ? successMsg
                     : (isArabic
-                        ? 'تم تقديم طلب لإعادة الكوبون!'
-                        : 'Request submitted to bring this coupon back!'),
+                    ? 'تم تقديم طلب لإعادة الكوبون!'
+                    : 'Request submitted to bring this coupon back!'),
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
@@ -240,7 +240,7 @@ class ProductDetailView extends StatelessWidget {
     final desc = (isArabic && offer.descriptionAr != null && offer.descriptionAr!.isNotEmpty)
         ? offer.descriptionAr!
         : offer.description;
-    
+
     final shareLink = offer.shareLink ?? offer.vendorDetails?.websiteUrl ?? offer.vendorDetails?.mapsOpenUrl ?? 'https://qupon.marbu.in/vendor/${offer.vendorDetails?.slug ?? ''}';
 
     final text = isArabic
@@ -272,7 +272,15 @@ class ProductDetailView extends StatelessWidget {
 
         final isExpired = offer.daysLeft == 0 && offer.hoursLeft == 0 && offer.minutesLeft == 0;
 
-        return Scaffold(
+        final canPop = Navigator.of(context).canPop();
+
+        return PopScope(
+          canPop: canPop,
+          onPopInvoked: (didPop) {
+            if (didPop) return;
+            context.go('/');
+          },
+          child: Scaffold(
           backgroundColor: Colors.white,
           appBar: AppBar(
             backgroundColor: Colors.white,
@@ -335,12 +343,18 @@ class ProductDetailView extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Divider
-                       Container(height: 1, color: const Color(0xFFE2E8F0)),
+                      Container(height: 1, color: const Color(0xFFE2E8F0)),
 
                       SizedBox(height: 20),
                       // "Back to Listings" Row
                       InkWell(
-                        onTap: () => Navigator.of(context).pop(),
+                        onTap: () {
+                          if (Navigator.of(context).canPop()) {
+                            Navigator.of(context).pop();
+                          } else {
+                            context.go('/');
+                          }
+                        },
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
                           child: Row(
@@ -419,71 +433,71 @@ class ProductDetailView extends StatelessWidget {
                                 ),
                               ),
                             ),
-                              // Time Left Badge on top-left of image
-                              if (!isExpired)
-                                PositionedDirectional(
-                                  top: 16,
-                                  start: 16,
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFFE8FDF5),
-                                      borderRadius: BorderRadius.circular(20),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black.withOpacity(0.05),
-                                          blurRadius: 4,
-                                          offset: const Offset(0, 2),
-                                        ),
-                                      ],
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        const Icon(
-                                          Icons.access_time_filled,
-                                          size: 14,
-                                          color: Color(0xFF047857),
-                                        ),
-                                        const SizedBox(width: 4),
-                                        Text(
-                                          isArabic
-                                              ? 'متبقي ${offer.daysLeft} يوم و ${offer.hoursLeft} ساعة و ${offer.minutesLeft} دقيقة'
-                                              : '${offer.daysLeft}d ${offer.hoursLeft}h ${offer.minutesLeft}m left',
-                                          style: const TextStyle(
-                                            color: Color(0xFF047857),
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 11,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              // Row of action buttons on the top-right of image
+                            // Time Left Badge on top-left of image
+                            if (!isExpired)
                               PositionedDirectional(
                                 top: 16,
-                                end: 16,
-                                child: Row(
-                                  children: [
-                                    _ImageCircularButton(
-                                      icon: state.isFavorite ? Icons.favorite : Icons.favorite_border_outlined,
-                                      iconColor: state.isFavorite ? Colors.red : const Color(0xFF64748B),
-                                      onTap: () async {
-                                        final loggedIn = await _ensureLoggedIn(context);
-                                        if (loggedIn && context.mounted) {
-                                          context.read<ProductDetailBloc>().add(const ToggleFavorite());
-                                        }
-                                      },
-                                    ),
-                                    const SizedBox(width: 8),
-                                    _ImageCircularButton(
-                                      icon: Icons.share_outlined,
-                                      onTap: () => _shareOffer(context, offer),
-                                    ),
-                                  ],
+                                start: 16,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFE8FDF5),
+                                    borderRadius: BorderRadius.circular(20),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.05),
+                                        blurRadius: 4,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(
+                                        Icons.access_time_filled,
+                                        size: 14,
+                                        color: Color(0xFF047857),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        isArabic
+                                            ? 'متبقي ${offer.daysLeft} يوم و ${offer.hoursLeft} ساعة و ${offer.minutesLeft} دقيقة'
+                                            : '${offer.daysLeft}d ${offer.hoursLeft}h ${offer.minutesLeft}m left',
+                                        style: const TextStyle(
+                                          color: Color(0xFF047857),
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 11,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
+                            // Row of action buttons on the top-right of image
+                            PositionedDirectional(
+                              top: 16,
+                              end: 16,
+                              child: Row(
+                                children: [
+                                  _ImageCircularButton(
+                                    icon: state.isFavorite ? Icons.favorite : Icons.favorite_border_outlined,
+                                    iconColor: state.isFavorite ? Colors.red : const Color(0xFF64748B),
+                                    onTap: () async {
+                                      final loggedIn = await _ensureLoggedIn(context);
+                                      if (loggedIn && context.mounted) {
+                                        context.read<ProductDetailBloc>().add(const ToggleFavorite());
+                                      }
+                                    },
+                                  ),
+                                  const SizedBox(width: 8),
+                                  _ImageCircularButton(
+                                    icon: Icons.share_outlined,
+                                    onTap: () => _shareOffer(context, offer),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -546,7 +560,7 @@ class ProductDetailView extends StatelessWidget {
                                     ),
                                   ),
                                 ),
-                            if (isExpired) ...[
+                                if (isExpired) ...[
                                   const SizedBox(width: 8),
                                   Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -636,15 +650,15 @@ class ProductDetailView extends StatelessWidget {
                                           ),
                                           child: isSelected
                                               ? Center(
-                                                  child: Container(
-                                                    width: 10,
-                                                    height: 10,
-                                                    decoration: const BoxDecoration(
-                                                      color: Color(0xFFFF6B35),
-                                                      shape: BoxShape.circle,
-                                                    ),
-                                                  ),
-                                                )
+                                            child: Container(
+                                              width: 10,
+                                              height: 10,
+                                              decoration: const BoxDecoration(
+                                                color: Color(0xFFFF6B35),
+                                                shape: BoxShape.circle,
+                                              ),
+                                            ),
+                                          )
                                               : null,
                                         ),
                                         const SizedBox(width: 12),
@@ -883,11 +897,11 @@ class ProductDetailView extends StatelessWidget {
                                       onPressed: isExpired
                                           ? null
                                           : () {
-                                              context.read<CartBloc>().add(
-                                                AddToCart(offer: offer, option: selectedOption),
-                                              );
-                                              _showAddedToCartSnackBar(context);
-                                            },
+                                        context.read<CartBloc>().add(
+                                          AddToCart(offer: offer, option: selectedOption),
+                                        );
+                                        _showAddedToCartSnackBar(context);
+                                      },
                                       style: OutlinedButton.styleFrom(
                                         side: const BorderSide(color: Color(0xFFE2E8F0)),
                                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -1120,7 +1134,7 @@ class ProductDetailView extends StatelessWidget {
                                         const SizedBox(width: 8),
                                         Expanded(
                                           child: Text(
-                                            (isArabic && offer.locationAr.isNotEmpty) ? offer.locationAr : (offer.locationEn.isNotEmpty ? offer.locationEn : offer.location),
+                                            '123 Tech Avenue, Silicon Valley, CA 94025',
                                             style: TextStyle(
                                               color: Color(0xFF475569),
                                               fontSize: 13,
@@ -1138,8 +1152,8 @@ class ProductDetailView extends StatelessWidget {
                                     builder: (context) {
                                       final details = offer.vendorDetails;
                                       final locationName = details?.locationEn ?? details?.locationAr ?? offer.location;
-                                      
-                                      final openUrl = details?.mapsOpenUrl ?? details?.locationLink ?? 
+
+                                      final openUrl = details?.mapsOpenUrl ?? details?.locationLink ??
                                           (locationName.isNotEmpty
                                               ? 'https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(locationName)}'
                                               : '');
@@ -1181,7 +1195,7 @@ class ProductDetailView extends StatelessWidget {
                                 final details = offer.vendorDetails;
                                 final vendorName = offer.vendor ?? 'Qupon';
                                 final List<Widget> buttons = [];
-                                
+
                                 void addSocial(IconData icon, String? url) {
                                   if (url != null && url.isNotEmpty) {
                                     buttons.add(
@@ -1210,13 +1224,13 @@ class ProductDetailView extends StatelessWidget {
                                   addSocial(Icons.music_note, details.tiktok);
                                   addSocial(details.whatsapp != null && details.whatsapp!.isNotEmpty ? Icons.chat_bubble : Icons.chat_bubble_outline, details.whatsapp != null && details.whatsapp!.isNotEmpty
                                       ? (details.whatsapp!.startsWith('http')
-                                          ? details.whatsapp
-                                          : 'https://wa.me/${details.whatsapp!.replaceAll(RegExp(r'[^0-9]'), '')}')
+                                      ? details.whatsapp
+                                      : 'https://wa.me/${details.whatsapp!.replaceAll(RegExp(r'[^0-9]'), '')}')
                                       : null);
-                                  addSocial(Icons.snapchat, details.snapchat != null && details.snapchat!.isNotEmpty 
-                                      ? (details.snapchat!.startsWith('http') 
-                                          ? details.snapchat 
-                                          : 'https://www.snapchat.com/add/${details.snapchat}')
+                                  addSocial(Icons.snapchat, details.snapchat != null && details.snapchat!.isNotEmpty
+                                      ? (details.snapchat!.startsWith('http')
+                                      ? details.snapchat
+                                      : 'https://www.snapchat.com/add/${details.snapchat}')
                                       : null);
                                 }
 
@@ -1400,7 +1414,7 @@ class ProductDetailView extends StatelessWidget {
               ),
             ],
           ),
-        );
+          ));
       },
     );
   }
@@ -1524,7 +1538,7 @@ class _VendorMapWidgetState extends State<VendorMapWidget> {
           }
         }
       }
-      
+
       final llParam = uri.queryParameters['ll'];
       if (llParam != null) {
         final parts = llParam.split(',');
@@ -1544,14 +1558,10 @@ class _VendorMapWidgetState extends State<VendorMapWidget> {
   String _getEmbedUrl() {
     if (widget.openUrl.isEmpty) return '';
 
-    if (widget.openUrl.contains('output=embed')) {
-      return widget.openUrl;
-    }
-
     double? lat = widget.latitude;
     double? lon = widget.longitude;
 
-    if (lat == null || lon == null) {
+    if (lat == null || lon == null || (lat == 0 && lon == 0)) {
       final coords = _extractCoordinates(widget.openUrl);
       if (coords != null) {
         lat = coords['latitude'];
@@ -1559,23 +1569,21 @@ class _VendorMapWidgetState extends State<VendorMapWidget> {
       }
     }
 
-    if (lat != null && lon != null) {
-      return 'https://maps.google.com/maps?q=$lat,$lon&t=&z=13&ie=UTF8&iwloc=&output=embed';
+    if (lat == null || lon == null || (lat == 0 && lon == 0)) {
+      return '';
     }
 
-    if (widget.openUrl.contains('google.com/maps')) {
-      final separator = widget.openUrl.contains('?') ? '&' : '?';
-      return '${widget.openUrl}${separator}output=embed';
+    if (widget.openUrl.contains('output=embed')) {
+      return widget.openUrl;
     }
 
-    return 'https://maps.google.com/maps?q=${Uri.encodeComponent(widget.openUrl)}&output=embed';
+    return 'https://maps.google.com/maps?q=$lat,$lon&t=&z=13&ie=UTF8&iwloc=&output=embed';
   }
 
   void _initOrUpdateController() {
     final embedUrl = _getEmbedUrl();
     if (embedUrl.isNotEmpty) {
-      if (_controller == null) {
-        _controller = WebViewController()
+      _controller ??= WebViewController()
           ..setJavaScriptMode(JavaScriptMode.unrestricted)
           ..setNavigationDelegate(
             NavigationDelegate(
@@ -1597,7 +1605,6 @@ class _VendorMapWidgetState extends State<VendorMapWidget> {
               },
             ),
           );
-      }
       _isLoading = true;
       _hasError = false;
       _controller!.loadRequest(Uri.parse(embedUrl));
