@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'l10n/app_localizations.dart';
 import 'src/features/localization/presentation/cubit/locale_cubit.dart';
@@ -24,9 +25,11 @@ import 'src/core/services/deep_link_service.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await PrefStore.init();
+  // Grab the already-initialised instance so we can pass it to CartBloc.
+  final sharedPreferences = await SharedPreferences.getInstance();
   final deepLinkService = DeepLinkService();
   await deepLinkService.init();
-  runApp(MyApp(deepLinkService: deepLinkService));
+  runApp(MyApp(deepLinkService: deepLinkService, sharedPreferences: sharedPreferences));
 }
 
 class MyApp extends StatelessWidget {
@@ -35,6 +38,7 @@ class MyApp extends StatelessWidget {
   final CartRepository? cartRepository;
   final AuthRepository? authRepository;
   final DeepLinkService? deepLinkService;
+  final SharedPreferences? sharedPreferences;
 
   const MyApp({
     super.key,
@@ -43,6 +47,7 @@ class MyApp extends StatelessWidget {
     this.cartRepository,
     this.authRepository,
     this.deepLinkService,
+    this.sharedPreferences,
   });
 
   @override
@@ -68,6 +73,7 @@ class MyApp extends StatelessWidget {
           BlocProvider<CartBloc>(
             create: (context) => CartBloc(
               cartRepository: context.read<CartRepository>(),
+              sharedPreferences: sharedPreferences!,
             ),
           ),
           BlocProvider<OffersBloc>(

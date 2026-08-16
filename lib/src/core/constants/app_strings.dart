@@ -4,6 +4,8 @@ import 'package:qupon/l10n/app_localizations.dart';
 class AppStrings {
   static const String keyProfile = 'profile_data';
   static const String keyToken = 'token';
+  static const String keyCartItems = 'cart_local_items';
+  static const String keyCartCount = 'cart_item_count';
 
   // Welcome Screen Strings
   static String welcomeTitle(BuildContext context) => AppLocalizations.of(context)!.welcomeTitle;

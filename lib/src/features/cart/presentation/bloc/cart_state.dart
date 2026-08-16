@@ -11,6 +11,9 @@ class CartState {
   final String? error;
   final List<PaymentGateway> paymentGateways;
   final bool gatewaysLoading;
+  /// Persisted count loaded from disk — used as the badge value before the
+  /// first API response comes back after a cold start.
+  final int persistedCount;
 
   // ── Checkout ──────────────────────────────────────────────────────────────
   final bool isCheckingOut;
@@ -29,6 +32,7 @@ class CartState {
     this.isCheckingOut = false,
     this.checkoutResponse,
     this.checkoutError,
+    this.persistedCount = 0,
   });
 
   List<ApiCartItem> get items => cartData?.items ?? const [];
@@ -39,7 +43,9 @@ class CartState {
 
   double get total => subtotal;
 
-  int get totalQuantity => cartData?.totals.itemCount ?? 0;
+  /// Returns the live API count when available, otherwise the persisted count
+  /// (so the badge is correct immediately after a cold start).
+  int get totalQuantity => cartData?.totals.itemCount ?? persistedCount;
 
   /// Only the gateways that the API marks as active
   List<PaymentGateway> get activeGateways =>
@@ -64,6 +70,7 @@ class CartState {
     String? checkoutError,
     bool clearCheckout = false,
     bool clearError = false,
+    int? persistedCount,
   }) {
     return CartState(
       cartData: cartData ?? this.cartData,
@@ -77,6 +84,7 @@ class CartState {
       isCheckingOut: isCheckingOut ?? this.isCheckingOut,
       checkoutResponse: clearCheckout ? null : (checkoutResponse ?? this.checkoutResponse),
       checkoutError: clearCheckout ? null : (checkoutError ?? this.checkoutError),
+      persistedCount: persistedCount ?? this.persistedCount,
     );
   }
 }

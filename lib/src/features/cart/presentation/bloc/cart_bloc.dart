@@ -1,16 +1,27 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'cart_event.dart';
 import 'cart_state.dart';
 import '../../data/models/api_cart_model.dart';
 import '../../data/models/checkout_model.dart';
 import '../../data/repositories/cart_repository.dart';
+import '../../data/local/cart_local_storage.dart';
 
 class CartBloc extends Bloc<CartEvent, CartState> {
   final CartRepository _cartRepository;
 
-  CartBloc({required CartRepository cartRepository})
-      : _cartRepository = cartRepository,
-        super(const CartState()) {
+  CartBloc({
+    required CartRepository cartRepository,
+    required SharedPreferences sharedPreferences,
+  })  : _cartRepository = cartRepository,
+        super(
+          CartState(
+            // Restore any items that were saved before the last app kill.
+            localItems: CartLocalStorage.loadItems(sharedPreferences),
+            // Restore the badge count so it shows instantly before API responds.
+            persistedCount: CartLocalStorage.loadCount(sharedPreferences),
+          ),
+        ) {
     on<LoadCart>(_onLoadCart);
     on<AddToCart>(_onAddToCart);
     on<RemoveFromCart>(_onRemoveFromCart);
@@ -37,12 +48,15 @@ class CartBloc extends Bloc<CartEvent, CartState> {
           ? activeGateways.first.identifier
           : state.paymentMethod;
 
+      // Keep the persisted count in sync with the live API count.
+      await CartLocalStorage.saveCount(cartData.totals.itemCount);
       emit(state.copyWith(
         cartData: cartData,
         paymentGateways: gateways,
         paymentMethod: selectedMethod,
         isLoading: false,
         gatewaysLoading: false,
+        persistedCount: cartData.totals.itemCount,
       ));
     } catch (e) {
       emit(state.copyWith(error: e.toString(), isLoading: false, gatewaysLoading: false));
@@ -65,10 +79,14 @@ class CartBloc extends Bloc<CartEvent, CartState> {
 
       // Call API with the full accumulated list
       final cartData = await _cartRepository.getCart(updatedItems);
+      // Persist so items survive app restarts.
+      await CartLocalStorage.saveItems(updatedItems);
+      await CartLocalStorage.saveCount(cartData.totals.itemCount);
       emit(state.copyWith(
         cartData: cartData,
         localItems: updatedItems,
         isLoading: false,
+        persistedCount: cartData.totals.itemCount,
       ));
     } catch (e) {
       emit(state.copyWith(error: e.toString(), isLoading: false));
@@ -113,10 +131,14 @@ class CartBloc extends Bloc<CartEvent, CartState> {
         ),
       );
 
+      // Persist the updated list after removal.
+      await CartLocalStorage.saveItems(updatedLocalItems);
+      await CartLocalStorage.saveCount(filteredItems.length);
       emit(state.copyWith(
         cartData: updatedCartData,
         localItems: updatedLocalItems,
         isLoading: false,
+        persistedCount: filteredItems.length,
       ));
     } catch (e) {
       final remainingItems = state.items.where((i) => i.key != event.key && i.couponId != event.key).toList();
@@ -129,6 +151,9 @@ class CartBloc extends Bloc<CartEvent, CartState> {
         return itemKey != event.key && item['couponId'] != event.key;
       }).toList();
 
+      // Persist even on error-path removal.
+      await CartLocalStorage.saveItems(updatedLocalItems);
+      await CartLocalStorage.saveCount(remainingItems.length);
       emit(state.copyWith(
         cartData: ApiCartData(
           items: remainingItems,
@@ -142,6 +167,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
         ),
         localItems: updatedLocalItems,
         isLoading: false,
+        persistedCount: remainingItems.length,
       ));
     }
   }
@@ -198,7 +224,9 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     }
   }
 
-  void _onClearCart(ClearCart event, Emitter<CartState> emit) {
+  Future<void> _onClearCart(ClearCart event, Emitter<CartState> emit) async {
+    // Remove persisted items so they don't come back after restart.
+    await CartLocalStorage.clear();
     emit(const CartState());
   }
 }
