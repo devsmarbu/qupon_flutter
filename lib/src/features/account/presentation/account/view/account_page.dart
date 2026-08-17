@@ -7,6 +7,7 @@ import '../bloc/account_event.dart';
 import '../bloc/account_state.dart';
 import '../../login/view/login_page.dart';
 import 'package:qupon/src/core/constants/app_colors.dart';
+import 'package:qupon/src/features/localization/data/services/localization_service.dart';
 import 'package:qupon/l10n/app_localizations.dart';
 import '../../../data/models/dashboard_model.dart';
 import 'package:qupon/src/features/offers/presentation/widgets/offer_horizontal_card_api.dart';
@@ -391,7 +392,7 @@ class _AccountPageState extends State<AccountPage> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          isArabic ? 'قائمة رغباتي' : 'My Wishlist',
+                          l10n.myWishlist,
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w900,
@@ -400,7 +401,7 @@ class _AccountPageState extends State<AccountPage> {
                         ),
                         if (state.wishlist.isNotEmpty)
                           Text(
-                            '${state.wishlist.length} ${isArabic ? 'عناصر' : (state.wishlist.length == 1 ? 'item' : 'items')}',
+                            l10n.itemCount(state.wishlist.length),
                             style: const TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
@@ -422,7 +423,7 @@ class _AccountPageState extends State<AccountPage> {
                         ),
                         child: Center(
                           child: Text(
-                            isArabic ? 'لا توجد عناصر في قائمة رغباتك حالياً' : 'No items in your wishlist yet',
+                            l10n.noItemsInWishlist,
                             style: const TextStyle(color: Color(0xFF64748B), fontSize: 14),
                           ),
                         ),
@@ -586,7 +587,7 @@ class _AccountPageState extends State<AccountPage> {
     );
   }
 
-  Widget _buildActiveFilterChips(dynamic l10n, bool isArabic) {
+  Widget _buildActiveFilterChips(AppLocalizations l10n, bool isArabic) {
     // ── Date label ─────────────────────────────────────────────────────────
     String dateValue;
     if (_fromCtrl.text.isNotEmpty || _toCtrl.text.isNotEmpty) {
@@ -594,7 +595,7 @@ class _AccountPageState extends State<AccountPage> {
       final to   = _toCtrl.text.isNotEmpty   ? _toCtrl.text   : '...';
       dateValue = '$from – $to';
     } else if (_selectedPeriod == 'All time') {
-      dateValue = isArabic ? 'كل الوقت' : 'All time';
+      dateValue = LocalizationService().getString('FILTER_ALL_TIME', l10n.filterAllTime);
     } else {
       dateValue = _selectedPeriod;
     }
@@ -603,32 +604,32 @@ class _AccountPageState extends State<AccountPage> {
     final String statusValue;
     switch (_selectedStatus) {
       case 'active':
-        statusValue = isArabic ? 'نشط' : 'Active';
+        statusValue = LocalizationService().getString('STATUS_ACTIVE', l10n.filterStatusActive);
         break;
       case 'expired':
-        statusValue = isArabic ? 'منتهي' : 'Expired';
+        statusValue = LocalizationService().getString('COUPON_EXPIRED', l10n.filterStatusExpired);
         break;
       case 'pending':
-        statusValue = isArabic ? 'معلق' : 'Pending';
+        statusValue = LocalizationService().getString('STATUS_PENDING', l10n.filterStatusPending);
         break;
       default:
-        statusValue = isArabic ? 'الكل' : 'All';
+        statusValue = LocalizationService().getString('FILTER_ALL', l10n.filterAll);
     }
 
     // ── Vendor label ───────────────────────────────────────────────────────
     final String vendorValue = _selectedVendor == 'all'
-        ? (isArabic ? 'الكل' : 'All')
+        ? LocalizationService().getString('FILTER_ALL', l10n.filterAll)
         : _selectedVendor;
 
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
         children: [
-          _filterChip(label: isArabic ? 'التاريخ: ' : 'Date: ', value: dateValue),
+          _filterChip(label: LocalizationService().getString('FILTER_DATE_LABEL', l10n.filterDateLabel), value: dateValue),
           const SizedBox(width: 8),
-          _filterChip(label: isArabic ? 'الحالة: ' : 'Status: ', value: statusValue),
+          _filterChip(label: LocalizationService().getString('FILTER_STATUS_LABEL', l10n.filterStatusLabel), value: statusValue),
           const SizedBox(width: 8),
-          _filterChip(label: isArabic ? 'المورد: ' : 'Vendor: ', value: vendorValue),
+          _filterChip(label: LocalizationService().getString('FILTER_VENDOR_LABEL', l10n.filterVendorLabel), value: vendorValue),
         ],
       ),
     );
@@ -1356,7 +1357,10 @@ class _OrderCardItemState extends State<_OrderCardItem> {
                   Expanded(
                     child: Center(
                       child: Text(
-                        widget.isArabic ? 'رمز الاستجابة السريعة للكوبون' : 'Your Coupon QR Code',
+                        LocalizationService().getString(
+                          'COUPON_QR_CODE_TITLE',
+                          AppLocalizations.of(context)!.couponQrCodeTitle,
+                        ),
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -1378,9 +1382,10 @@ class _OrderCardItemState extends State<_OrderCardItem> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Text(
-                  widget.isArabic
-                      ? 'قم بتقديم رمز QR للبائع لاسترداد مشترياتك.'
-                      : 'Show this QR code to the vendor to redeem your purchase.',
+                  LocalizationService().getString(
+                    'COUPON_QR_CODE_SUBTITLE',
+                    AppLocalizations.of(context)!.qrCodeSubtitle,
+                  ),
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     fontSize: 13,
@@ -1418,7 +1423,10 @@ class _OrderCardItemState extends State<_OrderCardItem> {
               const SizedBox(height: 32),
               // Coupon Code Label
               Text(
-                widget.isArabic ? 'رمز الكوبون' : 'Coupon Code',
+                LocalizationService().getString(
+                  'COUPON_CODE_LABEL',
+                  AppLocalizations.of(context)!.couponCodeQr,
+                ),
                 style: const TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
@@ -1519,7 +1527,7 @@ class _OrderCardItemState extends State<_OrderCardItem> {
     );
   }
 
-  Widget _buildStatusWidget(String status, bool isArabic) {
+  Widget _buildStatusWidget(String status, bool isArabic, AppLocalizations l10n) {
     Color bgColor;
     Color textColor;
     IconData icon;
@@ -1530,22 +1538,22 @@ class _OrderCardItemState extends State<_OrderCardItem> {
       bgColor = const Color(0xFFFEF3C7);
       textColor = const Color(0xFFD97706);
       icon = Icons.access_time;
-      text = isArabic ? 'في انتظار الاسترداد' : 'Awaiting redemption';
+      text = LocalizationService().getString('STATUS_AWAITING_REDEMPTION', l10n.awaitingRedemption);
     } else if (lowerStatus.contains('expired')) {
       bgColor = const Color(0xFFFEE2E2);
       textColor = const Color(0xFFEF4444);
       icon = Icons.error_outline;
-      text = isArabic ? 'منتهي الصلاحية' : 'Expired';
+      text = LocalizationService().getString('COUPON_EXPIRED', l10n.filterStatusExpired);
     } else if (lowerStatus.contains('redeemed') || lowerStatus.contains('used')) {
       bgColor = const Color(0xFFDCFCE7);
       textColor = const Color(0xFF15803D);
       icon = Icons.check_circle_outline;
-      text = isArabic ? 'تم الاسترداد' : 'Redeemed';
+      text = LocalizationService().getString('STATUS_REDEEMED', l10n.redeemedLabel);
     } else {
       bgColor = const Color(0xFFFEF3C7);
       textColor = const Color(0xFFD97706);
       icon = Icons.access_time;
-      text = isArabic ? 'في انتظار الاسترداد' : 'Awaiting redemption';
+      text = LocalizationService().getString('STATUS_AWAITING_REDEMPTION', l10n.awaitingRedemption);
     }
 
     return Container(
@@ -1574,6 +1582,7 @@ class _OrderCardItemState extends State<_OrderCardItem> {
 
   @override
   Widget _buildCouponSection(BuildContext context, DashboardCoupon coupon, bool isArabic) {
+    final l10n = AppLocalizations.of(context)!;
     final vendor = coupon.vendor.isNotEmpty ? coupon.vendor : '';
     final offerName = coupon.offer.isNotEmpty ? coupon.offer : '';
     final couponCode = coupon.code.isNotEmpty ? coupon.code : '';
@@ -1588,7 +1597,10 @@ class _OrderCardItemState extends State<_OrderCardItem> {
     String timeLeft = '';
     final daysUntil = coupon.daysUntilRedeem;
     if (daysUntil != null) {
-      timeLeft = isArabic ? '$daysUntil يوم متبقي' : '${daysUntil}d left';
+      timeLeft = LocalizationService().getString(
+        'COUPON_DAYS_LEFT',
+        l10n.daysLeftShort(daysUntil),
+      ).replaceAll('{count}', daysUntil.toString()).replaceAll('{days}', daysUntil.toString());
     }
 
     String redeemByFormatted = rawRedeemBy;
@@ -1627,36 +1639,42 @@ class _OrderCardItemState extends State<_OrderCardItem> {
         if (timeLeft.isEmpty) {
           final difference = expiry.difference(DateTime.now());
           final days = difference.inDays;
-          timeLeft = isArabic ? '$days يوم متبقي' : '${days}d left';
+          timeLeft = LocalizationService().getString(
+            'COUPON_DAYS_LEFT',
+            l10n.daysLeftShort(days),
+          ).replaceAll('{count}', days.toString()).replaceAll('{days}', days.toString());
         }
       }
     } catch (_) {}
 
     if (timeLeft.isEmpty) {
-      timeLeft = isArabic ? '118 يوم متبقي' : '118d left';
+      timeLeft = LocalizationService().getString(
+        'COUPON_DAYS_LEFT',
+        l10n.daysLeftShort(118),
+      ).replaceAll('{count}', '118').replaceAll('{days}', '118');
     }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildDetailRow(
-          isArabic ? 'البائع' : 'Vendor',
+          LocalizationService().getString('COUPON_VENDOR_LABEL', l10n.vendorLabel),
           Text(vendor, style: const TextStyle(color: Color(0xFF0F172A))),
         ),
         _buildDetailRow(
-          isArabic ? 'العرض' : 'Offer',
+          LocalizationService().getString('COUPON_OFFER_LABEL', l10n.offerLabel),
           Text(offerName, style: const TextStyle(color: Color(0xFF0F172A))),
         ),
         _buildDetailRow(
-          isArabic ? 'الكود' : 'Code',
+          LocalizationService().getString('COUPON_CODE_LABEL', l10n.codeLabel),
           Text(couponCode, style: const TextStyle(color: Color(0xFF0F172A), fontWeight: FontWeight.bold)),
         ),
         _buildDetailRow(
-          isArabic ? 'رابط الكوبون' : 'Coupon URL',
+          LocalizationService().getString('COUPON_URL_LABEL', l10n.couponUrlLabel),
           GestureDetector(
             onTap: () => _copyToClipboard(
               couponUrl,
-              isArabic ? 'تم نسخ الرابط في الحافظة' : 'Coupon URL copied to clipboard',
+              LocalizationService().getString('COUPON_SHARE_COPIED', l10n.couponCopiedClipboard),
             ),
             child: Text(
               couponUrl,
@@ -1671,19 +1689,19 @@ class _OrderCardItemState extends State<_OrderCardItem> {
           ),
         ),
         _buildDetailRow(
-          isArabic ? 'السعر' : 'Price',
+          LocalizationService().getString('COUPON_DETAILS_PRICE', l10n.priceLabel),
           Text(coupon.price.isNotEmpty ? coupon.price : 'QAR 20', style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
         ),
         _buildDetailRow(
-          isArabic ? 'الحالة' : 'Status',
-          _buildStatusWidget(status, isArabic),
+          LocalizationService().getString('COUPON_STATUS_LABEL', l10n.statusLabel),
+          _buildStatusWidget(status, isArabic, l10n),
         ),
         _buildDetailRow(
-          isArabic ? 'تاريخ الاسترداد' : 'Redeem by',
+          LocalizationService().getString('COUPON_REDEEM_BY_LABEL', l10n.redeemByLabel),
           Text(redeemByFormatted, style: const TextStyle(color: Color(0xFF0F172A))),
         ),
         _buildDetailRow(
-          isArabic ? 'الوقت المتبقي' : 'Time left',
+          LocalizationService().getString('COUPON_TIME_LEFT_LABEL', l10n.timeLeftLabel),
           Row(
             children: [
               const Icon(Icons.access_time_outlined, size: 16, color: Color(0xFF64748B)),
@@ -1698,7 +1716,7 @@ class _OrderCardItemState extends State<_OrderCardItem> {
           ),
         ),
         _buildDetailRow(
-          isArabic ? 'رمز QR' : 'QR code',
+          LocalizationService().getString('COUPON_QR_CODE_LABEL', l10n.qrCodeLabel),
           GestureDetector(
             onTap: () => _showQrCodeDialog(context, couponCode, redeemByFormatted),
             child: Row(
@@ -1707,7 +1725,7 @@ class _OrderCardItemState extends State<_OrderCardItem> {
                 const Icon(Icons.qr_code_2, size: 16, color: AppColors.primary),
                 const SizedBox(width: 4),
                 Text(
-                  isArabic ? 'عرض رمز QR' : 'Show QR code',
+                  LocalizationService().getString('COUPON_SHOW_QR_CODE', l10n.showQrCode),
                   style: const TextStyle(
                     color: AppColors.primary,
                   ),

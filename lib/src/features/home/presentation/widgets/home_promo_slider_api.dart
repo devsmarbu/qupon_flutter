@@ -5,6 +5,8 @@ import '../../data/models/home_banner.dart';
 import '../../../offers/data/models/offer.dart';
 import '../../../offers/presentation/pages/product_detail_page.dart';
 import '../../../main/presentation/pages/main_page.dart';
+import '../../../localization/data/services/localization_service.dart';
+import '../../../../../l10n/app_localizations.dart';
 
 /// Promotional banner slider driven by real API data.
 class HomePromoSliderApi extends StatefulWidget {
@@ -49,6 +51,7 @@ class _HomePromoSliderApiState extends State<HomePromoSliderApi> {
   Widget build(BuildContext context) {
     if (widget.banners.isEmpty) return const SizedBox.shrink();
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
+    final l10n = AppLocalizations.of(context)!;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -78,14 +81,14 @@ class _HomePromoSliderApiState extends State<HomePromoSliderApi> {
                   onTap: () async {
                     // Try to guess/map to a category for nicer fallback UI
                     final category = b.title.toLowerCase().contains('smile')
-                        ? (isArabic ? 'صحة وجمال' : 'Health & Wellness')
+                        ? LocalizationService().getString('HEALTH_WELLNESS', l10n.healthWellness)
                         : b.title.toLowerCase().contains('zubara')
-                            ? (isArabic ? 'سياحة وسفر' : 'Travel & Tourism')
+                            ? LocalizationService().getString('TRAVEL_TOURISM', l10n.travelTourism)
                             : b.title.toLowerCase().contains('foodie')
-                                ? (isArabic ? 'مطاعم ومأكولات' : 'Food & Drinks')
+                                ? LocalizationService().getString('HOME_BEST_IN_FOOD', l10n.foodDrinks)
                                 : b.title.toLowerCase().contains('gaming')
-                                    ? (isArabic ? 'ترفيه' : 'Entertainment')
-                                    : (isArabic ? 'الجمال' : 'Beauty');
+                                    ? LocalizationService().getString('ENTERTAINMENT', l10n.entertainmentLabel)
+                                    : LocalizationService().getString('BEAUTY', l10n.beautyLabel);
 
                     final offer = Offer(
                       id: b.id,

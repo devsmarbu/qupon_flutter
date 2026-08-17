@@ -5,6 +5,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'l10n/app_localizations.dart';
 import 'src/features/localization/presentation/cubit/locale_cubit.dart';
+import 'src/features/localization/data/services/localization_service.dart';
+import 'src/features/localization/data/repositories/localization_repository.dart';
 import 'src/features/offers/data/repositories/offers_repository.dart';
 import 'src/features/offers/presentation/bloc/offers_bloc.dart';
 import 'src/features/account/presentation/account/bloc/account_bloc.dart';
@@ -25,6 +27,7 @@ import 'src/core/services/deep_link_service.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await PrefStore.init();
+  LocalizationService().init();
   // Grab the already-initialised instance so we can pass it to CartBloc.
   final sharedPreferences = await SharedPreferences.getInstance();
   final deepLinkService = DeepLinkService();
@@ -37,6 +40,7 @@ class MyApp extends StatelessWidget {
   final OffersRepository? offersRepository;
   final CartRepository? cartRepository;
   final AuthRepository? authRepository;
+  final LocalizationRepository? localizationRepository;
   final DeepLinkService? deepLinkService;
   final SharedPreferences? sharedPreferences;
 
@@ -46,6 +50,7 @@ class MyApp extends StatelessWidget {
     this.offersRepository,
     this.cartRepository,
     this.authRepository,
+    this.localizationRepository,
     this.deepLinkService,
     this.sharedPreferences,
   });
@@ -63,6 +68,9 @@ class MyApp extends StatelessWidget {
         ),
         RepositoryProvider<CartRepository>(
           create: (context) => cartRepository ?? CartRepositoryImpl(apiClient: ApiClient()),
+        ),
+        RepositoryProvider<LocalizationRepository>(
+          create: (context) => localizationRepository ?? LocalizationRepositoryImpl(apiClient: ApiClient()),
         ),
       ],
       child: MultiBlocProvider(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../../l10n/app_localizations.dart';
 import '../../../localization/presentation/cubit/locale_cubit.dart';
 import '../../data/models/home_data.dart';
 import '../../data/models/home_collection.dart';
@@ -53,6 +54,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildError(BuildContext context, String message) {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -76,7 +78,7 @@ class _HomePageState extends State<HomePage> {
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12)),
               ),
-              child: const Text('Retry'),
+              child: Text(l10n.retryLabel),
             ),
           ],
         ),
@@ -84,8 +86,182 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildContent(
-      BuildContext context, HomeData data, bool isArabic) {
+  Widget _buildSearchBar(BuildContext context, bool isArabic) {
+    final l10n = AppLocalizations.of(context)!;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+      child: RawAutocomplete<HomeCoupon>(
+        optionsBuilder: (TextEditingValue textEditingValue) async {
+          final query = textEditingValue.text.trim();
+          if (query.isEmpty) {
+            return const Iterable<HomeCoupon>.empty();
+          }
+          try {
+            final repo = context.read<HomeRepository>();
+            final results = await repo.searchCoupons(query, limit: 8);
+            return results;
+          } catch (e) {
+            debugPrint('Search error: $e');
+            return const Iterable<HomeCoupon>.empty();
+          }
+        },
+        displayStringForOption: (HomeCoupon option) => option.name,
+        onSelected: (HomeCoupon selection) async {
+          final offer = Offer(
+            id: selection.id,
+            title: selection.name,
+            titleAr: selection.nameAr,
+            category: selection.category,
+            imageUrl: selection.imageUrl,
+            daysLeft: selection.daysLeft,
+            hoursLeft: selection.hoursLeft,
+            minutesLeft: selection.minutesLeft,
+            location: selection.location(isArabic),
+            description: selection.description,
+            descriptionAr: selection.descriptionAr,
+            price: selection.price,
+            currency: 'QAR',
+            slug: selection.slug,
+            vendor: selection.vendor,
+            vendorId: selection.vendorId,
+            validity: selection.validity,
+            wishlisted: selection.wishlisted,
+          );
+          final viewCart = await Navigator.of(context).push<bool>(
+            MaterialPageRoute(
+              builder: (context) => ProductDetailPage(offer: offer),
+            ),
+          );
+          if (viewCart == true && context.mounted) {
+            final mainPageState = context.findAncestorStateOfType<MainPageState>();
+            if (mainPageState != null) {
+              mainPageState.setSelectedIndex(3); // Cart is index 3
+            }
+          }
+        },
+        fieldViewBuilder: (BuildContext context, TextEditingController textEditingController, FocusNode focusNode, VoidCallback onFieldSubmitted) {
+          return Container(
+            height: 48,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: const Color(0xFFE2E8F0)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.03),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: TextField(
+              controller: textEditingController,
+              focusNode: focusNode,
+              textInputAction: TextInputAction.search,
+              onSubmitted: (_) => onFieldSubmitted(),
+              style: const TextStyle(
+                color: Color(0xFF0F172A),
+                fontSize: 14,
+              ),
+              decoration: InputDecoration(
+                border: InputBorder.none,
+                contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                prefixIcon: const Icon(Icons.search, color: Color(0xFF94A3B8), size: 20),
+                hintText: l10n.searchHint,
+                hintStyle: const TextStyle(
+                  color: Color(0xFF94A3B8),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                ),
+                suffixIcon: ValueListenableBuilder<TextEditingValue>(
+                  valueListenable: textEditingController,
+                  builder: (context, value, child) {
+                    return value.text.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.clear, color: Color(0xFF94A3B8), size: 16),
+                            onPressed: () {
+                              textEditingController.clear();
+                            },
+                          )
+                        : const SizedBox.shrink();
+                  },
+                ),
+              ),
+            ),
+          );
+        },
+        optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<HomeCoupon> onSelected, Iterable<HomeCoupon> options) {
+          final width = MediaQuery.of(context).size.width - 32;
+          return Align(
+            alignment: Alignment.topLeft,
+            child: Material(
+              color: Colors.transparent,
+              child: Container(
+                width: width,
+                constraints: const BoxConstraints(maxHeight: 280),
+                margin: const EdgeInsets.only(top: 8),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.08),
+                      blurRadius: 16,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: ListView.separated(
+                    padding: EdgeInsets.zero,
+                    shrinkWrap: true,
+                    itemCount: options.length,
+                    separatorBuilder: (context, index) => Container(
+                      height: 1,
+                      color: const Color(0xFFF1F5F9),
+                    ),
+                    itemBuilder: (BuildContext context, int index) {
+                      final option = options.elementAt(index);
+                      return InkWell(
+                        onTap: () {
+                          onSelected(option);
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 36,
+                                height: 36,
+                                decoration: const BoxDecoration(
+                                  color: Color(0xFFFFF2EC),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Center(
+                                  child: Icon(Icons.local_offer, color: const Color(0xFFFF6B35), size: 18),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(child: Text(option.name, style: const TextStyle(fontSize: 14))),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildContent(BuildContext context, HomeData data, bool isArabic) {
+    final l10n = AppLocalizations.of(context)!;
     // Find the promo coupon dynamically from any collections
     final allCoupons = data.collections.expand((c) => c.coupons).toList();
     HomeCoupon? promoCoupon;

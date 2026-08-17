@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../../l10n/app_localizations.dart';
 import '../../../main/presentation/widgets/app_footer.dart';
+import '../../../localization/presentation/cubit/locale_cubit.dart';
+import '../../../localization/data/services/localization_service.dart';
 
 class AnimalCarePage extends StatelessWidget {
   const AnimalCarePage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final localeCubit = context.watch<LocaleCubit>();
+    final isArabic = localeCubit.state.languageCode == 'ar';
+
     return SafeArea(
       child: SingleChildScrollView(
         child: Column(
@@ -32,9 +39,12 @@ class AnimalCarePage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 16),
-                  const Text(
-                    'Animal Care',
-                    style: TextStyle(
+                  Text(
+                    LocalizationService().getString(
+                      'ANIMAL_CARE',
+                      AppLocalizations.of(context)!.animalCare,
+                    ),
+                    style: const TextStyle(
                       fontSize: 26,
                       fontWeight: FontWeight.w900,
                       color: Color(0xFF0F172A),
@@ -45,12 +55,15 @@ class AnimalCarePage extends StatelessWidget {
             ),
 
             // ── Placeholder Content ───────────────────────────────────────
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 48),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 48),
               child: Center(
                 child: Text(
-                  'Animal Care offers coming soon...',
-                  style: TextStyle(fontSize: 16, color: Color(0xFF64748B)),
+                  LocalizationService().getString(
+                    'ANIMAL_CARE_COMING_SOON',
+                    AppLocalizations.of(context)!.animalCareComingSoon,
+                  ),
+                  style: const TextStyle(fontSize: 16, color: Color(0xFF64748B)),
                 ),
               ),
             ),

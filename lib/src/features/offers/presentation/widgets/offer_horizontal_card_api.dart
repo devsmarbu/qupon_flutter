@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import '../../../localization/data/services/localization_service.dart';
 import '../../../home/data/models/home_coupon.dart';
 import '../../data/models/offer.dart';
 import '../pages/product_detail_page.dart';
 import '../../../main/presentation/pages/main_page.dart';
+import '../../../../../l10n/app_localizations.dart';
 
 /// Horizontal card for the carousel-layout collection sections.
 /// Redesigned to exactly match the premium look in the screenshot.
@@ -14,6 +16,7 @@ class OfferHorizontalCardApi extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
+    final l10n = AppLocalizations.of(context)!;
     final imageUrl = coupon.imageUrl;
 
     return GestureDetector(
@@ -221,7 +224,7 @@ class OfferHorizontalCardApi extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            isArabic ? 'سعر الصفقة' : 'DEAL PRICE',
+                            LocalizationService().getString('COUPON_DETAILS_DEAL_PRICE', l10n.dealPrice),
                             style: const TextStyle(
                               fontSize: 9,
                               fontWeight: FontWeight.bold,
@@ -251,7 +254,7 @@ class OfferHorizontalCardApi extends StatelessWidget {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              isArabic ? 'التفاصيل' : 'Details',
+                              LocalizationService().getString('COMMON_DETAILS', l10n.detailsLabel),
                               style: const TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,

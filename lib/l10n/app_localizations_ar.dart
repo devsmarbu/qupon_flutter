@@ -73,7 +73,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get shoppingCartTitle => 'عربة التسوق';
 
   @override
-  String get cartEmptyTitle => 'عربتك فارغة';
+  String get cartEmptyTitle => 'عربة التسوق فارغة';
 
   @override
   String get cartEmptySubtitle => 'تصفح الصفقات وأضف الكوبونات إلى عربتك.';
@@ -86,7 +86,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get pastDealsSubtitle =>
-      'تصفح العروض منتهية الصلاحية واطلب كوبوناتك المفضلة للعودة.';
+      'تصفح العروض المنتهية واطلب إعادة كوبوناتك المفضلة.';
 
   @override
   String pastDealsCount(int count) {
@@ -98,6 +98,16 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get requestCoupon => 'اطلب الكوبون';
+
+  @override
+  String get requestCouponHint =>
+      'مثال: لقد فاتني هذا العرض وأود شراءه مرة أخرى...';
+
+  @override
+  String get couponQrCodeTitle => 'رمز الاستجابة السريعة للكوبون';
+
+  @override
+  String get qrCodeSubtitle => 'قم بتقديم رمز QR للبائع لاسترداد مشترياتك.';
 
   @override
   String get orderSummary => 'ملخص الطلب';
@@ -454,8 +464,793 @@ class AppLocalizationsAr extends AppLocalizations {
   String get groceryStore => 'متجر البقالة';
 
   @override
-  String get couponRedeemed => 'تم استخدام الكوبون';
+  String get coffeeShop => 'مقهى';
 
   @override
-  String get coffeeShop => 'مقهى';
+  String get qrCodeLabel => 'رمز QR';
+
+  @override
+  String get showQrCode => 'عرض رمز QR';
+
+  @override
+  String get noOffersInCategory => 'لا توجد عروض متاحة في هذه الفئة حالياً';
+
+  @override
+  String get couponOptionBasic => 'أساسي';
+
+  @override
+  String get couponViewDetails => 'عرض التفاصيل';
+
+  @override
+  String get retryLabel => 'إعادة المحاولة';
+
+  @override
+  String get noPastDealsAvailable => 'لا توجد عروض سابقة متاحة حالياً.';
+
+  @override
+  String get requestCouponShort => 'اطلب الكوبون';
+
+  @override
+  String get requestThisCoupon => 'طلب هذا الكوبون';
+
+  @override
+  String requestCouponDescription(String name) {
+    return 'أخبرنا لماذا تريد إعادة $name. سيراجع البائع والمسؤول رسالتك.';
+  }
+
+  @override
+  String get yourMessage => 'رسالتك';
+
+  @override
+  String get submitRequest => 'إرسال الطلب';
+
+  @override
+  String get cancelLabel => 'إلغاء';
+
+  @override
+  String get navCategories => 'الفئات';
+
+  @override
+  String daysLeftShort(int days) {
+    return '$days يوم متبقي';
+  }
+
+  @override
+  String itemCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count عنصر',
+      many: '$count عنصرًا',
+      few: '$count عناصر',
+      two: 'عنصران',
+      one: 'عنصر واحد',
+      zero: 'لا توجد عناصر',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get myWishlist => 'قائمة رغباتي';
+
+  @override
+  String get noItemsInWishlist => 'لا توجد عناصر في قائمة رغباتك حالياً';
+
+  @override
+  String get animalCare => 'رعاية الحيوانات';
+
+  @override
+  String get animalCareComingSoon => 'عروض رعاية الحيوانات قريباً...';
+
+  @override
+  String get foodDrinks => 'مطاعم ومأكولات';
+
+  @override
+  String get foodDrinksComingSoon => 'عروض الأطعمة والمشروبات قريباً...';
+
+  @override
+  String get failedToLoadOffers => 'فشل تحميل العروض. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get noOffersInCollection =>
+      'لا توجد عروض متاحة في هذه المجموعة حالياً';
+
+  @override
+  String get searchPlaceholder => 'البحث عن كوبونات، موردين...';
+
+  @override
+  String get subtotalLabel => 'المجموع الفرعي';
+
+  @override
+  String get recipientPhoneLabel => 'رقم جوال المستلم';
+
+  @override
+  String get giftPhoneHint => 'سنرسل رمز/رموز الكوبون إلى هذا الرقم بعد الدفع.';
+
+  @override
+  String get qatarPhoneHint =>
+      'رقم جوال قطري، 8 أرقام (مثال 50123456 أو +974 50123456).';
+
+  @override
+  String get vendorLabel => 'البائع';
+
+  @override
+  String get offerLabel => 'العرض';
+
+  @override
+  String get codeLabel => 'الكود';
+
+  @override
+  String get couponUrlLabel => 'رابط الكوبون';
+
+  @override
+  String get couponCopiedClipboard => 'تم نسخ الرابط في الحافظة';
+
+  @override
+  String get priceLabel => 'السعر';
+
+  @override
+  String get statusLabel => 'الحالة';
+
+  @override
+  String get redeemByLabel => 'تاريخ الاسترداد';
+
+  @override
+  String get timeLeftLabel => 'الوقت المتبقي';
+
+  @override
+  String get dealPrice => 'سعر الصفقة';
+
+  @override
+  String get detailsLabel => 'التفاصيل';
+
+  @override
+  String get healthWellness => 'صحة وجمال';
+
+  @override
+  String get travelTourism => 'سياحة وسفر';
+
+  @override
+  String get entertainmentLabel => 'ترفيه';
+
+  @override
+  String get beautyLabel => 'الجمال';
+
+  @override
+  String get viewCartLabel => 'عرض السلة';
+
+  @override
+  String get appNameLabel => 'كوبون';
+
+  @override
+  String get thisOfferExpired => 'انتهى هذا العرض';
+
+  @override
+  String get openInMaps => 'افتح في الخرائط';
+
+  @override
+  String get navAccount => 'الحساب';
+
+  @override
+  String get deleteLabel => 'حذف';
+
+  @override
+  String get couponCodeQr => 'رمز الكوبون';
+
+  @override
+  String get navHome => 'بيت';
+
+  @override
+  String get navPastDeals => 'الصفقات السابقة';
+
+  @override
+  String get navSearchPlaceholder => 'ابحث عن كوبونات، متاجر...';
+
+  @override
+  String get navSearchLoading => 'جاري البحث...';
+
+  @override
+  String get navSearchEmpty => 'لم يتم العثور على كوبونات.';
+
+  @override
+  String get navSearchError => 'فشل البحث. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get navPortals => 'البوابات:';
+
+  @override
+  String get navAdmin => 'المسؤول';
+
+  @override
+  String get navVendor => 'البائع';
+
+  @override
+  String get navInfluencer => 'المؤثر';
+
+  @override
+  String get footerAddress =>
+      'الدوحة، قطر، الخليج الغربي، برج الريم، مبنى رقم 37، الطابق 11، مكتب 46، ص.ب 24355';
+
+  @override
+  String get footerPhone => 'الهاتف:';
+
+  @override
+  String get footerEmail => 'البريد:';
+
+  @override
+  String get footerFollowUs => 'تابعنا';
+
+  @override
+  String get footerCompany => 'الشركة';
+
+  @override
+  String get footerAboutUs => 'من نحن';
+
+  @override
+  String get footerCouponPage => 'صفحة الكوبونات';
+
+  @override
+  String get footerSupport => 'الدعم';
+
+  @override
+  String get footerTerms => 'الشروط والأحكام';
+
+  @override
+  String get footerRefundPolicy => 'سياسة الاسترداد';
+
+  @override
+  String get footerContactUs => 'اتصل بنا';
+
+  @override
+  String get footerPrivacyPolicy => 'سياسة الخصوصية';
+
+  @override
+  String get footerMyAccount => 'حسابي';
+
+  @override
+  String get footerMyOrders => 'طلباتي';
+
+  @override
+  String get footerMyWishlist => 'قائمة أمنياتي';
+
+  @override
+  String get wishlistTitle => 'قائمة أمنياتي';
+
+  @override
+  String get wishlistSubtitle => 'الكوبونات التي حفظتها لاحقاً.';
+
+  @override
+  String get wishlistBackDashboard => 'العودة للوحة التحكم';
+
+  @override
+  String get wishlistLoading => 'جاري تحميل قائمة الأمنيات…';
+
+  @override
+  String get wishlistEmpty => 'قائمة أمنياتك فارغة';
+
+  @override
+  String get wishlistEmptyHint => 'اضغط على القلب على أي كوبون لحفظه هنا.';
+
+  @override
+  String get wishlistBrowse => 'تصفح الكوبونات';
+
+  @override
+  String get wishlistRemove => 'إزالة';
+
+  @override
+  String get wishlistRemoved => 'تمت الإزالة من قائمة الأمنيات.';
+
+  @override
+  String get wishlistLoadError => 'تعذر تحميل قائمة الأمنيات.';
+
+  @override
+  String get wishlistRemoveError => 'تعذر الإزالة من قائمة الأمنيات.';
+
+  @override
+  String get footerPortal => 'البوابة';
+
+  @override
+  String get footerPortalPartner => 'الشريك';
+
+  @override
+  String get footerPoweredByPrefix => 'بدعم من:';
+
+  @override
+  String get footerPoweredByBrand => 'بارادايم للتسويق والإعلان';
+
+  @override
+  String get cmsScrollTop => 'العودة للأعلى';
+
+  @override
+  String get cmsReadMore => 'اقرأ المزيد';
+
+  @override
+  String get cmsReadLess => 'اقرأ أقل';
+
+  @override
+  String get contactTitle => 'اتصل بنا';
+
+  @override
+  String get contactHeroAlt => 'اتصل بكوبون';
+
+  @override
+  String get contactSendMessage => 'أرسل رسالة';
+
+  @override
+  String get contactGetInTouch => 'تواصل معنا';
+
+  @override
+  String get contactName => 'اسمك';
+
+  @override
+  String get contactPhone => 'الهاتف';
+
+  @override
+  String get contactEmail => 'البريد الإلكتروني';
+
+  @override
+  String get contactSubject => 'الموضوع';
+
+  @override
+  String get contactMessage => 'رسالتك';
+
+  @override
+  String get contactPhoneLabel => 'رقم الهاتف';
+
+  @override
+  String get contactEmailLabel => 'البريد الإلكتروني';
+
+  @override
+  String get contactLocationLabel => 'موقعنا';
+
+  @override
+  String get contactSubmit => 'إرسال';
+
+  @override
+  String get contactSubmitting => 'جارٍ الإرسال…';
+
+  @override
+  String get contactSubmitSuccess => 'شكراً لك. تم إرسال رسالتك.';
+
+  @override
+  String get contactSubmitError => 'تعذر إرسال رسالتك. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get homeLimitedOffer => 'عرض لفترة محدودة';
+
+  @override
+  String get homeShopNow => 'تسوق الآن';
+
+  @override
+  String get homeShopByCategory => 'تسوق حسب الفئة';
+
+  @override
+  String get homeTrendingOffers => '🔥 عروض رائجة';
+
+  @override
+  String get homeViewAll => 'عرض الكل';
+
+  @override
+  String get homeActiveOffers => 'عروض نشطة';
+
+  @override
+  String get homeBestInFood => '🍔 الأفضل في الطعام';
+
+  @override
+  String get homeViewMore => 'عرض المزيد';
+
+  @override
+  String get homeTopFashion => '👗 أفضل صفقات الأزياء';
+
+  @override
+  String get homeElectronics => '💻 إلكترونيات وتقنية';
+
+  @override
+  String get homeSports => '⚽ رياضة وخارجية';
+
+  @override
+  String get couponValidTill => 'صالح حتى';
+
+  @override
+  String get couponExpired => 'منتهي';
+
+  @override
+  String get couponGetCode => 'احصل على الرمز';
+
+  @override
+  String get couponViewDeal => 'عرض الصفقة';
+
+  @override
+  String get couponOff => 'خصم';
+
+  @override
+  String get couponStartingAt => 'تبدأ من';
+
+  @override
+  String get couponOfferPrice => 'تدفع';
+
+  @override
+  String get couponListPrice => 'كان';
+
+  @override
+  String get couponExp => 'ينتهي:';
+
+  @override
+  String get couponD => 'ي';
+
+  @override
+  String get couponH => 'س';
+
+  @override
+  String get couponM => 'د';
+
+  @override
+  String get couponS => 'ث';
+
+  @override
+  String get couponLeft => 'متبقي';
+
+  @override
+  String couponSocialProofShort(Object count) {
+    return '🔥 $count عملية شراء';
+  }
+
+  @override
+  String get couponSocialProofShortOne => '🔥 عملية شراء واحدة';
+
+  @override
+  String get couponDetailsAboutDeal => 'وصف العرض';
+
+  @override
+  String get couponDetailsHowToUse => 'كيفية الاستخدام';
+
+  @override
+  String get couponDetailsTerms => 'الشروط والأحكام';
+
+  @override
+  String get couponDetailsAboutVendor => 'تفاصيل البائع';
+
+  @override
+  String get couponDetailsVisitStore => 'زيارة المتجر';
+
+  @override
+  String get couponDetailsSelectOption => 'اختر المتغير';
+
+  @override
+  String get couponDetailsViewVendor => 'عرض ملف تعريف البائع';
+
+  @override
+  String get couponDetailsDiscount => 'الخصم';
+
+  @override
+  String get couponDetailsImportantNotes => 'ملاحظات هامة';
+
+  @override
+  String get couponDetailsPrice => 'المبلغ المستحق';
+
+  @override
+  String get couponDetailsYouPay => 'المبلغ المستحق';
+
+  @override
+  String get couponDetailsYouSave => 'انت وفرت';
+
+  @override
+  String get couponDetailsGetDeal => 'احصل على الصفقة الآن';
+
+  @override
+  String get couponDetailsBuyAsGift => 'شراء كهدية';
+
+  @override
+  String get couponDetailsSave => 'حفظ';
+
+  @override
+  String get couponDetailsSaved => 'تم الحفظ';
+
+  @override
+  String get couponDetailsWishlist => 'أضف إلى قائمة الأمنيات';
+
+  @override
+  String get couponDetailsWishlistSaved => 'إزالة من قائمة الأمنيات';
+
+  @override
+  String get couponDetailsCart => 'عربة التسوق';
+
+  @override
+  String get couponDetailsCheckout => 'الدفع';
+
+  @override
+  String get couponDetailsBack => 'العودة للقوائم';
+
+  @override
+  String get couponDetailsPurchaseProgress => 'توفر الشراء';
+
+  @override
+  String get couponDetailsPurchased => 'تم شراؤها';
+
+  @override
+  String couponDetailsSocialProof(Object count) {
+    return '🔥 $count شخصاً حصلوا على هذه الصفقة';
+  }
+
+  @override
+  String get couponDetailsSocialProofOne => '🔥 شخص واحد حصل على هذه الصفقة';
+
+  @override
+  String get couponDetailsSocialProofFirst => '✨ كن أول من يحصل على هذه الصفقة';
+
+  @override
+  String get couponDetailsOf => 'من';
+
+  @override
+  String get couponDetailsRemaining => 'متبقية';
+
+  @override
+  String get couponDetailsSoldOut => 'نفدت الكمية';
+
+  @override
+  String get couponDetailsSoldOutHint =>
+      'وصل هذا الكوبون إلى الحد الأقصى للشراء.';
+
+  @override
+  String get couponDetailsExpiredTitle => 'انتهى هذا العرض';
+
+  @override
+  String get couponDetailsExpiredMessage =>
+      'لم يعد هذا الكوبون متاحاً للشراء. يمكنك طلبه من الصفقات السابقة وسنبلغ البائع.';
+
+  @override
+  String get couponDetailsNotPublishedMessage => 'لم يتم نشر هذا الكوبون.';
+
+  @override
+  String get couponDetailsRequestCoupon => 'طلب الكوبون';
+
+  @override
+  String get couponDetailsShare => 'مشاركة';
+
+  @override
+  String get couponShareTitle => 'مشاركة';
+
+  @override
+  String get couponShareDescription =>
+      'أرسل هذا العرض إلى الأصدقاء أو انسخ الرابط.';
+
+  @override
+  String get couponShareLinkLabel => 'رابط الكوبون';
+
+  @override
+  String get couponShareCopyBtn => 'نسخ';
+
+  @override
+  String get couponShareCopiedBtn => 'تم النسخ';
+
+  @override
+  String get couponShareCopied => 'تم نسخ الرابط';
+
+  @override
+  String get couponShareCopyFailed => 'تعذر نسخ الرابط. انسخه يدويًا.';
+
+  @override
+  String get couponShareNative => 'مشاركة عبر الجهاز';
+
+  @override
+  String get couponShareNativeFailed => 'تم إلغاء المشاركة أو أنها غير متاحة.';
+
+  @override
+  String get vendorProfileBack => 'العودة للرئيسية';
+
+  @override
+  String get vendorProfileAbout => 'نبذة';
+
+  @override
+  String get vendorProfileContact => 'تواصل';
+
+  @override
+  String get vendorProfileFollowUs => 'تابعنا';
+
+  @override
+  String get vendorProfileLandline => 'هاتف أرضي';
+
+  @override
+  String get vendorProfileOffers => 'عروض';
+
+  @override
+  String get vendorProfileNoOffersTitle => 'لا توجد عروض نشطة';
+
+  @override
+  String get vendorProfileNoOffersDesc =>
+      'لا يوجد لدى هذا البائع كوبونات نشطة حالياً.';
+
+  @override
+  String get couponFormMaxPurchases => 'إجمالي الكوبونات المتاحة للشراء';
+
+  @override
+  String get couponFormMaxPurchasesHint =>
+      'الحد الأقصى لعدد العملاء الذين يمكنهم شراء هذا الكوبون. اتركه فارغًا لعدم التحديد.';
+
+  @override
+  String get cartTitle => 'عربة التسوق';
+
+  @override
+  String get cartContinueShopping => 'متابعة التسوق';
+
+  @override
+  String get cartEmptyDesc => 'تصفح العروض وأضف الكوبونات إلى عربتك.';
+
+  @override
+  String get cartBrowseDeals => 'تصفح العروض';
+
+  @override
+  String get cartOrderSummary => 'ملخص الطلب';
+
+  @override
+  String get cartSubtotal => 'المجموع الفرعي';
+
+  @override
+  String get cartTotalSavings => 'إجمالي التوفير';
+
+  @override
+  String get cartTotal => 'الإجمالي';
+
+  @override
+  String get cartPayVia => 'الدفع عبر';
+
+  @override
+  String get cartBalance => 'الرصيد';
+
+  @override
+  String get cartCheckout => 'الدفع';
+
+  @override
+  String get cartProcessing => 'جاري المعالجة…';
+
+  @override
+  String get cartNoPaymentMethods => 'لا توجد طرق دفع متاحة.';
+
+  @override
+  String get cartAdded => 'تمت الإضافة إلى السلة';
+
+  @override
+  String get cartExpiredInCart =>
+      'انتهت صلاحية عنصر أو أكثر في سلتك. أزلها للمتابعة.';
+
+  @override
+  String get checkoutGiftTitle => 'إهداء هذا الطلب';
+
+  @override
+  String get checkoutGiftDesc => 'أرسل تفاصيل الكوبون لشخص آخر عبر رسالة نصية.';
+
+  @override
+  String get checkoutGiftPhoneLabel => 'رقم جوال المستلم';
+
+  @override
+  String get checkoutGiftPhoneHint =>
+      'سنرسل رمز/رموز الكوبون إلى هذا الرقم بعد الدفع.';
+
+  @override
+  String get commonQatarPhoneHint =>
+      'رقم قطري من 8 أرقام (مثل 50123456 أو +974 50123456).';
+
+  @override
+  String pastDealsTotal(Object count) {
+    return '$count صفقة سابقة';
+  }
+
+  @override
+  String get pastDealsLoadingMore => 'جاري تحميل المزيد…';
+
+  @override
+  String get pastDealsRequestButton => 'طلب الكوبون';
+
+  @override
+  String get pastDealsRequestTitle => 'اطلب هذا الكوبون';
+
+  @override
+  String pastDealsRequestDescription(Object name) {
+    return 'أخبرنا لماذا تريد إعادة $name. سيراجع البائع والمسؤول رسالتك.';
+  }
+
+  @override
+  String get pastDealsRequestDescriptionGeneric =>
+      'أخبرنا لماذا تريد إعادة هذا الكوبون.';
+
+  @override
+  String get pastDealsMessageLabel => 'رسالتك';
+
+  @override
+  String get pastDealsMessagePlaceholder =>
+      'مثال: فاتني هذا العرض وأود شراءه مرة أخرى…';
+
+  @override
+  String get pastDealsMessageRequired => 'يرجى إدخال رسالة.';
+
+  @override
+  String get pastDealsSubmit => 'إرسال الطلب';
+
+  @override
+  String get pastDealsSubmitting => 'جاري الإرسال…';
+
+  @override
+  String get pastDealsCancel => 'إلغاء';
+
+  @override
+  String get pastDealsSubmitSuccess => 'تم إرسال طلبك بنجاح.';
+
+  @override
+  String get pastDealsSubmitError => 'تعذر إرسال طلبك. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get pastDealsEmptyTitle => 'لا توجد صفقات سابقة بعد';
+
+  @override
+  String get pastDealsEmptyHint =>
+      'ستظهر الكوبونات المنتهية هنا بعد انتهاء العروض.';
+
+  @override
+  String get pastDealsNoMatch => 'لا توجد صفقات سابقة تطابق بحثك';
+
+  @override
+  String get pastDealsNoMatchHint => 'جرّب كلمة مختلفة أو امسح البحث.';
+
+  @override
+  String get pastDealsClearSearch => 'مسح البحث';
+
+  @override
+  String get filterAllTime => 'كل الوقت';
+
+  @override
+  String get filterStatusActive => 'نشط';
+
+  @override
+  String get filterStatusExpired => 'منتهي';
+
+  @override
+  String get filterStatusPending => 'معلق';
+
+  @override
+  String get filterAll => 'الكل';
+
+  @override
+  String get filterDateLabel => 'التاريخ: ';
+
+  @override
+  String get filterStatusLabel => 'الحالة: ';
+
+  @override
+  String get filterVendorLabel => 'المورد: ';
+
+  @override
+  String get awaitingRedemption => 'في انتظار الاسترداد';
+
+  @override
+  String get redeemedLabel => 'تم الاسترداد';
+
+  @override
+  String get shopByCategory => 'تسوق حسب الفئة';
+
+  @override
+  String get electronicsLabel => 'إلكترونيات';
+
+  @override
+  String get viewAllLabel => 'عرض الكل';
+
+  @override
+  String get qrDialogVendor => 'البائع';
+
+  @override
+  String get qrDialogOffer => 'العرض';
+
+  @override
+  String get qrDialogStatus => 'الحالة';
+
+  @override
+  String get qrDialogOrderRef => 'مرجع الطلب';
+
+  @override
+  String get qrDialogExpiry => 'تاريخ الانتهاء';
+
+  @override
+  String get qrDialogRedeemCode => 'رمز الاسترداد';
+
+  @override
+  String get qrDialogClose => 'إغلاق';
 }

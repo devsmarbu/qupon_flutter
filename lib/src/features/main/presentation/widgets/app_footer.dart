@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../localization/data/services/localization_service.dart';
+import '../../../localization/presentation/cubit/locale_cubit.dart';
 
 /// Common footer widget matching the Qupon brand design.
 /// Shows logo, contact details, navigation links, and social links.
@@ -7,6 +10,10 @@ class AppFooter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Watch LocaleCubit to rebuild when language changes
+    context.watch<LocaleCubit>();
+    final loc = LocalizationService();
+
     return Container(
       color: const Color(0xFF0D0D0D),
       padding: const EdgeInsets.fromLTRB(24, 36, 24, 32),
@@ -44,10 +51,13 @@ class AppFooter extends StatelessWidget {
           const SizedBox(height: 28),
 
           // ── Address ────────────────────────────────────────────────────
-          const Text(
-            'Doha, Qatar, West Bay, Al Reem Tower, Building\n'
-            'number 37, 11th floor, office 46, P.O. Box 24355',
-            style: TextStyle(
+          Text(
+            loc.getString(
+              'FOOTER_ADDRESS',
+              'Doha, Qatar, West Bay, Al Reem Tower, Building\n'
+              'number 37, 11th floor, office 46, P.O. Box 24355',
+            ),
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 14,
               height: 1.65,
@@ -57,17 +67,17 @@ class AppFooter extends StatelessWidget {
 
           // ── Phone ──────────────────────────────────────────────────────
           RichText(
-            text: const TextSpan(
+            text: TextSpan(
               children: [
                 TextSpan(
-                  text: 'Phone: ',
-                  style: TextStyle(
+                  text: loc.getString('FOOTER_PHONE', 'Phone: '),
+                  style: const TextStyle(
                     color: Color(0xFFFF6B35),
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                TextSpan(
+                const TextSpan(
                   text: '+974 3122 4113',
                   style: TextStyle(
                     color: Colors.white,
@@ -81,17 +91,17 @@ class AppFooter extends StatelessWidget {
 
           // ── Email ──────────────────────────────────────────────────────
           RichText(
-            text: const TextSpan(
+            text: TextSpan(
               children: [
                 TextSpan(
-                  text: 'Email: ',
-                  style: TextStyle(
+                  text: loc.getString('FOOTER_EMAIL', 'Email: '),
+                  style: const TextStyle(
                     color: Color(0xFFFF6B35),
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                TextSpan(
+                const TextSpan(
                   text: 'info@qupon.qa',
                   style: TextStyle(
                     color: Colors.white,
@@ -112,9 +122,9 @@ class AppFooter extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'COMPANY',
-                      style: TextStyle(
+                    Text(
+                      loc.getString('FOOTER_COMPANY', 'COMPANY'),
+                      style: const TextStyle(
                         color: Color(0xFFFF6B35),
                         fontSize: 13,
                         fontWeight: FontWeight.w800,
@@ -122,7 +132,7 @@ class AppFooter extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    _FooterLink(label: 'About Us'),
+                    _FooterLink(label: loc.getString('FOOTER_ABOUT_US', 'About Us')),
                   ],
                 ),
               ),
@@ -131,9 +141,9 @@ class AppFooter extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'SUPPORT',
-                      style: TextStyle(
+                    Text(
+                      loc.getString('FOOTER_SUPPORT', 'SUPPORT'),
+                      style: const TextStyle(
                         color: Color(0xFFFF6B35),
                         fontSize: 13,
                         fontWeight: FontWeight.w800,
@@ -141,13 +151,13 @@ class AppFooter extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    _FooterLink(label: 'Terms & Conditions'),
+                    _FooterLink(label: loc.getString('FOOTER_TERMS', 'Terms & Conditions')),
                     const SizedBox(height: 12),
-                    _FooterLink(label: 'Refund Policy'),
+                    _FooterLink(label: loc.getString('FOOTER_REFUND_POLICY', 'Refund Policy')),
                     const SizedBox(height: 12),
-                    _FooterLink(label: 'Contact Us'),
+                    _FooterLink(label: loc.getString('FOOTER_CONTACT_US', 'Contact Us')),
                     const SizedBox(height: 12),
-                    _FooterLink(label: 'Privacy Policy'),
+                    _FooterLink(label: loc.getString('FOOTER_PRIVACY_POLICY', 'Privacy Policy')),
                   ],
                 ),
               ),
@@ -156,9 +166,9 @@ class AppFooter extends StatelessWidget {
           const SizedBox(height: 36),
 
           // ── MY ACCOUNT ─────────────────────────────────────────────────
-          const Text(
-            'MY ACCOUNT',
-            style: TextStyle(
+          Text(
+            loc.getString('FOOTER_MY_ACCOUNT', 'MY ACCOUNT'),
+            style: const TextStyle(
               color: Color(0xFFFF6B35),
               fontSize: 13,
               fontWeight: FontWeight.w800,
@@ -166,17 +176,17 @@ class AppFooter extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          _FooterLink(label: 'My Orders'),
+          _FooterLink(label: loc.getString('FOOTER_MY_ORDERS', 'My Orders')),
           const SizedBox(height: 12),
-          _FooterLink(label: 'My Wishlist'),
+          _FooterLink(label: loc.getString('FOOTER_MY_WISHLIST', 'My Wishlist')),
           const SizedBox(height: 36),
 
           // ── Follow Us ──────────────────────────────────────────────────
           Row(
             children: [
-              const Text(
-                'Follow Us',
-                style: TextStyle(
+              Text(
+                loc.getString('FOOTER_FOLLOW_US', 'Follow Us'),
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
@@ -206,18 +216,18 @@ class AppFooter extends StatelessWidget {
 
           // ── Powered by ─────────────────────────────────────────────────
           RichText(
-            text: const TextSpan(
+            text: TextSpan(
               children: [
                 TextSpan(
-                  text: 'Powered by: ',
-                  style: TextStyle(
+                  text: loc.getString('FOOTER_POWERED_BY_PREFIX', 'Powered by: '),
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 13,
                   ),
                 ),
                 TextSpan(
-                  text: 'Paradigm Marketing And Advertising',
-                  style: TextStyle(
+                  text: loc.getString('FOOTER_POWERED_BY_BRAND', 'Paradigm Marketing And Advertising'),
+                  style: const TextStyle(
                     color: Color(0xFFFF6B35),
                     fontSize: 13,
                     fontWeight: FontWeight.w600,

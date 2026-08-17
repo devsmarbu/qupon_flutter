@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../l10n/app_localizations.dart';
 import '../../../localization/presentation/cubit/locale_cubit.dart';
+import '../../../localization/data/services/localization_service.dart';
 import '../../../main/presentation/widgets/app_footer.dart';
 import '../../../main/presentation/pages/main_page.dart';
 import '../../../home/data/models/home_category.dart';
@@ -226,7 +227,10 @@ class _CategoryOffersPageState extends State<CategoryOffersPage> {
                         child: Padding(
                           padding: const EdgeInsets.symmetric(vertical: 60, horizontal: 24),
                           child: Text(
-                            isArabic ? 'لا توجد عروض متاحة في هذه الفئة حالياً' : 'No offers available in this category currently',
+                            LocalizationService().getString(
+                              'CATEGORY_EMPTY_OFFERS',
+                              l10n.noOffersInCategory,
+                            ),
                             style: const TextStyle(color: Color(0xFF64748B)),
                             textAlign: TextAlign.center,
                           ),
@@ -279,7 +283,7 @@ class _CategoryOffersPageState extends State<CategoryOffersPage> {
         : offer.description;
     final optionName = description.length <= 20
         ? description.toUpperCase()
-        : (isArabic ? 'أساسي' : 'BASIC');
+        : LocalizationService().getString('COUPON_OPTION_BASIC', l10n.couponOptionBasic);
 
     return GestureDetector(
       onTap: () async {
@@ -546,7 +550,7 @@ class _CategoryOffersPageState extends State<CategoryOffersPage> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              isArabic ? 'عرض التفاصيل' : 'View Details',
+                              LocalizationService().getString('COUPON_VIEW_DETAILS', l10n.couponViewDetails),
                               style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(width: 6),

@@ -23,6 +23,7 @@ import 'package:qupon/src/features/cart/data/models/payment_gateway.dart';
 import 'package:qupon/src/features/cart/data/models/checkout_model.dart';
 import 'package:qupon/src/features/account/data/models/dashboard_model.dart';
 import 'package:qupon/src/features/home/data/models/home_coupon.dart';
+import 'package:qupon/src/features/localization/data/repositories/localization_repository.dart';
 
 class FakeHomeRepository implements HomeRepository {
   @override
@@ -223,6 +224,48 @@ class FakeAuthRepository implements AuthRepository {
   }
 }
 
+class FakeLocalizationRepository implements LocalizationRepository {
+  @override
+  Future<Map<String, String>> getLabels(int langId) async {
+    return {
+      'NAV_HOME': 'Home',
+      'NAV_SEARCH_PLACEHOLDER': 'Search...',
+      'HOME_SHOP_BY_CATEGORY': 'Shop by Category',
+      'HOME_ELECTRONICS': 'Electronics',
+      'HOME_VIEW_ALL': 'View All',
+      'NAV_PAST_DEALS': 'Past Deals',
+      'PAST_DEALS_SUBTITLE': 'Past Deals Subtitle',
+      'PAST_DEALS_REQUEST_BUTTON': 'Request Coupon',
+      'PAST_DEALS_REQUEST_TITLE': 'Request Coupon Dialog',
+      'PAST_DEALS_MESSAGE_LABEL': 'Your message',
+      'PAST_DEALS_SUBMIT': 'Submit request',
+      'PAST_DEALS_CANCEL': 'Cancel',
+      'WISHLIST_TITLE': 'My Wishlist',
+      'WISHLIST_EMPTY': 'No items in wishlist',
+      'CART_TITLE': 'Shopping Cart',
+      'CART_EMPTY_TITLE': 'Your cart is empty',
+      'CART_EMPTY_DESC': 'Add items to cart',
+      'CART_BROWSE_DEALS': 'Browse deals',
+      'COUPON_DETAILS_YOU_SAVE': 'You save',
+      'WISHLIST_REMOVE': 'Delete',
+      'CART_ORDER_SUMMARY': 'Order summary',
+      'CART_SUBTOTAL': 'Subtotal',
+      'CART_TOTAL_SAVINGS': 'Total savings',
+      'CART_TOTAL': 'Total',
+      'CHECKOUT_GIFT_TITLE': 'Gift this order',
+      'CHECKOUT_GIFT_DESC': 'Send as gift',
+      'CHECKOUT_GIFT_PHONE_LABEL': 'Recipient phone',
+      'CHECKOUT_GIFT_PHONE_HINT': 'Enter recipient phone',
+      'COMMON_QATAR_PHONE_HINT': 'Qatar number',
+      'CART_PAY_VIA': 'Pay via',
+      'CART_BALANCE': 'Balance',
+      'CART_CHECKOUT': 'Checkout',
+      'COUPON_DETAILS_DEAL_PRICE': 'Deal Price',
+      'COMMON_DETAILS': 'Details',
+    };
+  }
+}
+
 void main() {
   testWidgets('Smoke test for MainPage, CartPage, and PastDealsPage', (WidgetTester tester) async {
     SharedPreferences.setMockInitialValues({});
@@ -241,14 +284,21 @@ void main() {
     final fakeCartRepo = FakeCartRepository();
     final fakeAuthRepo = FakeAuthRepository();
 
+    final sharedPrefs = await SharedPreferences.getInstance();
+
+    final fakeLocRepo = FakeLocalizationRepository();
+
     // Build our app and trigger a frame.
     await tester.pumpWidget(MyApp(
       homeRepository: fakeHomeRepo,
       offersRepository: fakeOffersRepo,
       cartRepository: fakeCartRepo,
       authRepository: fakeAuthRepo,
+      localizationRepository: fakeLocRepo,
+      sharedPreferences: sharedPrefs,
     ));
     
+    await tester.pump(const Duration(milliseconds: 2600));
     await tester.pumpAndSettle();
     // Verify home page loads by checking "Top Picks" text is visible
     expect(find.text('Top Picks', skipOffstage: false), findsOneWidget);
