@@ -228,6 +228,7 @@ class FakeLocalizationRepository implements LocalizationRepository {
   @override
   Future<Map<String, String>> getLabels(int langId) async {
     return {
+      'APP_FILTER': 'Filter',
       'NAV_HOME': 'Home',
       'NAV_SEARCH_PLACEHOLDER': 'Search...',
       'HOME_SHOP_BY_CATEGORY': 'Shop by Category',
