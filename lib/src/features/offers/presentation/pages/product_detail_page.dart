@@ -1346,7 +1346,10 @@ class ProductDetailView extends StatelessWidget {
                               Expanded(
                                 flex: 4,
                                 child: OutlinedButton(
-                                  onPressed: () {
+                                  onPressed: () async {
+                                    if (!await _ensureLoggedIn(context)) return;
+                                    if (!context.mounted) return;
+
                                     DirectCheckoutSheet.show(
                                       context,
                                       offer: offer,
@@ -1376,7 +1379,10 @@ class ProductDetailView extends StatelessWidget {
                               Expanded(
                                 flex: 4,
                                 child: ElevatedButton(
-                                  onPressed: () {
+                                  onPressed: () async {
+                                    if (!await _ensureLoggedIn(context)) return;
+                                    if (!context.mounted) return;
+
                                     DirectCheckoutSheet.show(
                                       context,
                                       offer: offer,
