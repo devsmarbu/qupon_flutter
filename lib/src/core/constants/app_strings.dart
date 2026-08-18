@@ -6,6 +6,7 @@ class AppStrings {
   static const String keyToken = 'token';
   static const String keyCartItems = 'cart_local_items';
   static const String keyCartCount = 'cart_item_count';
+  static const String keyLanguage = 'language_code';
 
   // Welcome Screen Strings
   static String welcomeTitle(BuildContext context) => AppLocalizations.of(context)!.welcomeTitle;

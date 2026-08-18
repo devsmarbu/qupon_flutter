@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/main/presentation/pages/main_page.dart';
+import '../../features/main/presentation/pages/splash_page.dart';
 import '../../features/home/presentation/pages/collection_coupons_page.dart';
 import '../../features/home/data/models/home_collection.dart';
 import '../../features/offers/data/models/offer.dart';
@@ -18,7 +19,7 @@ class AppRouter {
     routes: [
       GoRoute(
         path: '/',
-        builder: (context, state) => const MainPage(),
+        builder: (context, state) => const SplashPage(),
       ),
       GoRoute(
         path: '/offers',

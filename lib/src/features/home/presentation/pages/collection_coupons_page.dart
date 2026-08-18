@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../l10n/app_localizations.dart';
 import '../../../localization/presentation/cubit/locale_cubit.dart';
+import '../../../localization/data/services/localization_service.dart';
 import '../../../main/presentation/pages/main_page.dart';
 import '../../data/models/home_collection.dart';
 import '../../data/models/home_coupon.dart';
@@ -231,9 +232,10 @@ class _CollectionCouponsPageState extends State<CollectionCouponsPage> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          isArabic
-                              ? 'فشل تحميل العروض. يرجى المحاولة مرة أخرى.'
-                              : 'Failed to load offers. Please try again.',
+                          LocalizationService().getString(
+                            'COLLECTION_LOAD_ERROR',
+                            AppLocalizations.of(context)!.failedToLoadOffers,
+                          ),
                           style: const TextStyle(color: Colors.red),
                           textAlign: TextAlign.center,
                         ),
@@ -244,7 +246,7 @@ class _CollectionCouponsPageState extends State<CollectionCouponsPage> {
                             backgroundColor: const Color(0xFFFF6B35),
                             foregroundColor: Colors.white,
                           ),
-                          child: Text(isArabic ? 'إعادة المحاولة' : 'Retry'),
+                          child: Text(LocalizationService().getString('RETRY', l10n.retryLabel)),
                         ),
                       ],
                     ),
@@ -255,9 +257,10 @@ class _CollectionCouponsPageState extends State<CollectionCouponsPage> {
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 60, horizontal: 24),
                     child: Text(
-                      isArabic
-                          ? 'لا توجد عروض متاحة في هذه المجموعة حالياً'
-                          : 'No offers available in this collection currently',
+                      LocalizationService().getString(
+                        'COLLECTION_EMPTY_OFFERS',
+                        AppLocalizations.of(context)!.noOffersInCollection,
+                      ),
                       style: const TextStyle(color: Color(0xFF64748B)),
                       textAlign: TextAlign.center,
                     ),
@@ -327,7 +330,7 @@ class _CollectionCouponsPageState extends State<CollectionCouponsPage> {
         ? coupon.descriptionAr
         : coupon.description;
     final optionName =
-        description.length <= 20 ? description.toUpperCase() : (isArabic ? 'أساسي' : 'BASIC');
+        description.length <= 20 ? description.toUpperCase() : LocalizationService().getString('COUPON_OPTION_BASIC', l10n.couponOptionBasic);
 
     return GestureDetector(
       onTap: () async {
@@ -641,7 +644,7 @@ class _CollectionCouponsPageState extends State<CollectionCouponsPage> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              isArabic ? 'عرض التفاصيل' : 'View Details',
+                              LocalizationService().getString('COUPON_VIEW_DETAILS', l10n.couponViewDetails),
                               style: const TextStyle(
                                   fontSize: 14, fontWeight: FontWeight.bold),
                             ),

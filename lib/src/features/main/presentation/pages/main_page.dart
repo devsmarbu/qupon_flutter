@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../localization/presentation/cubit/locale_cubit.dart';
+import '../../../localization/data/services/localization_service.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../home/presentation/pages/home_page.dart';
 import '../../../account/presentation/account/view/account_page.dart';
@@ -271,28 +272,28 @@ class MainPageState extends State<MainPage> {
                 index: 0,
                 icon: Icons.home_outlined,
                 activeIcon: Icons.home,
-                label: l10n.drawerHome,
+                label: LocalizationService().getString('NAV_HOME', l10n.drawerHome),
               ),
               _buildTabItem(
                 context: context,
                 index: 1,
                 icon: Icons.grid_view_outlined,
                 activeIcon: Icons.grid_view_rounded,
-                label: isArabic ? 'الفئات' : 'Categories',
+                label: LocalizationService().getString('NAV_CATEGORIES', l10n.navCategories),
               ),
               _buildTabItem(
                 context: context,
                 index: 2,
                 icon: Icons.local_offer_outlined,
                 activeIcon: Icons.local_offer,
-                label: l10n.pastDealsTitle,
+                label: LocalizationService().getString('NAV_PAST_DEALS', l10n.pastDealsTitle),
               ),
               _buildTabItem(
                 context: context,
                 index: 3,
                 icon: Icons.shopping_cart_outlined,
                 activeIcon: Icons.shopping_cart,
-                label: l10n.drawerCart,
+                label: LocalizationService().getString('COUPON_DETAILS_CART', l10n.drawerCart),
                 badgeCount: context.watch<CartBloc>().state.totalQuantity,
               ),
               _buildTabItem(
@@ -300,7 +301,7 @@ class MainPageState extends State<MainPage> {
                 index: 4,
                 icon: Icons.person_outline,
                 activeIcon: Icons.person,
-                label: isArabic ? 'الحساب' : 'Account',
+                label: LocalizationService().getString('FOOTER_MY_ACCOUNT', l10n.navAccount),
               ),
             ],
           ),

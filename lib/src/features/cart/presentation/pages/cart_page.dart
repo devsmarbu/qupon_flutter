@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../l10n/app_localizations.dart';
 import '../../../localization/presentation/cubit/locale_cubit.dart';
+import '../../../localization/data/services/localization_service.dart';
 import '../../../main/presentation/pages/main_page.dart';
 import '../bloc/cart_bloc.dart';
 import '../bloc/cart_state.dart';
@@ -166,8 +167,8 @@ class _CartPageState extends State<CartPage> {
                         const SizedBox(width: 16),
                         Text(
                           isEmpty
-                              ? l10n.shoppingCartTitle
-                              : '${l10n.shoppingCartTitle} (${state.totalQuantity})',
+                              ? LocalizationService().getString('CART_TITLE', l10n.shoppingCartTitle)
+                              : '${LocalizationService().getString('CART_TITLE', l10n.shoppingCartTitle)} (${state.totalQuantity})',
                           style: const TextStyle(
                             fontSize: 26,
                             fontWeight: FontWeight.w900,
@@ -247,7 +248,7 @@ class _CartPageState extends State<CartPage> {
 
           // Title: "Your cart is empty"
           Text(
-            l10n.cartEmptyTitle,
+            LocalizationService().getString('CART_EMPTY_TITLE', l10n.cartEmptyTitle),
             style: const TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w800,
@@ -259,7 +260,7 @@ class _CartPageState extends State<CartPage> {
 
           // Subtitle
           Text(
-            l10n.cartEmptySubtitle,
+            LocalizationService().getString('CART_EMPTY_DESC', l10n.cartEmptySubtitle),
             style: const TextStyle(
               fontSize: 14,
               color: Color(0xFF64748B),
@@ -282,7 +283,7 @@ class _CartPageState extends State<CartPage> {
               padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 12),
             ),
             child: Text(
-              l10n.browseDeals,
+              LocalizationService().getString('CART_BROWSE_DEALS', l10n.browseDeals),
               style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
@@ -387,7 +388,9 @@ class _CartPageState extends State<CartPage> {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      l10n.youSave((item.listPrice - item.payable).toStringAsFixed(0)),
+                      isArabic
+                          ? '${LocalizationService().getString('COUPON_DETAILS_YOU_SAVE', 'أنت وفرت')} ${(item.listPrice - item.payable).toStringAsFixed(0)} ر.ق'
+                          : '${LocalizationService().getString('COUPON_DETAILS_YOU_SAVE', 'You save')} QAR ${(item.listPrice - item.payable).toStringAsFixed(0)}',
                       style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
@@ -419,7 +422,7 @@ class _CartPageState extends State<CartPage> {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            isArabic ? 'حذف' : 'Delete',
+                            LocalizationService().getString('WISHLIST_REMOVE', l10n.deleteLabel),
                             style: const TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
@@ -463,7 +466,7 @@ class _CartPageState extends State<CartPage> {
         children: [
           // ── Title "Order summary" ──
           Text(
-            l10n.orderSummary,
+            LocalizationService().getString('CART_ORDER_SUMMARY', l10n.orderSummary),
             style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
@@ -477,7 +480,7 @@ class _CartPageState extends State<CartPage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                l10n.subtotal(state.totalQuantity),
+                '${LocalizationService().getString('CART_SUBTOTAL', l10n.subtotalLabel)} (${state.totalQuantity})',
                 style: const TextStyle(fontSize: 14, color: Color(0xFF64748B)),
               ),
               Text(
@@ -493,7 +496,7 @@ class _CartPageState extends State<CartPage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                l10n.totalSavings,
+                LocalizationService().getString('CART_TOTAL_SAVINGS', l10n.totalSavings),
                 style: const TextStyle(fontSize: 14, color: Color(0xFF16A34A), fontWeight: FontWeight.w600),
               ),
               Text(
@@ -511,7 +514,7 @@ class _CartPageState extends State<CartPage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                l10n.totalLabel,
+                LocalizationService().getString('CART_TOTAL', l10n.totalLabel),
                 style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
               ),
               Text(
@@ -545,7 +548,7 @@ class _CartPageState extends State<CartPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            l10n.giftThisOrder,
+                            LocalizationService().getString('CHECKOUT_GIFT_TITLE', l10n.giftThisOrder),
                             style: const TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.bold,
@@ -554,7 +557,7 @@ class _CartPageState extends State<CartPage> {
                           ),
                           const SizedBox(height: 3),
                           Text(
-                            l10n.giftSubtitle,
+                            LocalizationService().getString('CHECKOUT_GIFT_DESC', l10n.giftSubtitle),
                             style: const TextStyle(
                               fontSize: 12,
                               color: Color(0xFF64748B),
@@ -584,8 +587,8 @@ class _CartPageState extends State<CartPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const SizedBox(height: 16),
-                      const Text(
-                        'Recipient mobile number',
+                      Text(
+                        LocalizationService().getString('CHECKOUT_GIFT_PHONE_LABEL', l10n.recipientPhoneLabel),
                         style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.bold,
@@ -629,18 +632,18 @@ class _CartPageState extends State<CartPage> {
                         ),
                       ),
                       const SizedBox(height: 10),
-                      const Text(
-                        'We will text the coupon code(s) to this number after payment.',
-                        style: TextStyle(
+                      Text(
+                        LocalizationService().getString('CHECKOUT_GIFT_PHONE_HINT', l10n.giftPhoneHint),
+                        style: const TextStyle(
                           fontSize: 12,
                           color: Color(0xFF64748B),
                           height: 1.4,
                         ),
                       ),
                       const SizedBox(height: 6),
-                      const Text(
-                        'Qatar mobile number, 8 digits (e.g. 50123456 or +974 50123456).',
-                        style: TextStyle(
+                      Text(
+                        LocalizationService().getString('COMMON_QATAR_PHONE_HINT', l10n.qatarPhoneHint),
+                        style: const TextStyle(
                           fontSize: 12,
                           color: Color(0xFF64748B),
                           height: 1.4,
@@ -656,7 +659,7 @@ class _CartPageState extends State<CartPage> {
 
           // ── Pay via section ──
           Text(
-            l10n.payVia,
+            LocalizationService().getString('CART_PAY_VIA', l10n.payVia),
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
@@ -686,7 +689,9 @@ class _CartPageState extends State<CartPage> {
               bool isDisabled = false;
               if (gateway.identifier == 'wallet') {
                 final walletBalance = gateway.walletSettings?.minBalance ?? 0.0;
-                subtitle = 'Balance: QAR ${walletBalance.toStringAsFixed(0)}';
+                subtitle = isArabic
+                    ? '${LocalizationService().getString('CART_BALANCE', 'الرصيد')}: ${walletBalance.toStringAsFixed(0)} ر.ق'
+                    : '${LocalizationService().getString('CART_BALANCE', 'Balance')}: QAR ${walletBalance.toStringAsFixed(0)}';
                 isDisabled = walletBalance <= 0;
               }
 
@@ -744,7 +749,9 @@ class _CartPageState extends State<CartPage> {
                       ),
                     )
                   : Text(
-                      'Checkout · QAR ${state.total.toStringAsFixed(0)}',
+                      isArabic
+                          ? '${LocalizationService().getString('CART_CHECKOUT', 'الدفع')} · ${state.total.toStringAsFixed(0)} ر.ق'
+                          : '${LocalizationService().getString('CART_CHECKOUT', 'Checkout')} · QAR ${state.total.toStringAsFixed(0)}',
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,

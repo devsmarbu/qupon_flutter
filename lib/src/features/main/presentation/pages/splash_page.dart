@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../localization/data/services/localization_service.dart';
+import '../../../localization/data/repositories/localization_repository.dart';
 import '../../../account/presentation/account/bloc/account_bloc.dart';
 import '../../../account/presentation/account/bloc/account_state.dart';
 import '../../../account/presentation/welcome/view/welcome_page.dart';
@@ -19,6 +21,7 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
   bool _animationFinished = false;
+  bool _labelsFetchedOrFailed = false;
 
   @override
   void initState() {
@@ -46,6 +49,9 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
     // Start the animation
     _controller.forward();
 
+    // Start fetching labels
+    _fetchLabels();
+
     // Route to next page after 2.5 seconds (ensures splash displays long enough)
     Future.delayed(const Duration(milliseconds: 2500), () {
       if (mounted) {
@@ -57,9 +63,37 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
     });
   }
 
+  Future<void> _fetchLabels() async {
+    debugPrint('[SplashPage] _fetchLabels called');
+    try {
+      final repo = context.read<LocalizationRepository>();
+      debugPrint('[SplashPage] Calling repo.getLabels(1) and repo.getLabels(2)...');
+      final results = await Future.wait([
+        repo.getLabels(1).timeout(const Duration(seconds: 5)),
+        repo.getLabels(2).timeout(const Duration(seconds: 5)),
+      ]);
+      
+      final enMap = results[0];
+      final arMap = results[1];
+      
+      debugPrint('[SplashPage] Labels fetched: EN=${enMap.length} keys, AR=${arMap.length} keys');
+      LocalizationService().updateLabels(en: enMap, ar: arMap);
+      debugPrint('[SplashPage] Labels updated in LocalizationService');
+    } catch (e) {
+      debugPrint('[SplashPage] Error fetching localization labels: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _labelsFetchedOrFailed = true;
+        });
+        _checkStateAndNavigate();
+      }
+    }
+  }
+
   void _checkStateAndNavigate() {
     final state = context.read<AccountBloc>().state;
-    if (!_animationFinished || state is AccountInitial) return;
+    if (!_animationFinished || !_labelsFetchedOrFailed || state is AccountInitial) return;
 
     final Widget nextScreen;
     if (state is AccountAuthenticated) {

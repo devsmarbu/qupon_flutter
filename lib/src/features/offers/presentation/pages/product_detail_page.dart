@@ -5,7 +5,9 @@ import 'package:share_plus/share_plus.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:go_router/go_router.dart';
 import '../../../localization/presentation/cubit/locale_cubit.dart';
+import '../../../localization/data/services/localization_service.dart';
 import '../../../main/presentation/widgets/app_footer.dart';
+import '../../../../../l10n/app_localizations.dart';
 
 import '../../data/models/offer.dart';
 import '../../data/models/offer_option.dart';
@@ -78,8 +80,29 @@ class _Localizations {
   };
 
   static String get(BuildContext context, String key) {
+    final dynamicKey = _mapLocalizationsKeyToApiLabelsKey(key);
+    if (dynamicKey != null) {
+      final value = LocalizationService().getString(dynamicKey, '');
+      if (value.isNotEmpty) return value;
+    }
     final locale = Localizations.localeOf(context).languageCode;
     return _localizedValues[locale]?[key] ?? _localizedValues['en']![key]!;
+  }
+
+  static String? _mapLocalizationsKeyToApiLabelsKey(String key) {
+    switch (key) {
+      case 'backToListings': return 'COUPON_DETAILS_BACK';
+      case 'selectOption': return 'COUPON_DETAILS_SELECT_OPTION';
+      case 'youPay': return 'COUPON_DETAILS_YOU_PAY';
+      case 'getDealNow': return 'COUPON_DETAILS_GET_DEAL';
+      case 'buyAsGift': return 'COUPON_DETAILS_BUY_AS_GIFT';
+      case 'offerDescription': return 'COUPON_DETAILS_ABOUT_DEAL';
+      case 'importantNotes': return 'COUPON_DETAILS_IMPORTANT_NOTES';
+      case 'vendorDetails': return 'COUPON_DETAILS_ABOUT_VENDOR';
+      case 'viewVendorProfile': return 'COUPON_DETAILS_VIEW_VENDOR';
+      case 'followUs': return 'VENDOR_PROFILE_FOLLOW_US';
+      default: return null;
+    }
   }
 }
 
@@ -191,6 +214,7 @@ class ProductDetailView extends StatelessWidget {
 
   void _showAddedToCartSnackBar(BuildContext context) {
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
+    final l10n = AppLocalizations.of(context)!;
     final messenger = ScaffoldMessenger.of(context);
     messenger.clearSnackBars();
     messenger.showSnackBar(
@@ -209,7 +233,7 @@ class ProductDetailView extends StatelessWidget {
         duration: const Duration(seconds: 2),
         action: SnackBarAction(
           textColor: const Color(0xFFFF6B35),
-          label: isArabic ? 'عرض السلة' : 'View Cart',
+          label: LocalizationService().getString('COUPON_DETAILS_CART', l10n.viewCartLabel),
           onPressed: () {
             Navigator.of(context).pop(true);
           },
@@ -233,7 +257,8 @@ class ProductDetailView extends StatelessWidget {
 
   void _shareOffer(BuildContext context, Offer offer) {
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
-    final vendorName = offer.vendorDetails?.name ?? offer.vendor ?? (isArabic ? 'كوبون' : 'Qupon');
+    final l10n = AppLocalizations.of(context)!;
+    final vendorName = offer.vendorDetails?.name ?? offer.vendor ?? LocalizationService().getString('APP_NAME', l10n.appNameLabel);
     final title = (isArabic && offer.titleAr != null && offer.titleAr!.isNotEmpty)
         ? offer.titleAr!
         : offer.title;
@@ -243,9 +268,15 @@ class ProductDetailView extends StatelessWidget {
 
     final shareLink = offer.shareLink ?? offer.vendorDetails?.websiteUrl ?? offer.vendorDetails?.mapsOpenUrl ?? 'https://qupon.marbu.in/vendor/${offer.vendorDetails?.slug ?? ''}';
 
-    final text = isArabic
-        ? 'تحقق من هذا العرض الرائع من $vendorName!\n\n$title\n$desc\n\nلمزيد من التفاصيل: $shareLink'
-        : 'Check out this amazing deal from $vendorName!\n\n$title\n$desc\n\nMore details: $shareLink';
+    final text = LocalizationService().getString(
+      'SHARE_TEXT_TEMPLATE',
+      isArabic
+          ? 'تحقق من هذا العرض الرائع من {vendorName}!\n\n{title}\n{desc}\n\nلمزيد من التفاصيل: {shareLink}'
+          : 'Check out this amazing deal from {vendorName}!\n\n{title}\n{desc}\n\nMore details: {shareLink}',
+    ).replaceAll('{vendorName}', vendorName)
+     .replaceAll('{title}', title)
+     .replaceAll('{desc}', desc)
+     .replaceAll('{shareLink}', shareLink);
 
     Share.share(text, subject: title);
   }
@@ -254,6 +285,7 @@ class ProductDetailView extends StatelessWidget {
   Widget build(BuildContext context) {
     final localeCubit = context.watch<LocaleCubit>();
     final isArabic = localeCubit.state.languageCode == 'ar';
+    final l10n = AppLocalizations.of(context)!;
 
     return BlocBuilder<ProductDetailBloc, ProductDetailState>(
       builder: (context, state) {
@@ -579,7 +611,7 @@ class ProductDetailView extends StatelessWidget {
                                         ),
                                         const SizedBox(width: 4),
                                         Text(
-                                          isArabic ? 'منتهي الصلاحية' : 'Expired',
+                                          LocalizationService().getString('COUPON_EXPIRED', l10n.expired),
                                           style: const TextStyle(
                                             fontSize: 12,
                                             fontWeight: FontWeight.bold,
@@ -736,7 +768,7 @@ class ProductDetailView extends StatelessWidget {
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           Text(
-                                            isArabic ? 'انتهى هذا العرض' : 'This offer has expired',
+                                            LocalizationService().getString('COUPON_DETAILS_EXPIRED_TITLE', l10n.thisOfferExpired),
                                             style: const TextStyle(
                                               fontWeight: FontWeight.bold,
                                               color: Color(0xFF0F172A),
@@ -817,7 +849,7 @@ class ProductDetailView extends StatelessWidget {
                                     padding: const EdgeInsets.symmetric(vertical: 14),
                                   ),
                                   child: Text(
-                                    isArabic ? 'طلب كوبون' : 'Request Coupon',
+                                    LocalizationService().getString('COUPON_DETAILS_REQUEST_COUPON', l10n.requestCoupon),
                                     style: const TextStyle(
                                       fontSize: 15,
                                       fontWeight: FontWeight.bold,
@@ -1333,7 +1365,7 @@ class ProductDetailView extends StatelessWidget {
                                     padding: const EdgeInsets.symmetric(vertical: 14),
                                   ),
                                   child: Text(
-                                    isArabic ? 'طلب كوبون' : 'Request Coupon',
+                                    LocalizationService().getString('COUPON_DETAILS_REQUEST_COUPON', l10n.requestCoupon),
                                     style: const TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.bold,
@@ -1636,6 +1668,7 @@ class _VendorMapWidgetState extends State<VendorMapWidget> {
   @override
   Widget build(BuildContext context) {
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
+    final l10n = AppLocalizations.of(context)!;
     final embedUrl = _getEmbedUrl();
 
     Widget mapContent;
@@ -1707,7 +1740,7 @@ class _VendorMapWidgetState extends State<VendorMapWidget> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        isArabic ? 'افتح في الخرائط' : 'Open in Maps',
+                        LocalizationService().getString('COUPON_DETAILS_VISIT_STORE', l10n.openInMaps),
                         style: const TextStyle(
                           color: Color(0xFFFF6B35),
                           fontSize: 12,

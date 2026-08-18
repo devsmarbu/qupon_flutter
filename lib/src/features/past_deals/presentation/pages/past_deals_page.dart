@@ -4,6 +4,7 @@ import '../../../../core/network/api_client.dart';
 import '../../../../core/network/api_endpoints.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../localization/presentation/cubit/locale_cubit.dart';
+import '../../../localization/data/services/localization_service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../data/models/past_deal_model.dart';
 import '../../../offers/data/models/offer.dart';
@@ -143,7 +144,7 @@ class _PastDealsPageState extends State<PastDealsPage> {
                     ),
                     const SizedBox(width: 16),
                     Text(
-                      l10n.pastDealsTitle,
+                      LocalizationService().getString('NAV_PAST_DEALS', l10n.pastDealsTitle),
                       style: const TextStyle(
                         fontSize: 26,
                         fontWeight: FontWeight.w900,
@@ -158,7 +159,7 @@ class _PastDealsPageState extends State<PastDealsPage> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Text(
-                  l10n.pastDealsSubtitle,
+                  LocalizationService().getString('PAST_DEALS_SUBTITLE', l10n.pastDealsSubtitle),
                   style: const TextStyle(
                     fontSize: 14,
                     color: Color(0xFF64748B),
@@ -215,7 +216,7 @@ class _PastDealsPageState extends State<PastDealsPage> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: Text(isArabic ? 'إعادة المحاولة' : 'Retry'),
+                child: Text(LocalizationService().getString('RETRY', l10n.retryLabel)),
               ),
             ],
           ),
@@ -235,7 +236,10 @@ class _PastDealsPageState extends State<PastDealsPage> {
               const Icon(Icons.history_toggle_off_outlined, size: 64, color: Color(0xFFCBD5E1)),
               const SizedBox(height: 16),
               Text(
-                isArabic ? 'لا توجد عروض سابقة متاحة حالياً.' : 'No past deals available at the moment.',
+                LocalizationService().getString(
+                  'PAST_DEALS_EMPTY_TITLE',
+                  l10n.noPastDealsAvailable,
+                ),
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                   fontSize: 16,
@@ -649,7 +653,7 @@ class _PastDealCard extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                       ),
                       child: Text(
-                        isArabic ? 'اطلب الكوبون' : 'Request coupon',
+                        LocalizationService().getString('PAST_DEALS_REQUEST_BUTTON', l10n.requestCouponShort),
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 13,
@@ -705,16 +709,31 @@ class _RequestCouponDialogState extends State<RequestCouponDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final title = widget.isArabic ? 'طلب هذا الكوبون' : 'Request this coupon';
-    final subtitle = widget.isArabic
-        ? 'أخبرنا لماذا تريد استعادة ${widget.brandName}. سيقوم البائع والمسؤول بمراجعة رسالتك.'
-        : 'Tell us why you want ${widget.brandName} back. The vendor and admin will review your message.';
-    final messageLabel = widget.isArabic ? 'رسالتك' : 'Your message';
-    final hintText = widget.isArabic
-        ? 'مثال: لقد فاتني هذا العرض وأود شراءه مرة أخرى...'
-        : 'e.g. I missed this deal and would love to buy it again...';
-    final submitLabel = widget.isArabic ? 'إرسال الطلب' : 'Submit request';
-    final cancelLabel = widget.isArabic ? 'إلغاء' : 'Cancel';
+    final l10n = AppLocalizations.of(context)!;
+    final title = LocalizationService().getString(
+      'PAST_DEALS_REQUEST_TITLE',
+      l10n.requestThisCoupon,
+    );
+    final subtitle = LocalizationService().getString(
+      'PAST_DEALS_REQUEST_DESCRIPTION',
+      l10n.requestCouponDescription(widget.brandName),
+    );
+    final messageLabel = LocalizationService().getString(
+      'PAST_DEALS_MESSAGE_LABEL',
+      l10n.yourMessage,
+    );
+    final hintText = LocalizationService().getString(
+      'PAST_DEALS_MESSAGE_PLACEHOLDER',
+      l10n.requestCouponHint,
+    );
+    final submitLabel = LocalizationService().getString(
+      'PAST_DEALS_SUBMIT',
+      l10n.submitRequest,
+    );
+    final cancelLabel = LocalizationService().getString(
+      'PAST_DEALS_CANCEL',
+      l10n.cancelLabel,
+    );
 
     return Dialog(
       backgroundColor: Colors.white,

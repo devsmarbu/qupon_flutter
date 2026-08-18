@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../../l10n/app_localizations.dart';
 import '../../../localization/presentation/cubit/locale_cubit.dart';
+import '../../../localization/data/services/localization_service.dart';
 
 class FoodDrinksPage extends StatelessWidget {
   const FoodDrinksPage({super.key});
@@ -10,7 +12,10 @@ class FoodDrinksPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final localeCubit = context.watch<LocaleCubit>();
     final isArabic = localeCubit.state.languageCode == 'ar';
-    final title = isArabic ? 'الأطعمة والمشروبات' : 'Food & Drinks';
+    final title = LocalizationService().getString(
+      'HOME_BEST_IN_FOOD',
+      AppLocalizations.of(context)!.foodDrinks,
+    );
 
     return SafeArea(
       child: Column(
@@ -44,11 +49,14 @@ class FoodDrinksPage extends StatelessWidget {
               ],
             ),
           ),
-          const Expanded(
+          Expanded(
             child: Center(
               child: Text(
-                'Food & Drinks offers coming soon...',
-                style: TextStyle(fontSize: 16, color: Color(0xFF64748B)),
+                LocalizationService().getString(
+                  'FOOD_DRINKS_COMING_SOON',
+                  AppLocalizations.of(context)!.foodDrinksComingSoon,
+                ),
+                style: const TextStyle(fontSize: 16, color: Color(0xFF64748B)),
               ),
             ),
           ),

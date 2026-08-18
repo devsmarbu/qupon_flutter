@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:qupon/src/features/cart/presentation/bloc/cart_bloc.dart';
 import 'package:qupon/src/features/cart/presentation/bloc/cart_event.dart';
 import 'package:qupon/src/features/cart/presentation/bloc/cart_state.dart';
@@ -79,9 +80,11 @@ void main() {
     late MockCartRepository repository;
     late CartBloc cartBloc;
 
-    setUp(() {
+    setUp(() async {
+      SharedPreferences.setMockInitialValues({});
+      final prefs = await SharedPreferences.getInstance();
       repository = MockCartRepository();
-      cartBloc = CartBloc(cartRepository: repository);
+      cartBloc = CartBloc(cartRepository: repository, sharedPreferences: prefs);
     });
 
     tearDown(() {
@@ -96,6 +99,10 @@ void main() {
 
     test('RemoveFromCart removes selected item from cart state and local items', () async {
       // First populate cart with 2 items
+      repository.lastGetCartItems = [
+        {'couponId': 'item1', 'variantId': 'v1'},
+        {'couponId': 'item2', 'variantId': 'v2'},
+      ];
       cartBloc.emit(CartState(
         localItems: [
           {'couponId': 'item1', 'variantId': 'v1'},

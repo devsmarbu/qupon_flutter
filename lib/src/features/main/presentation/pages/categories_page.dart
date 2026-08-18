@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../localization/presentation/cubit/locale_cubit.dart';
+import '../../../localization/data/services/localization_service.dart';
 import '../../../home/data/models/home_category.dart';
 import '../../../home/data/repositories/home_repository.dart';
 import '../../../offers/presentation/pages/category_offers_page.dart';
@@ -77,9 +78,12 @@ class _CategoriesPageState extends State<CategoriesPage> {
               const Icon(Icons.wifi_off_outlined, size: 48, color: Color(0xFFCBD5E1)),
               const SizedBox(height: 16),
               Text(
-                isArabic
-                    ? 'فشل تحميل الفئات. يرجى التحقق من اتصالك بالإنترنت.'
-                    : 'Failed to load categories. Please check your network connection.',
+                LocalizationService().getString(
+                  'CATEGORIES_LOAD_ERROR',
+                  isArabic
+                      ? 'فشل تحميل الفئات. يرجى التحقق من اتصالك بالإنترنت.'
+                      : 'Failed to load categories. Please check your network connection.',
+                ),
                 textAlign: TextAlign.center,
                 style: const TextStyle(color: Color(0xFF64748B)),
               ),
@@ -93,7 +97,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: Text(isArabic ? 'إعادة المحاولة' : 'Retry'),
+                child: Text(LocalizationService().getString('RETRY', AppLocalizations.of(context)!.retryLabel)),
               ),
             ],
           ),
@@ -110,9 +114,12 @@ class _CategoriesPageState extends State<CategoriesPage> {
     final totalOffers = categories.fold<int>(0, (sum, cat) => sum + cat.offersCount);
     final totalCategories = categories.length;
 
-    final subtitleText = isArabic
-        ? '$totalOffers عرضاً عبر $totalCategories فئات مميزة'
-        : '$totalOffers offers across $totalCategories premium categories';
+    final subtitleText = LocalizationService().getString(
+      'CATEGORIES_SUBTITLE',
+      isArabic
+          ? '$totalOffers عرضاً عبر $totalCategories فئات مميزة'
+          : '$totalOffers offers across $totalCategories premium categories',
+    );
 
     return RefreshIndicator(
       color: AppColors.primary,
@@ -161,7 +168,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    isArabic ? 'الفئات' : 'Categories',
+                    LocalizationService().getString('NAV_CATEGORIES', l10n.navCategories),
                     style: const TextStyle(
                       fontSize: 32,
                       fontWeight: FontWeight.w900,
