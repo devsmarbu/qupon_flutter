@@ -527,6 +527,7 @@ class _AccountPageState extends State<AccountPage> {
 
   Widget _buildFiltersButton(BuildContext context, List<String> vendors) {
     final count = _activeFilterCount;
+    final l10n = AppLocalizations.of(context)!;
     return GestureDetector(
       onTap: () => _showFilterBottomSheet(context, vendors),
       child: Container(
@@ -552,9 +553,12 @@ class _AccountPageState extends State<AccountPage> {
               size: 17,
             ),
             const SizedBox(width: 6),
-            const Text(
-              'Filters',
-              style: TextStyle(
+            Text(
+              LocalizationService().getString(
+                'APP_FILTER',
+                l10n.filterTitle,
+              ),
+              style: const TextStyle(
                 color: Color(0xFFFF6B35),
                 fontWeight: FontWeight.w700,
                 fontSize: 14,
@@ -1013,7 +1017,10 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  l10n.filterTitle,
+                  LocalizationService().getString(
+                    'APP_FILTER',
+                    l10n.filterTitle,
+                  ),
                   style: const TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.w900,
@@ -1780,7 +1787,10 @@ class _OrderCardItemState extends State<_OrderCardItem> {
     return const Color(0xFFFFEFEA); // Light orange
   }
 
-  String _getDisplayTitle(DashboardTransaction tx) {
+  String _getDisplayTitle(DashboardTransaction tx, bool isArabic) {
+    if (tx.orderDisplayRef.isNotEmpty) {
+      return isArabic ? tx.orderDisplayRef : tx.orderDisplayRef;
+    }
     if (tx.title.isNotEmpty) return tx.title;
     if (tx.vendor.isNotEmpty) return tx.vendor;
 
@@ -1871,7 +1881,7 @@ class _OrderCardItemState extends State<_OrderCardItem> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        _getDisplayTitle(tx),
+                        _getDisplayTitle(tx, isArabic),
                         style: const TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.bold,
