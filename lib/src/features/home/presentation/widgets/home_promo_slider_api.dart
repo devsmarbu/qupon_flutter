@@ -56,22 +56,24 @@ class _HomePromoSliderApiState extends State<HomePromoSliderApi> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Container(
-          height: 200,
-          margin: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.08),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+          child: AspectRatio(
+            aspectRatio: 640 / 360,
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.08),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
-            ],
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(16),
-            child: PageView.builder(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: PageView.builder(
               controller: _pageController,
               onPageChanged: (i) => setState(() => _currentPage = i),
               itemCount: widget.banners.length,
@@ -130,50 +132,57 @@ class _HomePromoSliderApiState extends State<HomePromoSliderApi> {
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
-                      // Blurred background image
-                      ImageFiltered(
-                        imageFilter: ui.ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-                        child: Image.network(
-                          b.imageUrl,
-                          fit: BoxFit.cover,
-                          width: double.infinity,
-                          height: double.infinity,
-                          errorBuilder: (ctx, _, __) => const SizedBox.shrink(),
-                        ),
-                      ),
-                      // Subtle dark tint overlay over the blurred background
-                      Container(
-                        color: Colors.black.withValues(alpha: 0.15),
-                      ),
-                      // Foreground contained image
-                      Image.network(
-                        b.imageUrl,
-                        fit: BoxFit.cover,
+                      // Background image (static)
+                      Image.asset(
+                        'assets/mountain.jpg',
+                        fit: BoxFit.contain,
                         width: double.infinity,
                         height: double.infinity,
-                        loadingBuilder: (ctx, child, progress) {
-                          if (progress == null) return child;
-                          return Container(
-                            color: const Color(0xFFF1F5F9),
-                            child: const Center(
-                              child: CircularProgressIndicator(
-                                color: Color(0xFFFF6B35),
-                                strokeWidth: 2,
-                              ),
-                            ),
-                          );
-                        },
-                        errorBuilder: (ctx, _, __) => Container(
-                          color: const Color(0xFFF1F5F9),
-                          child: const Center(
-                            child: Icon(
-                              Icons.image_not_supported_outlined,
-                              size: 40,
-                              color: Color(0xFF94A3B8),
-                            ),
-                          ),
-                        ),
                       ),
+                      // Keep network image commented out for future use
+                      // ImageFiltered(
+                      //   imageFilter: ui.ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+                      //   child: Image.network(
+                      //     b.imageUrl,
+                      //     fit: BoxFit.cover,
+                      //     width: double.infinity,
+                      //     height: double.infinity,
+                      //     errorBuilder: (ctx, _, __) => const SizedBox.shrink(),
+                      //   ),
+                      // ),
+                      // Subtle dark tint overlay over the blurred background
+                      // Container(
+                      //   color: Colors.black.withValues(alpha: 0.15),
+                      // ),
+                      // Foreground contained image
+                      // Image.network(
+                      //   b.imageUrl,
+                      //   fit: BoxFit.cover,
+                      //   width: double.infinity,
+                      //   height: double.infinity,
+                      //   loadingBuilder: (ctx, child, progress) {
+                      //     if (progress == null) return child;
+                      //     return Container(
+                      //       color: const Color(0xFFF1F5F9),
+                      //       child: const Center(
+                      //         child: CircularProgressIndicator(
+                      //           color: Color(0xFFFF6B35),
+                      //           strokeWidth: 2,
+                      //         ),
+                      //       ),
+                      //     );
+                      //   },
+                      //   errorBuilder: (ctx, _, __) => Container(
+                      //     color: const Color(0xFFF1F5F9),
+                      //     child: const Center(
+                      //       child: Icon(
+                      //         Icons.image_not_supported_outlined,
+                      //         size: 40,
+                      //         color: Color(0xFF94A3B8),
+                      //       ),
+                      //     ),
+                      //   ),
+                      // ),
                       // Gradient overlay
                       Positioned(
                         bottom: 0,
@@ -238,7 +247,9 @@ class _HomePromoSliderApiState extends State<HomePromoSliderApi> {
             ),
           ),
         ),
-        // Indicator Dots
+      ),
+    ),
+    // Indicator Dots
         if (widget.banners.length > 1)
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
