@@ -457,7 +457,7 @@ class ProductDetailView extends StatelessWidget {
                                       Positioned.fill(
                                         child: Image.network(
                                           offer.imageUrl,
-                                          fit: BoxFit.cover,
+                                         // fit: BoxFit.cover,
                                           errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
                                         ),
                                       ),

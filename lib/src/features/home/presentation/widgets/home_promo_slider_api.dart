@@ -132,57 +132,70 @@ class _HomePromoSliderApiState extends State<HomePromoSliderApi> {
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
-                      // Background image (static)
-                      Image.asset(
-                        'assets/mountain.jpg',
-                        fit: BoxFit.contain,
-                        width: double.infinity,
-                        height: double.infinity,
-                      ),
-                      // Keep network image commented out for future use
-                      // ImageFiltered(
-                      //   imageFilter: ui.ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-                      //   child: Image.network(
-                      //     b.imageUrl,
-                      //     fit: BoxFit.cover,
-                      //     width: double.infinity,
-                      //     height: double.infinity,
-                      //     errorBuilder: (ctx, _, __) => const SizedBox.shrink(),
-                      //   ),
-                      // ),
-                      // Subtle dark tint overlay over the blurred background
-                      // Container(
-                      //   color: Colors.black.withValues(alpha: 0.15),
-                      // ),
-                      // Foreground contained image
-                      // Image.network(
-                      //   b.imageUrl,
-                      //   fit: BoxFit.cover,
-                      //   width: double.infinity,
-                      //   height: double.infinity,
-                      //   loadingBuilder: (ctx, child, progress) {
-                      //     if (progress == null) return child;
-                      //     return Container(
-                      //       color: const Color(0xFFF1F5F9),
-                      //       child: const Center(
-                      //         child: CircularProgressIndicator(
-                      //           color: Color(0xFFFF6B35),
-                      //           strokeWidth: 2,
-                      //         ),
-                      //       ),
-                      //     );
-                      //   },
-                      //   errorBuilder: (ctx, _, __) => Container(
-                      //     color: const Color(0xFFF1F5F9),
-                      //     child: const Center(
-                      //       child: Icon(
-                      //         Icons.image_not_supported_outlined,
-                      //         size: 40,
-                      //         color: Color(0xFF94A3B8),
-                      //       ),
-                      //     ),
-                      //   ),
-                      // ),
+                      // Dynamic network image loading from API response
+                      if (b.imageUrl.isNotEmpty && (b.imageUrl.startsWith('http://') || b.imageUrl.startsWith('https://'))) ...[
+                        // Blurred background image
+                        ImageFiltered(
+                          imageFilter: ui.ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+                          child: Image.network(
+                            b.imageUrl,
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            height: double.infinity,
+                            errorBuilder: (ctx, _, __) => const SizedBox.shrink(),
+                          ),
+                        ),
+                        // Subtle dark tint overlay over the blurred background
+                        Container(
+                          color: Colors.black.withValues(alpha: 0.15),
+                        ),
+                        // Main network image
+                        Image.network(
+                          b.imageUrl,
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          height: double.infinity,
+                          loadingBuilder: (ctx, child, progress) {
+                            if (progress == null) return child;
+                            return Container(
+                              color: const Color(0xFFF1F5F9),
+                              child: const Center(
+                                child: CircularProgressIndicator(
+                                  color: Color(0xFFFF6B35),
+                                  strokeWidth: 2,
+                                ),
+                              ),
+                            );
+                          },
+                          errorBuilder: (ctx, _, __) => Container(
+                            color: const Color(0xFFF1F5F9),
+                            child: const Center(
+                              child: Icon(
+                                Icons.image_not_supported_outlined,
+                                size: 40,
+                                color: Color(0xFF94A3B8),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ] else ...[
+                        Container(
+                          decoration: const BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [Color(0xFFFF6B35), Color(0xFFFF8C42)],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                          ),
+                          child: const Center(
+                            child: Icon(
+                              Icons.local_offer_outlined,
+                              size: 48,
+                              color: Colors.white70,
+                            ),
+                          ),
+                        ),
+                      ],
                       // Gradient overlay
                       Positioned(
                         bottom: 0,
