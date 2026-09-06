@@ -89,7 +89,7 @@ flutter:
     - assets/appIcons/ic_splash_logo.svg
     - assets/appIcons/ic_google.svg
     - assets/appIcons/ic_facebook.svg
-    - assets/video/QUPON SPLASH SCREEN.mp4
+    - assets/video/qupon_splash.mp4
 
   fonts:
     - family: Outfit
