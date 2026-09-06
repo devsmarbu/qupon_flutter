@@ -243,8 +243,8 @@ class MainPageState extends State<MainPage> {
         left: 16,
         right: 16,
         bottom: MediaQuery.of(context).padding.bottom > 0
-            ? MediaQuery.of(context).padding.bottom + 8
-            : 16,
+            ? MediaQuery.of(context).padding.bottom
+            : 0,
         top: 8,
       ),
       child:
