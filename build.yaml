@@ -1,0 +1,12 @@
+targets:
+  $default:
+    builders:
+      freezed:
+        generate_for:
+          include:
+            - lib/src/features/offers/data/models/offer.dart
+            - lib/src/features/offers/presentation/bloc/offers_bloc.dart
+      json_serializable:
+        generate_for:
+          include:
+            - lib/src/features/offers/data/models/offer.dart

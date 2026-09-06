@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.qupon"
+    namespace = "com.quponapp.qupon"
     // webview_flutter_android v4.x requires compileSdk >= 35
     compileSdk = 36
     ndkVersion = flutter.ndkVersion
@@ -22,19 +22,32 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.qupon"
+        applicationId = "com.quponapp.qupon"
         // webview_flutter v4 requires minSdk >= 21
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
-        versionCode = flutter.versionCode
-        versionName = flutter.versionName
+        versionCode = 1
+        versionName = "1.0.0"
+    }
+
+    signingConfigs {
+        create("release") {
+            keyAlias = "Qupon"
+            keyPassword = "Qupon@2026"
+            storeFile = file("../qupon.jks")
+            storePassword = "Qupon@2026"
+        }
     }
 
     buildTypes {
-        release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+        getByName("release") {
+            signingConfig = signingConfigs.getByName("release")
+            isMinifyEnabled = false
+            isShrinkResources = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
 }

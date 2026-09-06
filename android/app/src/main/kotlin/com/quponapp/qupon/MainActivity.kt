@@ -1,4 +1,4 @@
-package com.example.qupon
+package com.quponapp.qupon
 
 import io.flutter.embedding.android.FlutterActivity
 
