@@ -563,16 +563,9 @@ class _AccountPageState extends State<AccountPage> {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              LocalizationService().getString('DELETION_PENDING_MSG', 'Your account deletion request is pending administrator approval.'),
+                              LocalizationService().getString('DELETION_PENDING_MSG', 'We’ve received your account deletion request. Your account and associated personal data will be permanently deleted within 2 business days.'),
                               style: const TextStyle(fontSize: 13, color: Color(0xFFB45309)),
                             ),
-                            if (state.deletionStatus?.deletionReason != null && state.deletionStatus!.deletionReason!.isNotEmpty) ...[
-                              const SizedBox(height: 6),
-                              Text(
-                                'Reason: "${state.deletionStatus!.deletionReason}"',
-                                style: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic, color: Color(0xFFB45309)),
-                              ),
-                            ],
                             const SizedBox(height: 12),
                             SizedBox(
                               width: double.infinity,
