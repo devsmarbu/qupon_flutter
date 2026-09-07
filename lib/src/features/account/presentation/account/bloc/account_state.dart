@@ -1,4 +1,5 @@
 import '../../../data/models/dashboard_model.dart';
+import '../../../data/models/account_deletion_status.dart';
 import '../../../../home/data/models/home_coupon.dart';
 
 abstract class AccountState {
@@ -20,6 +21,10 @@ class AccountAuthenticated extends AccountState {
   final DashboardData? dashboardData;
   final List<HomeCoupon> wishlist;
   final bool isLoadingDashboard;
+  final bool isDeletingAccount;
+  final bool isCancellingDeletion;
+  final AccountDeletionStatus? deletionStatus;
+  final String? actionMessage;
   final String? error;
   final List<DashboardTransaction>? filteredTransactions;
 
@@ -30,6 +35,10 @@ class AccountAuthenticated extends AccountState {
     this.dashboardData,
     this.wishlist = const [],
     this.isLoadingDashboard = false,
+    this.isDeletingAccount = false,
+    this.isCancellingDeletion = false,
+    this.deletionStatus,
+    this.actionMessage,
     this.error,
     this.filteredTransactions,
   });
@@ -41,9 +50,14 @@ class AccountAuthenticated extends AccountState {
     DashboardData? dashboardData,
     List<HomeCoupon>? wishlist,
     bool? isLoadingDashboard,
+    bool? isDeletingAccount,
+    bool? isCancellingDeletion,
+    AccountDeletionStatus? deletionStatus,
+    String? actionMessage,
     String? error,
     List<DashboardTransaction>? filteredTransactions,
     bool clearFilteredTransactions = false,
+    bool clearActionMessage = false,
   }) {
     return AccountAuthenticated(
       email: email ?? this.email,
@@ -52,6 +66,10 @@ class AccountAuthenticated extends AccountState {
       dashboardData: dashboardData ?? this.dashboardData,
       wishlist: wishlist ?? this.wishlist,
       isLoadingDashboard: isLoadingDashboard ?? this.isLoadingDashboard,
+      isDeletingAccount: isDeletingAccount ?? this.isDeletingAccount,
+      isCancellingDeletion: isCancellingDeletion ?? this.isCancellingDeletion,
+      deletionStatus: deletionStatus ?? this.deletionStatus,
+      actionMessage: clearActionMessage ? null : (actionMessage ?? this.actionMessage),
       error: error ?? this.error,
       filteredTransactions: clearFilteredTransactions ? null : (filteredTransactions ?? this.filteredTransactions),
     );

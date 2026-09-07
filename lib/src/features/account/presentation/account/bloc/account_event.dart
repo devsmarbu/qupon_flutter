@@ -35,3 +35,23 @@ class LoadDashboard extends AccountEvent {
     this.vendor,
   });
 }
+
+class DeleteAccountRequested extends AccountEvent {
+  final String? reason;
+  final bool logoutAfterRequest;
+
+  const DeleteAccountRequested({
+    this.reason,
+    this.logoutAfterRequest = false,
+  });
+}
+
+class CancelDeleteAccountRequested extends AccountEvent {
+  const CancelDeleteAccountRequested();
+}
+
+class CheckDeletionStatusRequested extends AccountEvent {
+  const CheckDeletionStatusRequested();
+}
+
+

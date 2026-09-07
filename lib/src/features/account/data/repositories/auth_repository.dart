@@ -5,6 +5,7 @@ import '../../../../core/preferences/pref_store.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../models/profile_data.dart';
 import '../models/dashboard_model.dart';
+import '../models/account_deletion_status.dart';
 import '../../../home/data/models/home_coupon.dart';
 
 abstract class AuthRepository {
@@ -51,6 +52,11 @@ abstract class AuthRepository {
     String? to,
     String? vendor,
   });
+
+  Future<void> deleteAccount();
+  Future<AccountDeletionStatus> getAccountDeletionStatus();
+  Future<String> requestAccountDeletion({String? reason});
+  Future<String> cancelAccountDeletion();
 }
 
 class AuthRepositoryImpl implements AuthRepository {
@@ -398,6 +404,96 @@ class AuthRepositoryImpl implements AuthRepository {
           .whereType<Map<String, dynamic>>()
           .map((t) => DashboardTransaction.fromJson(t))
           .toList();
+    } on DioException catch (e) {
+      final data = e.response?.data;
+      final errorMessage = (data is Map ? data['message'] : null) ?? e.message ?? 'Unknown network error occurred';
+      throw Exception(errorMessage);
+    } catch (e) {
+      throw Exception(e.toString());
+    }
+  }
+
+  @override
+  Future<void> deleteAccount() async {
+    await requestAccountDeletion();
+  }
+
+  @override
+  Future<AccountDeletionStatus> getAccountDeletionStatus() async {
+    try {
+      final response = await _apiClient.dio.get(
+        ApiEndpoints.deleteAccount,
+      );
+
+      if (response.statusCode != 200) {
+        return const AccountDeletionStatus(deletionRequested: false);
+      }
+
+      final responseData = response.data;
+      if (responseData is Map<String, dynamic>) {
+        return AccountDeletionStatus.fromJson(responseData);
+      }
+      return const AccountDeletionStatus(deletionRequested: false);
+    } catch (_) {
+      return const AccountDeletionStatus(deletionRequested: false);
+    }
+  }
+
+  @override
+  Future<String> requestAccountDeletion({String? reason}) async {
+    try {
+      final Map<String, dynamic> body = {};
+      if (reason != null && reason.trim().isNotEmpty) {
+        body['reason'] = reason.trim();
+      }
+
+      final response = await _apiClient.dio.post(
+        ApiEndpoints.deleteAccount,
+        data: body,
+      );
+
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        throw DioException(
+          requestOptions: response.requestOptions,
+          response: response,
+          message: 'Failed to request account deletion.',
+        );
+      }
+
+      final data = response.data;
+      if (data is Map && data['message'] != null) {
+        return data['message'].toString();
+      }
+      return 'Account deletion request submitted for admin approval.';
+    } on DioException catch (e) {
+      final data = e.response?.data;
+      final errorMessage = (data is Map ? data['message'] : null) ?? e.message ?? 'Unknown network error occurred';
+      throw Exception(errorMessage);
+    } catch (e) {
+      throw Exception(e.toString());
+    }
+  }
+
+  @override
+  Future<String> cancelAccountDeletion() async {
+    try {
+      final response = await _apiClient.dio.delete(
+        ApiEndpoints.deleteAccount,
+      );
+
+      if (response.statusCode != 200 && response.statusCode != 204) {
+        throw DioException(
+          requestOptions: response.requestOptions,
+          response: response,
+          message: 'Failed to cancel account deletion.',
+        );
+      }
+
+      final data = response.data;
+      if (data is Map && data['message'] != null) {
+        return data['message'].toString();
+      }
+      return 'Account deletion request cancelled.';
     } on DioException catch (e) {
       final data = e.response?.data;
       final errorMessage = (data is Map ? data['message'] : null) ?? e.message ?? 'Unknown network error occurred';

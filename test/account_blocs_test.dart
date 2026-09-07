@@ -5,6 +5,7 @@ import 'package:qupon/src/core/constants/app_strings.dart';
 import 'package:qupon/src/features/account/data/models/profile_data.dart';
 import 'package:qupon/src/features/account/data/repositories/auth_repository.dart';
 import 'package:qupon/src/features/account/data/models/dashboard_model.dart';
+import 'package:qupon/src/features/account/data/models/account_deletion_status.dart';
 import 'package:qupon/src/features/home/data/models/home_coupon.dart';
 import 'package:qupon/src/features/account/presentation/account/bloc/account_bloc.dart';
 import 'package:qupon/src/features/account/presentation/account/bloc/account_event.dart';
@@ -179,6 +180,44 @@ class FakeAuthRepository implements AuthRepository {
         coupons: [],
       ),
     ];
+  }
+
+  bool deleteAccountCalled = false;
+  bool cancelAccountDeletionCalled = false;
+  bool getAccountDeletionStatusCalled = false;
+  AccountDeletionStatus mockDeletionStatus = const AccountDeletionStatus(deletionRequested: false);
+
+  @override
+  Future<void> deleteAccount() async {
+    deleteAccountCalled = true;
+    if (throwError) throw Exception(errorMessage);
+  }
+
+  @override
+  Future<AccountDeletionStatus> getAccountDeletionStatus() async {
+    getAccountDeletionStatusCalled = true;
+    if (throwError) throw Exception(errorMessage);
+    return mockDeletionStatus;
+  }
+
+  @override
+  Future<String> requestAccountDeletion({String? reason}) async {
+    deleteAccountCalled = true;
+    if (throwError) throw Exception(errorMessage);
+    mockDeletionStatus = AccountDeletionStatus(
+      deletionRequested: true,
+      deletionRequestedAt: DateTime.now(),
+      deletionReason: reason,
+    );
+    return 'Account deletion request submitted for admin approval.';
+  }
+
+  @override
+  Future<String> cancelAccountDeletion() async {
+    cancelAccountDeletionCalled = true;
+    if (throwError) throw Exception(errorMessage);
+    mockDeletionStatus = const AccountDeletionStatus(deletionRequested: false);
+    return 'Account deletion request cancelled.';
   }
 }
 
@@ -570,6 +609,75 @@ void main() {
         expect(authRepository.lastFrom, '2026-08-01');
         expect(authRepository.lastTo, '2026-08-31');
         expect(authRepository.lastVendor, 'ElectroWorld');
+
+        bloc.close();
+      });
+
+      test('DeleteAccountRequested calls requestAccountDeletion and updates deletionStatus', () async {
+        final bloc = AccountBloc(authRepository: authRepository);
+
+        await expectLater(
+          bloc.stream,
+          emitsThrough(isA<AccountUnauthenticated>()),
+        );
+
+        await PrefStore().saveString(AppStrings.keyToken, 'mock_token');
+        authRepository.deleteAccountCalled = false;
+
+        bloc.emit(const AccountAuthenticated(email: 'test@example.com'));
+
+        bloc.add(const DeleteAccountRequested(reason: 'No longer needed'));
+
+        await expectLater(
+          bloc.stream,
+          emitsInOrder([
+            predicate<AccountState>((state) => state is AccountAuthenticated && state.isDeletingAccount),
+            predicate<AccountState>((state) =>
+                state is AccountAuthenticated &&
+                !state.isDeletingAccount &&
+                state.deletionStatus?.deletionRequested == true &&
+                state.deletionStatus?.deletionReason == 'No longer needed'),
+          ]),
+        );
+
+        expect(authRepository.deleteAccountCalled, isTrue);
+
+        bloc.close();
+      });
+
+      test('CancelDeleteAccountRequested calls cancelAccountDeletion and resets deletionStatus', () async {
+        final bloc = AccountBloc(authRepository: authRepository);
+
+        await expectLater(
+          bloc.stream,
+          emitsThrough(isA<AccountUnauthenticated>()),
+        );
+
+        await PrefStore().saveString(AppStrings.keyToken, 'mock_token');
+        authRepository.cancelAccountDeletionCalled = false;
+
+        bloc.emit(AccountAuthenticated(
+          email: 'test@example.com',
+          deletionStatus: AccountDeletionStatus(
+            deletionRequested: true,
+            deletionReason: 'Test',
+          ),
+        ));
+
+        bloc.add(const CancelDeleteAccountRequested());
+
+        await expectLater(
+          bloc.stream,
+          emitsInOrder([
+            predicate<AccountState>((state) => state is AccountAuthenticated && state.isCancellingDeletion),
+            predicate<AccountState>((state) =>
+                state is AccountAuthenticated &&
+                !state.isCancellingDeletion &&
+                state.deletionStatus?.deletionRequested == false),
+          ]),
+        );
+
+        expect(authRepository.cancelAccountDeletionCalled, isTrue);
 
         bloc.close();
       });

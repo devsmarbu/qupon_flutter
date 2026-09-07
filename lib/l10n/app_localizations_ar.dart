@@ -1253,4 +1253,33 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get qrDialogClose => 'إغلاق';
+
+  @override
+  String get deleteAccount => 'حذف الحساب';
+
+  @override
+  String get deleteAccountConfirmTitle => 'حذف الحساب؟';
+
+  @override
+  String get deleteAccountConfirmMessage =>
+      'هل أنت تأكيد من رغبتك في حذف حسابك؟ هذا الإجراء دائم ولا يمكن التراجع عنه. سيتم حذف جميع بياناتك والكوبونات النشطة.';
+
+  @override
+  String get accountSettings => 'إعدادات الحساب';
+
+  @override
+  String get deleteAccountReasonHint => 'سبب الحذف (اختياري)';
+
+  @override
+  String get deletionPendingTitle => 'طلب حذف الحساب قيد المراجعة';
+
+  @override
+  String get deletionPendingMessage =>
+      'طلب حذف حسابك قيد المراجعة والموافقة من قبل المسؤول.';
+
+  @override
+  String get cancelDeletionRequest => 'إلغاء طلب الحذف';
+
+  @override
+  String get submitDeletionRequest => 'إرسال طلب الحذف';
 }

@@ -18,6 +18,7 @@ import 'package:qupon/src/features/main/presentation/pages/splash_page.dart';
 import 'package:qupon/src/features/account/presentation/welcome/view/welcome_page.dart';
 import 'package:qupon/src/features/cart/data/repositories/cart_repository.dart';
 import 'package:qupon/src/features/account/data/repositories/auth_repository.dart';
+import 'package:qupon/src/features/account/data/models/account_deletion_status.dart';
 import 'package:qupon/src/features/cart/data/models/api_cart_model.dart';
 import 'package:qupon/src/features/cart/data/models/payment_gateway.dart';
 import 'package:qupon/src/features/cart/data/models/checkout_model.dart';
@@ -221,6 +222,24 @@ class FakeAuthRepository implements AuthRepository {
     String? vendor,
   }) async {
     return [];
+  }
+
+  @override
+  Future<void> deleteAccount() async {}
+
+  @override
+  Future<AccountDeletionStatus> getAccountDeletionStatus() async {
+    return const AccountDeletionStatus(deletionRequested: false);
+  }
+
+  @override
+  Future<String> requestAccountDeletion({String? reason}) async {
+    return 'Account deletion request submitted for admin approval.';
+  }
+
+  @override
+  Future<String> cancelAccountDeletion() async {
+    return 'Account deletion request cancelled.';
   }
 }
 

@@ -1256,4 +1256,33 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get qrDialogClose => 'Close';
+
+  @override
+  String get deleteAccount => 'Delete Account';
+
+  @override
+  String get deleteAccountConfirmTitle => 'Delete Account?';
+
+  @override
+  String get deleteAccountConfirmMessage =>
+      'Are you sure you want to delete your account? This action is permanent and cannot be undone. All your data and active coupons will be deleted.';
+
+  @override
+  String get accountSettings => 'Account Settings';
+
+  @override
+  String get deleteAccountReasonHint => 'Optional reason for deletion';
+
+  @override
+  String get deletionPendingTitle => 'Account Deletion Pending Approval';
+
+  @override
+  String get deletionPendingMessage =>
+      'Your account deletion request is pending administrator approval.';
+
+  @override
+  String get cancelDeletionRequest => 'Cancel Deletion Request';
+
+  @override
+  String get submitDeletionRequest => 'Submit Deletion Request';
 }

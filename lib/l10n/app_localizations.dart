@@ -2425,6 +2425,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Close'**
   String get qrDialogClose;
+
+  /// No description provided for @deleteAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Account'**
+  String get deleteAccount;
+
+  /// No description provided for @deleteAccountConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Account?'**
+  String get deleteAccountConfirmTitle;
+
+  /// No description provided for @deleteAccountConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete your account? This action is permanent and cannot be undone. All your data and active coupons will be deleted.'**
+  String get deleteAccountConfirmMessage;
+
+  /// No description provided for @accountSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Account Settings'**
+  String get accountSettings;
+
+  /// No description provided for @deleteAccountReasonHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional reason for deletion'**
+  String get deleteAccountReasonHint;
+
+  /// No description provided for @deletionPendingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Account Deletion Pending Approval'**
+  String get deletionPendingTitle;
+
+  /// No description provided for @deletionPendingMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account deletion request is pending administrator approval.'**
+  String get deletionPendingMessage;
+
+  /// No description provided for @cancelDeletionRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel Deletion Request'**
+  String get cancelDeletionRequest;
+
+  /// No description provided for @submitDeletionRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit Deletion Request'**
+  String get submitDeletionRequest;
 }
 
 class _AppLocalizationsDelegate

@@ -525,5 +525,14 @@
   "qrDialogOrderRef": "Order Ref",
   "qrDialogExpiry": "Expiry",
   "qrDialogRedeemCode": "Redeem Code",
-  "qrDialogClose": "Close"
+  "qrDialogClose": "Close",
+  "deleteAccount": "Delete Account",
+  "deleteAccountConfirmTitle": "Delete Account?",
+  "deleteAccountConfirmMessage": "Are you sure you want to delete your account? This action is permanent and cannot be undone. All your data and active coupons will be deleted.",
+  "accountSettings": "Account Settings",
+  "deleteAccountReasonHint": "Optional reason for deletion",
+  "deletionPendingTitle": "Account Deletion Pending Approval",
+  "deletionPendingMessage": "Your account deletion request is pending administrator approval.",
+  "cancelDeletionRequest": "Cancel Deletion Request",
+  "submitDeletionRequest": "Submit Deletion Request"
 }

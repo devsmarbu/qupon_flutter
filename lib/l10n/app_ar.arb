@@ -507,5 +507,14 @@
   "pastDealsEmptyHint": "ستظهر الكوبونات المنتهية هنا بعد انتهاء العروض.",
   "pastDealsNoMatch": "لا توجد صفقات سابقة تطابق بحثك",
   "pastDealsNoMatchHint": "جرّب كلمة مختلفة أو امسح البحث.",
-  "pastDealsClearSearch": "مسح البحث"
+  "pastDealsClearSearch": "مسح البحث",
+  "deleteAccount": "حذف الحساب",
+  "deleteAccountConfirmTitle": "حذف الحساب؟",
+  "deleteAccountConfirmMessage": "هل أنت تأكيد من رغبتك في حذف حسابك؟ هذا الإجراء دائم ولا يمكن التراجع عنه. سيتم حذف جميع بياناتك والكوبونات النشطة.",
+  "accountSettings": "إعدادات الحساب",
+  "deleteAccountReasonHint": "سبب الحذف (اختياري)",
+  "deletionPendingTitle": "طلب حذف الحساب قيد المراجعة",
+  "deletionPendingMessage": "طلب حذف حسابك قيد المراجعة والموافقة من قبل المسؤول.",
+  "cancelDeletionRequest": "إلغاء طلب الحذف",
+  "submitDeletionRequest": "إرسال طلب الحذف"
 }

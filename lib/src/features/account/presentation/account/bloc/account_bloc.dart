@@ -14,6 +14,9 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
         super(const AccountInitial()) {
     on<AccountLoggedIn>(_onAccountLoggedIn);
     on<SignOutRequested>(_onSignOutRequested);
+    on<DeleteAccountRequested>(_onDeleteAccountRequested);
+    on<CancelDeleteAccountRequested>(_onCancelDeleteAccountRequested);
+    on<CheckDeletionStatusRequested>(_onCheckDeletionStatusRequested);
     on<AppStarted>(_onAppStarted);
     on<LoadDashboard>(_onLoadDashboard);
 
@@ -50,6 +53,94 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
     await PrefStore().remove(AppStrings.keyToken);
     await PrefStore.clearProfile();
     emit(const AccountUnauthenticated());
+  }
+
+  Future<void> _onDeleteAccountRequested(
+    DeleteAccountRequested event,
+    Emitter<AccountState> emit,
+  ) async {
+    final currentState = state;
+    if (currentState is! AccountAuthenticated) return;
+
+    emit(currentState.copyWith(
+      isDeletingAccount: true,
+      error: null,
+      clearActionMessage: true,
+    ));
+
+    try {
+      final msg = await _authRepository.requestAccountDeletion(reason: event.reason);
+
+      if (event.logoutAfterRequest) {
+        await PrefStore().remove(AppStrings.keyToken);
+        await PrefStore.clearProfile();
+        emit(const AccountUnauthenticated());
+        return;
+      }
+
+      final status = await _authRepository.getAccountDeletionStatus();
+      emit(currentState.copyWith(
+        isDeletingAccount: false,
+        deletionStatus: status.deletionRequested
+            ? status
+            : status.copyWith(deletionRequested: true, deletionReason: event.reason),
+        actionMessage: msg,
+        error: null,
+      ));
+    } catch (e) {
+      final errorMessage = e.toString().replaceAll('Exception: ', '');
+      emit(currentState.copyWith(
+        isDeletingAccount: false,
+        error: errorMessage,
+      ));
+    }
+  }
+
+  Future<void> _onCancelDeleteAccountRequested(
+    CancelDeleteAccountRequested event,
+    Emitter<AccountState> emit,
+  ) async {
+    final currentState = state;
+    if (currentState is! AccountAuthenticated) return;
+
+    emit(currentState.copyWith(
+      isCancellingDeletion: true,
+      error: null,
+      clearActionMessage: true,
+    ));
+
+    try {
+      final msg = await _authRepository.cancelAccountDeletion();
+      final status = await _authRepository.getAccountDeletionStatus();
+
+      emit(currentState.copyWith(
+        isCancellingDeletion: false,
+        deletionStatus: status,
+        actionMessage: msg,
+        error: null,
+      ));
+    } catch (e) {
+      final errorMessage = e.toString().replaceAll('Exception: ', '');
+      emit(currentState.copyWith(
+        isCancellingDeletion: false,
+        error: errorMessage,
+      ));
+    }
+  }
+
+  Future<void> _onCheckDeletionStatusRequested(
+    CheckDeletionStatusRequested event,
+    Emitter<AccountState> emit,
+  ) async {
+    final currentState = state;
+    if (currentState is! AccountAuthenticated) return;
+
+    try {
+      final status = await _authRepository.getAccountDeletionStatus();
+      emit(currentState.copyWith(
+        deletionStatus: status,
+      ));
+    } catch (_) {}
   }
 
   Future<void> _onAppStarted(
@@ -111,10 +202,12 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
       } else {
         final data = await _authRepository.getDashboard(token: token);
         final wishlist = await _authRepository.getWishlist(token: token);
+        final deletionStatus = await _authRepository.getAccountDeletionStatus();
         emit(currentState.copyWith(
           isLoadingDashboard: false,
           dashboardData: data,
           wishlist: wishlist,
+          deletionStatus: deletionStatus,
           clearFilteredTransactions: true,
           error: null,
         ));

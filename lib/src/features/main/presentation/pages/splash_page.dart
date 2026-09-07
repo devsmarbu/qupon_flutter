@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:video_player/video_player.dart';
@@ -18,6 +19,7 @@ class SplashPage extends StatefulWidget {
 
 class _SplashPageState extends State<SplashPage> {
   VideoPlayerController? _videoController;
+  Timer? _safetyTimer;
   bool _videoFinished = false;
   bool _labelsFetchedOrFailed = false;
   bool _navigated = false;
@@ -30,7 +32,7 @@ class _SplashPageState extends State<SplashPage> {
     _fetchLabels();
 
     // Safety timeout: navigate after 8 seconds no matter what
-    Future.delayed(const Duration(seconds: 8), () {
+    _safetyTimer = Timer(const Duration(seconds: 8), () {
       if (mounted && !_navigated) {
         debugPrint('[SplashPage] Safety timeout reached, forcing navigation');
         _videoFinished = true;
@@ -171,6 +173,7 @@ class _SplashPageState extends State<SplashPage> {
 
   @override
   void dispose() {
+    _safetyTimer?.cancel();
     _videoController?.removeListener(_onVideoUpdate);
     _videoController?.dispose();
     super.dispose();

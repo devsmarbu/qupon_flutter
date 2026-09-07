@@ -60,7 +60,26 @@ class _AccountPageState extends State<AccountPage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<AccountBloc, AccountState>(
+    return BlocConsumer<AccountBloc, AccountState>(
+      listener: (context, state) {
+        if (state is AccountAuthenticated) {
+          if (state.error != null && !state.isLoadingDashboard && !state.isDeletingAccount && !state.isCancellingDeletion) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.error!),
+                backgroundColor: Colors.red,
+              ),
+            );
+          } else if (state.actionMessage != null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.actionMessage!),
+                backgroundColor: const Color(0xFF16A34A),
+              ),
+            );
+          }
+        }
+      },
       builder: (context, state) {
         if (state is AccountInitial) {
           return const Scaffold(
@@ -71,7 +90,36 @@ class _AccountPageState extends State<AccountPage> {
           );
         }
         if (state is AccountAuthenticated) {
-          return _buildDashboard(context, state);
+          final isBusy = state.isDeletingAccount || state.isCancellingDeletion;
+          return Stack(
+            children: [
+              _buildDashboard(context, state),
+              if (isBusy)
+                Container(
+                  color: Colors.black45,
+                  child: Center(
+                    child: Card(
+                      elevation: 4,
+                      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16))),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const CircularProgressIndicator(color: Colors.red),
+                            const SizedBox(height: 16),
+                            Text(
+                              state.isCancellingDeletion ? 'Cancelling deletion request...' : 'Submitting deletion request...',
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xFF0F172A)),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          );
         }
         return _buildLoggedOut(context);
       },
@@ -191,11 +239,44 @@ class _AccountPageState extends State<AccountPage> {
                         // ── Filters Button ─────────────────────────
                         _buildFiltersButton(context, vendors),
                         const SizedBox(width: 4),
-                        // Sign out icon
-                        GestureDetector(
-                          onTap: () => _confirmSignOut(context),
-                          child: const Icon(Icons.logout, color: Color(0xFF94A3B8), size: 20),
-                        ),
+                        // Account menu popover
+                        // PopupMenuButton<String>(
+                        //   icon: const Icon(Icons.more_vert, color: Color(0xFF94A3B8), size: 22),
+                        //   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        //   onSelected: (value) {
+                        //     if (value == 'signOut') {
+                        //       _confirmSignOut(context);
+                        //     } else if (value == 'deleteAccount') {
+                        //       _confirmDeleteAccount(context);
+                        //     }
+                        //   },
+                        //   itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                        //     PopupMenuItem<String>(
+                        //       value: 'signOut',
+                        //       child: Row(
+                        //         children: [
+                        //           const Icon(Icons.logout, color: Color(0xFF64748B), size: 18),
+                        //           const SizedBox(width: 8),
+                        //           Text(LocalizationService().getString('SIGN_OUT', 'Sign Out')),
+                        //         ],
+                        //       ),
+                        //     ),
+                        //     const PopupMenuDivider(),
+                        //     PopupMenuItem<String>(
+                        //       value: 'deleteAccount',
+                        //       child: Row(
+                        //         children: [
+                        //           const Icon(Icons.delete_forever_outlined, color: Colors.red, size: 18),
+                        //           const SizedBox(width: 8),
+                        //           Text(
+                        //             LocalizationService().getString('DELETE_ACCOUNT', 'Delete Account'),
+                        //             style: const TextStyle(color: Colors.red, fontWeight: FontWeight.w600),
+                        //           ),
+                        //         ],
+                        //       ),
+                        //     ),
+                        //   ],
+                        // ),
                       ],
                     ),
                     const SizedBox(height: 10),
@@ -440,6 +521,168 @@ class _AccountPageState extends State<AccountPage> {
                           },
                         ),
                       ),
+
+                    const SizedBox(height: 32),
+
+                    // ── Account Settings Section ──────────────────────────────────────
+                    Text(
+                      LocalizationService().getString('ACCOUNT_SETTINGS', 'Account Settings'),
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w900,
+                        color: Color(0xFF0F172A),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+
+                    // Pending Deletion Banner
+                    if (state.deletionStatus?.deletionRequested == true) ...[
+                      Container(
+                        width: double.infinity,
+                        margin: const EdgeInsets.only(bottom: 12),
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFFFBEB),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: const Color(0xFFFDE68A)),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                const Icon(Icons.warning_amber_rounded, color: Color(0xFFD97706), size: 22),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    LocalizationService().getString('DELETION_PENDING_TITLE', 'Account Deletion Pending Approval'),
+                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF92400E)),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              LocalizationService().getString('DELETION_PENDING_MSG', 'Your account deletion request is pending administrator approval.'),
+                              style: const TextStyle(fontSize: 13, color: Color(0xFFB45309)),
+                            ),
+                            if (state.deletionStatus?.deletionReason != null && state.deletionStatus!.deletionReason!.isNotEmpty) ...[
+                              const SizedBox(height: 6),
+                              Text(
+                                'Reason: "${state.deletionStatus!.deletionReason}"',
+                                style: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic, color: Color(0xFFB45309)),
+                              ),
+                            ],
+                            const SizedBox(height: 12),
+                            SizedBox(
+                              width: double.infinity,
+                              child: OutlinedButton(
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: const Color(0xFFB45309),
+                                  side: const BorderSide(color: Color(0xFFF59E0B)),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                ),
+                                onPressed: () => context.read<AccountBloc>().add(const CancelDeleteAccountRequested()),
+                                child: Text(
+                                  LocalizationService().getString('CANCEL_DELETION_REQUEST', 'Cancel Deletion Request'),
+                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.02),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                        border: Border.all(color: const Color(0xFFF1F5F9)),
+                      ),
+                      child: Column(
+                        children: [
+                          if (state.email.isNotEmpty) ...[
+                            ListTile(
+                              leading: Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: const BoxDecoration(
+                                  color: Color(0xFFF1F5F9),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(Icons.person_outline, color: Color(0xFF475569), size: 20),
+                              ),
+                              title: Text(
+                                state.name.isNotEmpty ? state.name : state.email,
+                                style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: Color(0xFF0F172A)),
+                              ),
+                              subtitle: state.name.isNotEmpty
+                                  ? Text(state.email, style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)))
+                                  : null,
+                            ),
+                            const Divider(color: Color(0xFFF1F5F9), height: 1, indent: 56, endIndent: 16),
+                          ],
+                          ListTile(
+                            onTap: () => _confirmSignOut(context),
+                            leading: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: const BoxDecoration(
+                                color: Color(0xFFF1F5F9),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(Icons.logout, color: Color(0xFF475569), size: 20),
+                            ),
+                            title: Text(
+                              LocalizationService().getString('SIGN_OUT', 'Sign Out'),
+                              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: Color(0xFF0F172A)),
+                            ),
+                            trailing: const Icon(Icons.chevron_right, color: Color(0xFF94A3B8), size: 18),
+                          ),
+                          const Divider(color: Color(0xFFF1F5F9), height: 1, indent: 56, endIndent: 16),
+                          if (state.deletionStatus?.deletionRequested == true)
+                            ListTile(
+                              onTap: () => context.read<AccountBloc>().add(const CancelDeleteAccountRequested()),
+                              leading: Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: const BoxDecoration(
+                                  color: Color(0xFFFFFBEB),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(Icons.undo, color: Color(0xFFD97706), size: 20),
+                              ),
+                              title: Text(
+                                LocalizationService().getString('CANCEL_DELETION_REQUEST', 'Cancel Deletion Request'),
+                                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: Color(0xFFD97706)),
+                              ),
+                              trailing: const Icon(Icons.chevron_right, color: Color(0xFFD97706), size: 18),
+                            )
+                          else
+                            ListTile(
+                              onTap: () => _confirmDeleteAccount(context),
+                              leading: Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: const BoxDecoration(
+                                  color: Color(0xFFFEF2F2),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(Icons.delete_forever_outlined, color: Colors.red, size: 20),
+                              ),
+                              title: Text(
+                                LocalizationService().getString('DELETE_ACCOUNT', 'Delete Account'),
+                                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: Colors.red),
+                              ),
+                              trailing: const Icon(Icons.chevron_right, color: Colors.red, size: 18),
+                            ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -774,6 +1017,91 @@ class _AccountPageState extends State<AccountPage> {
               context.read<AccountBloc>().add(const SignOutRequested());
             },
             child: const Text('Sign Out', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _confirmDeleteAccount(BuildContext context) {
+    final TextEditingController reasonCtrl = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            const Icon(Icons.warning_amber_rounded, color: Colors.red, size: 28),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                LocalizationService().getString('DELETE_ACCOUNT_CONFIRM_TITLE', 'Delete Account?'),
+                style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 18, color: Color(0xFF0F172A)),
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              LocalizationService().getString(
+                'DELETE_ACCOUNT_CONFIRM_MSG',
+                'Are you sure you want to delete your account? This action submits a deletion request for administrator approval.',
+              ),
+              style: const TextStyle(color: Color(0xFF475569), fontSize: 14, height: 1.4),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: reasonCtrl,
+              decoration: InputDecoration(
+                hintText: LocalizationService().getString('DELETE_ACCOUNT_REASON_HINT', 'Reason for deletion (optional)'),
+                hintStyle: const TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
+                filled: true,
+                fillColor: const Color(0xFFF8FAFC),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: const BorderSide(color: Color(0xFFFF6B35)),
+                ),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text(
+              LocalizationService().getString('CANCEL', 'Cancel'),
+              style: const TextStyle(color: Color(0xFF64748B), fontWeight: FontWeight.w600),
+            ),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              elevation: 0,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+            onPressed: () {
+              final reason = reasonCtrl.text.trim();
+              Navigator.of(ctx).pop();
+              context.read<AccountBloc>().add(DeleteAccountRequested(reason: reason));
+            },
+            child: Text(
+              LocalizationService().getString('SUBMIT_DELETION_REQUEST', 'Submit Request'),
+              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            ),
           ),
         ],
       ),
