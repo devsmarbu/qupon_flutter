@@ -47,8 +47,12 @@ class ProductDetailBloc extends Bloc<ProductDetailEvent, ProductDetailState> {
       selectedOptionIndex: 0,
       isFavorite: offer.wishlisted ?? false,
       isBookmarked: false,
-      isLoading: true,
+      isLoading: !event.preloaded,
     ));
+
+    if (event.preloaded) {
+      return;
+    }
 
     final slug = (offer.slug != null && offer.slug!.isNotEmpty) ? offer.slug! : offer.id;
     if (slug.isNotEmpty && !['1', '2', '3', '4', '5', '6'].contains(slug)) {

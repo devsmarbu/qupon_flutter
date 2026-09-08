@@ -8,8 +8,13 @@ abstract class ProductDetailEvent {
 class InitializeProductDetail extends ProductDetailEvent {
   final Offer offer;
   final List<OfferOption> variants;
+  final bool preloaded;
 
-  const InitializeProductDetail(this.offer, {this.variants = const []});
+  const InitializeProductDetail(
+    this.offer, {
+    this.variants = const [],
+    this.preloaded = false,
+  });
 }
 
 class SelectOption extends ProductDetailEvent {

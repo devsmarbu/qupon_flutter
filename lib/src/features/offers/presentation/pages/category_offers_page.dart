@@ -263,11 +263,7 @@ class _CategoryOffersPageState extends State<CategoryOffersPage> {
   }
 
   Future<void> _navigateToDetail(BuildContext context, Offer offer) async {
-    final viewCart = await Navigator.of(context).push<bool>(
-      MaterialPageRoute(
-        builder: (context) => ProductDetailPage(offer: offer),
-      ),
-    );
+    final viewCart = await ProductDetailPage.navigateWithPreload(context, offer);
     if (viewCart == true && context.mounted) {
       Navigator.of(context).pop(true);
     }
@@ -287,12 +283,7 @@ class _CategoryOffersPageState extends State<CategoryOffersPage> {
 
     return GestureDetector(
       onTap: () async {
-        final viewCart = await Navigator.of(context).push<bool>(
-          MaterialPageRoute(
-            builder: (context) => ProductDetailPage(offer: offer),
-          ),
-
-        );
+        final viewCart = await ProductDetailPage.navigateWithPreload(context, offer);
         if (viewCart == true && context.mounted) {
           Navigator.of(context).pop(true);
         }
@@ -528,11 +519,7 @@ class _CategoryOffersPageState extends State<CategoryOffersPage> {
 
                       ElevatedButton(
                         onPressed: () async {
-                          final viewCart = await Navigator.of(context).push<bool>(
-                            MaterialPageRoute(
-                              builder: (context) => ProductDetailPage(offer: offer),
-                            ),
-                          );
+                          final viewCart = await ProductDetailPage.navigateWithPreload(context, offer);
                           if (viewCart == true && context.mounted) {
                             Navigator.of(context).pop(true);
                           }

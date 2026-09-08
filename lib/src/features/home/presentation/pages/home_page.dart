@@ -127,11 +127,7 @@ class _HomePageState extends State<HomePage> {
             validity: selection.validity,
             wishlisted: selection.wishlisted,
           );
-          final viewCart = await Navigator.of(context).push<bool>(
-            MaterialPageRoute(
-              builder: (context) => ProductDetailPage(offer: offer),
-            ),
-          );
+          final viewCart = await ProductDetailPage.navigateWithPreload(context, offer);
           if (viewCart == true && context.mounted) {
             final mainPageState = context.findAncestorStateOfType<MainPageState>();
             if (mainPageState != null) {
@@ -347,11 +343,7 @@ class _HomePageState extends State<HomePage> {
                     validity: selection.validity,
                     wishlisted: selection.wishlisted,
                   );
-                  final viewCart = await Navigator.of(context).push<bool>(
-                    MaterialPageRoute(
-                      builder: (context) => ProductDetailPage(offer: offer),
-                    ),
-                  );
+                  final viewCart = await ProductDetailPage.navigateWithPreload(context, offer);
                   if (viewCart == true && context.mounted) {
                     final mainPageState = context.findAncestorStateOfType<MainPageState>();
                     if (mainPageState != null) {
@@ -594,11 +586,7 @@ class _HomePageState extends State<HomePage> {
                     currency: 'QAR',
                     slug: localPromo.slug,
                   );
-                  final viewCart = await Navigator.of(context).push<bool>(
-                    MaterialPageRoute(
-                      builder: (context) => ProductDetailPage(offer: offer),
-                    ),
-                  );
+                  final viewCart = await ProductDetailPage.navigateWithPreload(context, offer);
                   if (viewCart == true && context.mounted) {
                     final mainPageState = context.findAncestorStateOfType<MainPageState>();
                     if (mainPageState != null) {

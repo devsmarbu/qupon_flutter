@@ -109,16 +109,47 @@ class _Localizations {
 
 class ProductDetailPage extends StatelessWidget {
   final Offer offer;
+  final bool preloaded;
 
   const ProductDetailPage({
     super.key,
     required this.offer,
+    this.preloaded = false,
   });
+
+  static Future<bool?> navigateWithPreload(BuildContext context, Offer offer) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator(color: Color(0xFFFF6B35))),
+    );
+
+    Offer detailedOffer = offer;
+    final slug = (offer.slug != null && offer.slug!.isNotEmpty) ? offer.slug! : offer.id;
+    if (slug.isNotEmpty && !['1', '2', '3', '4', '5', '6'].contains(slug)) {
+      try {
+        detailedOffer = await OffersRepositoryImpl().getCouponDetails(slug);
+      } catch (_) {}
+    }
+
+    if (context.mounted) {
+      Navigator.of(context, rootNavigator: true).pop();
+    }
+
+    if (context.mounted) {
+      return Navigator.of(context).push<bool>(
+        MaterialPageRoute(
+          builder: (context) => ProductDetailPage(offer: detailedOffer, preloaded: true),
+        ),
+      );
+    }
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider<ProductDetailBloc>(
-      create: (context) => ProductDetailBloc()..add(InitializeProductDetail(offer, variants: offer.variants)),
+      create: (context) => ProductDetailBloc()..add(InitializeProductDetail(offer, variants: offer.variants, preloaded: preloaded)),
       child: const ProductDetailView(),
     );
   }
