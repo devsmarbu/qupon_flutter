@@ -1,5 +1,6 @@
 class ApiEndpoints {
-  static const String baseUrl = 'https://qupon.marbu.in';
+  //static const String baseUrl = 'https://qupon.marbu.in';
+  static const String baseUrl = 'https://qupon.qa';
   static const String register = '/api/auth/register';
   static const String login = '/api/auth/login';
   static const String verifyOtp = '/api/auth/verify-otp';

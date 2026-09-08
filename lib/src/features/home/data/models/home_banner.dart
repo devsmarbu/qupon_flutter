@@ -3,6 +3,7 @@ import '../../../../core/network/api_endpoints.dart';
 /// Represents a promotional banner from the storefront home API.
 class HomeBanner {
   final String id;
+  final String? couponId;
   final String title;
   final String titleAr;
   final String subtitle;
@@ -11,6 +12,7 @@ class HomeBanner {
 
   const HomeBanner({
     required this.id,
+    this.couponId,
     required this.title,
     required this.titleAr,
     required this.subtitle,
@@ -36,8 +38,16 @@ class HomeBanner {
       }
     }
 
+    final rawCouponId = json['couponId']?.toString() ??
+        json['coupon_id']?.toString() ??
+        json['couponID']?.toString() ??
+        (json['coupon'] is Map
+            ? (json['coupon']['id']?.toString() ?? json['coupon']['_id']?.toString())
+            : json['coupon']?.toString());
+
     return HomeBanner(
       id: json['id']?.toString() ?? json['_id']?.toString() ?? '',
+      couponId: (rawCouponId != null && rawCouponId.isNotEmpty) ? rawCouponId : null,
       title: json['title']?.toString() ?? json['name']?.toString() ?? '',
       titleAr: json['titleAr']?.toString() ?? json['nameAr']?.toString() ?? '',
       subtitle: json['subtitle']?.toString() ?? json['description']?.toString() ?? '',

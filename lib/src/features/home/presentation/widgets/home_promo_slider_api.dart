@@ -92,8 +92,9 @@ class _HomePromoSliderApiState extends State<HomePromoSliderApi> {
                                     ? LocalizationService().getString('ENTERTAINMENT', l10n.entertainmentLabel)
                                     : LocalizationService().getString('BEAUTY', l10n.beautyLabel);
 
+                    final bannerCouponId = (b.couponId != null && b.couponId!.isNotEmpty) ? b.couponId! : b.id;
                     final offer = Offer(
-                      id: b.id,
+                      id: bannerCouponId,
                       title: b.title,
                       titleAr: b.titleAr,
                       category: category,
