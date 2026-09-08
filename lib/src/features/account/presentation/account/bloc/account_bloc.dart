@@ -84,7 +84,6 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
         deletionStatus: status.deletionRequested
             ? status
             : status.copyWith(deletionRequested: true, deletionReason: event.reason),
-        actionMessage: msg,
         error: null,
       ));
     } catch (e) {
@@ -116,7 +115,6 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
       emit(currentState.copyWith(
         isCancellingDeletion: false,
         deletionStatus: status,
-        actionMessage: msg,
         error: null,
       ));
     } catch (e) {

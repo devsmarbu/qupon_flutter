@@ -72,14 +72,14 @@ class _PaymentWebViewPageState extends State<PaymentWebViewPage> {
     if (_isConfirming) return true;
 
     final lowerUrl = url.toLowerCase();
-    if (_isSuccessUrl(lowerUrl)) {
-      _confirmCheckoutAndPop(url);
-      return true;
-    }
     if (_isCancelUrl(lowerUrl)) {
       if (mounted) {
         Navigator.of(context).pop(PaymentResult.cancelled);
       }
+      return true;
+    }
+    if (_isSuccessUrl(lowerUrl)) {
+      _confirmCheckoutAndPop(url);
       return true;
     }
     return false;
@@ -166,6 +166,7 @@ class _PaymentWebViewPageState extends State<PaymentWebViewPage> {
         url.contains('/payment-cancel') ||
         url.contains('/payment-failed') ||
         url.contains('status=cancel') ||
+        url.contains('status=failed') ||
         url.contains('result=cancel') ||
         url.contains('result=failed');
   }

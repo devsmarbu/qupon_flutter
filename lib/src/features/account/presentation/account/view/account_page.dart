@@ -422,9 +422,15 @@ class _AccountPageState extends State<AccountPage> {
                         ),
                       )
                     else if (filteredTransactions.isEmpty)
-                      const Center(
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(vertical: 24),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(24),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: const Color(0xFFE2E8F0)),
+                        ),
+                        child: const Center(
                           child: Text(
                             'No recent orders',
                             style: TextStyle(color: Color(0xFF64748B), fontSize: 14),

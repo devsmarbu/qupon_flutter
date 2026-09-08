@@ -7,6 +7,7 @@ class ProductDetailState {
   final int selectedOptionIndex;
   final bool isFavorite;
   final bool isBookmarked;
+  final bool isLoading;
 
   const ProductDetailState({
     this.offer,
@@ -14,6 +15,7 @@ class ProductDetailState {
     this.selectedOptionIndex = 0,
     this.isFavorite = false,
     this.isBookmarked = false,
+    this.isLoading = false,
   });
 
   ProductDetailState copyWith({
@@ -22,6 +24,7 @@ class ProductDetailState {
     int? selectedOptionIndex,
     bool? isFavorite,
     bool? isBookmarked,
+    bool? isLoading,
   }) {
     return ProductDetailState(
       offer: offer ?? this.offer,
@@ -29,6 +32,7 @@ class ProductDetailState {
       selectedOptionIndex: selectedOptionIndex ?? this.selectedOptionIndex,
       isFavorite: isFavorite ?? this.isFavorite,
       isBookmarked: isBookmarked ?? this.isBookmarked,
+      isLoading: isLoading ?? this.isLoading,
     );
   }
 }
