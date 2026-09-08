@@ -12,6 +12,7 @@ import 'package:qupon/l10n/app_localizations.dart';
 import '../../../data/models/dashboard_model.dart';
 import 'package:qupon/src/features/offers/presentation/widgets/offer_horizontal_card_api.dart';
 import 'package:qupon/src/features/home/data/models/home_coupon.dart';
+import 'package:qupon/src/core/network/api_endpoints.dart';
 
 class AccountPage extends StatefulWidget {
   final VoidCallback? onNavigateHome;
@@ -421,9 +422,15 @@ class _AccountPageState extends State<AccountPage> {
                         ),
                       )
                     else if (filteredTransactions.isEmpty)
-                      const Center(
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(vertical: 24),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(24),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: const Color(0xFFE2E8F0)),
+                        ),
+                        child: const Center(
                           child: Text(
                             'No recent orders',
                             style: TextStyle(color: Color(0xFF64748B), fontSize: 14),
@@ -1917,7 +1924,7 @@ class _OrderCardItemState extends State<_OrderCardItem> {
 
     final couponUrl = coupon.couponUrl.isNotEmpty
         ? coupon.couponUrl
-        : 'https://qupon.marbu.in/coupon/${couponCode.isNotEmpty ? couponCode : ''}';
+        : '${ApiEndpoints.baseUrl}/coupon/${couponCode.isNotEmpty ? couponCode : ''}';
 
     final status = coupon.status.isNotEmpty ? coupon.status : '';
     final rawRedeemBy = coupon.redeemBy.isNotEmpty ? coupon.redeemBy : '';

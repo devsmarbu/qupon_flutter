@@ -1,3 +1,5 @@
+import 'package:qupon/src/core/network/api_endpoints.dart';
+
 class PastDeal {
   final String id;
   final String title;
@@ -43,7 +45,7 @@ class PastDeal {
 
     // Resolve relative URL path if any
     if (imgUrl.isNotEmpty && !imgUrl.startsWith('http')) {
-      imgUrl = 'https://qupon.marbu.in$imgUrl';
+      imgUrl = '${ApiEndpoints.baseUrl}$imgUrl';
     }
 
     return PastDeal(

@@ -47,7 +47,12 @@ class ProductDetailBloc extends Bloc<ProductDetailEvent, ProductDetailState> {
       selectedOptionIndex: 0,
       isFavorite: offer.wishlisted ?? false,
       isBookmarked: false,
+      isLoading: !event.preloaded,
     ));
+
+    if (event.preloaded) {
+      return;
+    }
 
     final slug = (offer.slug != null && offer.slug!.isNotEmpty) ? offer.slug! : offer.id;
     if (slug.isNotEmpty && !['1', '2', '3', '4', '5', '6'].contains(slug)) {
@@ -62,10 +67,14 @@ class ProductDetailBloc extends Bloc<ProductDetailEvent, ProductDetailState> {
           offer: detailedOffer,
           options: newOptions,
           isFavorite: detailedOffer.wishlisted ?? state.isFavorite,
+          isLoading: false,
         ));
       } catch (_) {
+        emit(state.copyWith(isLoading: false));
         // Keep showing the initial offer if fetch fails
       }
+    } else {
+      emit(state.copyWith(isLoading: false));
     }
   }
 

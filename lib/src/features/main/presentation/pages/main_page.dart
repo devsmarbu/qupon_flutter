@@ -43,6 +43,9 @@ class MainPageState extends State<MainPage> {
   }
 
   void setSelectedIndex(int index) {
+    if (index == 3) {
+      context.read<CartBloc>().add(const LoadCart());
+    }
     setState(() {
       _selectedIndex = index;
     });

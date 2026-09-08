@@ -12,6 +12,7 @@ import '../../../../../l10n/app_localizations.dart';
 import '../../data/models/offer.dart';
 import '../../data/models/offer_option.dart';
 import '../../data/models/vendor_details.dart';
+import 'package:qupon/src/core/network/api_endpoints.dart';
 import '../bloc/product_detail_bloc.dart';
 import '../bloc/product_detail_event.dart';
 import '../bloc/product_detail_state.dart';
@@ -108,16 +109,47 @@ class _Localizations {
 
 class ProductDetailPage extends StatelessWidget {
   final Offer offer;
+  final bool preloaded;
 
   const ProductDetailPage({
     super.key,
     required this.offer,
+    this.preloaded = false,
   });
+
+  static Future<bool?> navigateWithPreload(BuildContext context, Offer offer) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator(color: Color(0xFFFF6B35))),
+    );
+
+    Offer detailedOffer = offer;
+    final slug = (offer.slug != null && offer.slug!.isNotEmpty) ? offer.slug! : offer.id;
+    if (slug.isNotEmpty && !['1', '2', '3', '4', '5', '6'].contains(slug)) {
+      try {
+        detailedOffer = await OffersRepositoryImpl().getCouponDetails(slug);
+      } catch (_) {}
+    }
+
+    if (context.mounted) {
+      Navigator.of(context, rootNavigator: true).pop();
+    }
+
+    if (context.mounted) {
+      return Navigator.of(context).push<bool>(
+        MaterialPageRoute(
+          builder: (context) => ProductDetailPage(offer: detailedOffer, preloaded: true),
+        ),
+      );
+    }
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider<ProductDetailBloc>(
-      create: (context) => ProductDetailBloc()..add(InitializeProductDetail(offer, variants: offer.variants)),
+      create: (context) => ProductDetailBloc()..add(InitializeProductDetail(offer, variants: offer.variants, preloaded: preloaded)),
       child: const ProductDetailView(),
     );
   }
@@ -266,7 +298,7 @@ class ProductDetailView extends StatelessWidget {
         ? offer.descriptionAr!
         : offer.description;
 
-    final shareLink = offer.shareLink ?? offer.vendorDetails?.websiteUrl ?? offer.vendorDetails?.mapsOpenUrl ?? 'https://qupon.marbu.in/vendor/${offer.vendorDetails?.slug ?? ''}';
+    final shareLink = offer.shareLink ?? offer.vendorDetails?.websiteUrl ?? offer.vendorDetails?.mapsOpenUrl ?? '${ApiEndpoints.baseUrl}/vendor/${offer.vendorDetails?.slug ?? ''}';
 
     final text = LocalizationService().getString(
       'SHARE_TEXT_TEMPLATE',
@@ -290,9 +322,42 @@ class ProductDetailView extends StatelessWidget {
     return BlocBuilder<ProductDetailBloc, ProductDetailState>(
       builder: (context, state) {
         final offer = state.offer;
-        if (offer == null) {
-          return const Scaffold(
-            body: Center(
+        final canPop = Navigator.of(context).canPop();
+
+        if (offer == null || state.isLoading) {
+          return Scaffold(
+            backgroundColor: Colors.white,
+            appBar: AppBar(
+              backgroundColor: Colors.white,
+              elevation: 0,
+              surfaceTintColor: Colors.transparent,
+              leading: canPop
+                  ? IconButton(
+                      icon: Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF1F5F9),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(Icons.arrow_back_ios_new, color: Color(0xFF0F172A), size: 18),
+                      ),
+                      onPressed: () => Navigator.of(context).pop(),
+                    )
+                  : IconButton(
+                      icon: Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF1F5F9),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(Icons.home_outlined, color: Color(0xFF0F172A), size: 20),
+                      ),
+                      onPressed: () => context.go('/'),
+                    ),
+            ),
+            body: const Center(
               child: CircularProgressIndicator(color: Color(0xFFFF6B35)),
             ),
           );
@@ -304,7 +369,7 @@ class ProductDetailView extends StatelessWidget {
 
         final isExpired = offer.daysLeft == 0 && offer.hoursLeft == 0 && offer.minutesLeft == 0;
 
-        final canPop = Navigator.of(context).canPop();
+
 
         return PopScope(
           canPop: canPop,
@@ -1119,7 +1184,7 @@ class ProductDetailView extends StatelessWidget {
                                             const SizedBox(height: 2),
                                             InkWell(
                                               onTap: () async {
-                                                final profileLink = offer.vendorProfileLink ?? offer.vendorDetails?.websiteUrl ?? 'https://qupon.marbu.in/vendor/${offer.vendorDetails?.slug ?? ''}';
+                                                final profileLink = offer.vendorProfileLink ?? offer.vendorDetails?.websiteUrl ?? '${ApiEndpoints.baseUrl}/vendor/${offer.vendorDetails?.slug ?? ''}';
                                                 try {
                                                   final uri = Uri.parse(profileLink);
                                                   await launchUrl(uri, mode: LaunchMode.externalApplication);
@@ -1268,7 +1333,7 @@ class ProductDetailView extends StatelessWidget {
 
                                 if (buttons.isEmpty) {
                                   final query = Uri.encodeComponent(vendorName);
-                                  addSocial(Icons.language, 'https://qupon.marbu.in');
+                                  addSocial(Icons.language, ApiEndpoints.baseUrl);
                                   addSocial(Icons.facebook, 'https://www.facebook.com/search/top/?q=$query');
                                   addSocial(Icons.camera_alt, 'https://www.instagram.com');
                                   addSocial(Icons.alternate_email, 'https://twitter.com');

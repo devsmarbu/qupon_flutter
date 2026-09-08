@@ -118,11 +118,7 @@ class _HomePromoSliderApiState extends State<HomePromoSliderApi> {
                                       : 'Laser Treatment Center',
                     );
 
-                    final viewCart = await Navigator.of(context).push<bool>(
-                      MaterialPageRoute(
-                        builder: (context) => ProductDetailPage(offer: offer),
-                      ),
-                    );
+                    final viewCart = await ProductDetailPage.navigateWithPreload(context, offer);
                     if (viewCart == true && context.mounted) {
                       final mainPageState = context.findAncestorStateOfType<MainPageState>();
                       if (mainPageState != null) {
