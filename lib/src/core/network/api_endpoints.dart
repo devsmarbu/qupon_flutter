@@ -2,7 +2,6 @@ class ApiEndpoints {
   static const bool isDevelopment = false; // Set to true for development
   static const String devBaseUrl = 'https://qupon.marbu.in'; // Replace with your dev URL
   static const String prodBaseUrl = 'https://qupon.qa';
-  
   static const String baseUrl = isDevelopment ? devBaseUrl : prodBaseUrl;
   static const String register = '/api/auth/register';
   static const String login = '/api/auth/login';

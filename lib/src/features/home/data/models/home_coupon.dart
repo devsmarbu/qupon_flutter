@@ -60,7 +60,11 @@ class HomeCoupon {
     }
 
     return HomeCoupon(
-      id: json['id']?.toString() ?? '',
+      id: json['couponId']?.toString() ??
+          json['coupon_id']?.toString() ??
+          json['id']?.toString() ??
+          json['_id']?.toString() ??
+          '',
       name: json['name']?.toString() ?? '',
       nameAr: json['nameAr']?.toString() ?? '',
       vendor: json['vendor']?.toString() ?? '',
