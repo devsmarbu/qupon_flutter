@@ -12,6 +12,7 @@ import '../../../../../l10n/app_localizations.dart';
 import '../../data/models/offer.dart';
 import '../../data/models/offer_option.dart';
 import '../../data/models/vendor_details.dart';
+import 'package:qupon/src/core/network/api_endpoints.dart';
 import '../bloc/product_detail_bloc.dart';
 import '../bloc/product_detail_event.dart';
 import '../bloc/product_detail_state.dart';
@@ -266,7 +267,7 @@ class ProductDetailView extends StatelessWidget {
         ? offer.descriptionAr!
         : offer.description;
 
-    final shareLink = offer.shareLink ?? offer.vendorDetails?.websiteUrl ?? offer.vendorDetails?.mapsOpenUrl ?? 'https://qupon.marbu.in/vendor/${offer.vendorDetails?.slug ?? ''}';
+    final shareLink = offer.shareLink ?? offer.vendorDetails?.websiteUrl ?? offer.vendorDetails?.mapsOpenUrl ?? '${ApiEndpoints.baseUrl}/vendor/${offer.vendorDetails?.slug ?? ''}';
 
     final text = LocalizationService().getString(
       'SHARE_TEXT_TEMPLATE',
@@ -1119,7 +1120,7 @@ class ProductDetailView extends StatelessWidget {
                                             const SizedBox(height: 2),
                                             InkWell(
                                               onTap: () async {
-                                                final profileLink = offer.vendorProfileLink ?? offer.vendorDetails?.websiteUrl ?? 'https://qupon.marbu.in/vendor/${offer.vendorDetails?.slug ?? ''}';
+                                                final profileLink = offer.vendorProfileLink ?? offer.vendorDetails?.websiteUrl ?? '${ApiEndpoints.baseUrl}/vendor/${offer.vendorDetails?.slug ?? ''}';
                                                 try {
                                                   final uri = Uri.parse(profileLink);
                                                   await launchUrl(uri, mode: LaunchMode.externalApplication);
@@ -1268,7 +1269,7 @@ class ProductDetailView extends StatelessWidget {
 
                                 if (buttons.isEmpty) {
                                   final query = Uri.encodeComponent(vendorName);
-                                  addSocial(Icons.language, 'https://qupon.marbu.in');
+                                  addSocial(Icons.language, ApiEndpoints.baseUrl);
                                   addSocial(Icons.facebook, 'https://www.facebook.com/search/top/?q=$query');
                                   addSocial(Icons.camera_alt, 'https://www.instagram.com');
                                   addSocial(Icons.alternate_email, 'https://twitter.com');

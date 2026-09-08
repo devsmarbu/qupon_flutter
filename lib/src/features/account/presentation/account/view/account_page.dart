@@ -12,6 +12,7 @@ import 'package:qupon/l10n/app_localizations.dart';
 import '../../../data/models/dashboard_model.dart';
 import 'package:qupon/src/features/offers/presentation/widgets/offer_horizontal_card_api.dart';
 import 'package:qupon/src/features/home/data/models/home_coupon.dart';
+import 'package:qupon/src/core/network/api_endpoints.dart';
 
 class AccountPage extends StatefulWidget {
   final VoidCallback? onNavigateHome;
@@ -1917,7 +1918,7 @@ class _OrderCardItemState extends State<_OrderCardItem> {
 
     final couponUrl = coupon.couponUrl.isNotEmpty
         ? coupon.couponUrl
-        : 'https://qupon.marbu.in/coupon/${couponCode.isNotEmpty ? couponCode : ''}';
+        : '${ApiEndpoints.baseUrl}/coupon/${couponCode.isNotEmpty ? couponCode : ''}';
 
     final status = coupon.status.isNotEmpty ? coupon.status : '';
     final rawRedeemBy = coupon.redeemBy.isNotEmpty ? coupon.redeemBy : '';
