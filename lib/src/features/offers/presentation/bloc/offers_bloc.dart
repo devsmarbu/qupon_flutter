@@ -25,7 +25,19 @@ class OffersBloc extends Bloc<OffersEvent, OffersState> {
       }
       emit(OffersLoaded(offers));
     } catch (e) {
-      emit(OffersError(e.toString()));
+      final String userFriendlyMessage;
+      final errStr = e.toString().toLowerCase();
+      if (errStr.contains('socketexception') ||
+          errStr.contains('failed host lookup') ||
+          errStr.contains('connection') ||
+          errStr.contains('network') ||
+          errStr.contains('dioexception')) {
+        userFriendlyMessage =
+            'Failed to load offers. Please check your network connection.';
+      } else {
+        userFriendlyMessage = 'Failed to load offers. Please try again.';
+      }
+      emit(OffersError(userFriendlyMessage));
     }
   }
 }

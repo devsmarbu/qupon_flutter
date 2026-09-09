@@ -98,12 +98,89 @@ class _CategoryOffersPageState extends State<CategoryOffersPage> {
                 child: CircularProgressIndicator(color: Color(0xFFFF6B35)),
               );
             } else if (state is OffersError) {
-              return Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Text(
-                    state.message,
-                    style: const TextStyle(color: Color(0xFF64748B)),
+              final lower = state.message.toLowerCase();
+              final displayMessage = (lower.contains('exception') ||
+                      lower.contains('failed host lookup') ||
+                      lower.contains('socketexception') ||
+                      lower.contains('dioexception'))
+                  ? (isArabic
+                      ? 'فشل تحميل العروض. يرجى التحقق من اتصالك بالإنترنت.'
+                      : 'Failed to load offers. Please check your network connection.')
+                  : state.message;
+
+              return RefreshIndicator(
+                color: const Color(0xFFFF6B35),
+                backgroundColor: Colors.white,
+                onRefresh: () async {
+                  context.read<OffersBloc>().add(FetchOffers(categoryId: widget.category.id));
+                  await context
+                      .read<OffersBloc>()
+                      .stream
+                      .firstWhere((s) => s is OffersLoaded || s is OffersError);
+                },
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: Container(
+                    constraints: BoxConstraints(
+                      minHeight: MediaQuery.of(context).size.height * 0.7,
+                    ),
+                    alignment: Alignment.center,
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          width: 72,
+                          height: 72,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFFFFF2EC),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Center(
+                            child: Icon(
+                              Icons.wifi_off_outlined,
+                              size: 36,
+                              color: Color(0xFFFF6B35),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        Text(
+                          displayMessage,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: Color(0xFF64748B),
+                            fontSize: 15,
+                            height: 1.4,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        ElevatedButton.icon(
+                          onPressed: () {
+                            context.read<OffersBloc>().add(FetchOffers(categoryId: widget.category.id));
+                          },
+                          icon: const Icon(Icons.refresh_rounded, size: 18),
+                          label: Text(
+                            LocalizationService().getString('RETRY', l10n.retryLabel),
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFFF6B35),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            elevation: 0,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               );

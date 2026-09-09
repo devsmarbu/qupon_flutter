@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../../../../core/network/api_endpoints.dart';
 import '../../../localization/data/services/localization_service.dart';
 import '../../../localization/presentation/cubit/locale_cubit.dart';
+import '../pages/main_page.dart';
 
 /// Common footer widget matching the Qupon brand design.
 /// Shows logo, contact details, navigation links, and social links.
@@ -151,13 +154,25 @@ class AppFooter extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    _FooterLink(label: loc.getString('FOOTER_TERMS', 'Terms & Conditions')),
+                    _FooterLink(
+                      label: loc.getString('FOOTER_TERMS', 'Terms & Conditions'),
+                      url: ApiEndpoints.termsUrl,
+                    ),
                     const SizedBox(height: 12),
-                    _FooterLink(label: loc.getString('FOOTER_REFUND_POLICY', 'Refund Policy')),
+                    _FooterLink(
+                      label: loc.getString('FOOTER_REFUND_POLICY', 'Refund Policy'),
+                      url: ApiEndpoints.refundPolicyUrl,
+                    ),
                     const SizedBox(height: 12),
-                    _FooterLink(label: loc.getString('FOOTER_CONTACT_US', 'Contact Us')),
+                    _FooterLink(
+                      label: loc.getString('FOOTER_CONTACT_US', 'Contact Us'),
+                      url: ApiEndpoints.contactUsUrl,
+                    ),
                     const SizedBox(height: 12),
-                    _FooterLink(label: loc.getString('FOOTER_PRIVACY_POLICY', 'Privacy Policy')),
+                    _FooterLink(
+                      label: loc.getString('FOOTER_PRIVACY_POLICY', 'Privacy Policy'),
+                      url: ApiEndpoints.privacyPolicyUrl,
+                    ),
                   ],
                 ),
               ),
@@ -176,9 +191,25 @@ class AppFooter extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          _FooterLink(label: loc.getString('FOOTER_MY_ORDERS', 'My Orders')),
+          _FooterLink(
+            label: loc.getString('FOOTER_MY_ORDERS', 'My Orders'),
+            onTap: () {
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (context) => const MainPage(initialIndex: 3)),
+                (route) => false,
+              );
+            },
+          ),
           const SizedBox(height: 12),
-          _FooterLink(label: loc.getString('FOOTER_MY_WISHLIST', 'My Wishlist')),
+          _FooterLink(
+            label: loc.getString('FOOTER_MY_WISHLIST', 'My Wishlist'),
+            onTap: () {
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (context) => const MainPage(initialIndex: 3)),
+                (route) => false,
+              );
+            },
+          ),
           const SizedBox(height: 36),
 
           // ── Follow Us ──────────────────────────────────────────────────
@@ -195,7 +226,12 @@ class AppFooter extends StatelessWidget {
               const SizedBox(width: 14),
               // Instagram-style circular button
               GestureDetector(
-                onTap: () {},
+                onTap: () async {
+                  final uri = Uri.parse('https://www.instagram.com');
+                  if (await canLaunchUrl(uri)) {
+                    await launchUrl(uri, mode: LaunchMode.externalApplication);
+                  }
+                },
                 child: Container(
                   width: 44,
                   height: 44,
@@ -244,14 +280,33 @@ class AppFooter extends StatelessWidget {
 
 /// A tappable footer link item.
 class _FooterLink extends StatelessWidget {
-  const _FooterLink({required this.label});
+  const _FooterLink({required this.label, this.onTap, this.url});
 
   final String label;
+  final VoidCallback? onTap;
+  final String? url;
+
+  Future<void> _handleTap(BuildContext context) async {
+    if (onTap != null) {
+      onTap!();
+      return;
+    }
+    if (url != null && url!.isNotEmpty) {
+      final uri = Uri.parse(url!);
+      if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Could not launch $url')),
+          );
+        }
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {},
+      onTap: () => _handleTap(context),
       child: Text(
         label,
         style: const TextStyle(

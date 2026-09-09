@@ -69,37 +69,76 @@ class _CategoriesPageState extends State<CategoriesPage> {
     }
 
     if (_error != null) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 40),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.wifi_off_outlined, size: 48, color: Color(0xFFCBD5E1)),
-              const SizedBox(height: 16),
-              Text(
-                LocalizationService().getString(
-                  'CATEGORIES_LOAD_ERROR',
-                  isArabic
-                      ? 'فشل تحميل الفئات. يرجى التحقق من اتصالك بالإنترنت.'
-                      : 'Failed to load categories. Please check your network connection.',
-                ),
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: Color(0xFF64748B)),
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _fetchCategories,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+      return RefreshIndicator(
+        color: AppColors.primary,
+        backgroundColor: Colors.white,
+        onRefresh: _fetchCategories,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Container(
+            constraints: BoxConstraints(
+              minHeight: MediaQuery.of(context).size.height * 0.7,
+            ),
+            alignment: Alignment.center,
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 72,
+                  height: 72,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFFFF2EC),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Center(
+                    child: Icon(
+                      Icons.wifi_off_outlined,
+                      size: 36,
+                      color: AppColors.primary,
+                    ),
                   ),
                 ),
-                child: Text(LocalizationService().getString('RETRY', AppLocalizations.of(context)!.retryLabel)),
-              ),
-            ],
+                const SizedBox(height: 20),
+                Text(
+                  LocalizationService().getString(
+                    'CATEGORIES_LOAD_ERROR',
+                    isArabic
+                        ? 'فشل تحميل الفئات. يرجى التحقق من اتصالك بالإنترنت.'
+                        : 'Failed to load categories. Please check your network connection.',
+                  ),
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Color(0xFF64748B),
+                    fontSize: 15,
+                    height: 1.4,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                ElevatedButton.icon(
+                  onPressed: _fetchCategories,
+                  icon: const Icon(Icons.refresh_rounded, size: 18),
+                  label: Text(
+                    LocalizationService().getString('RETRY', AppLocalizations.of(context)!.retryLabel),
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    elevation: 0,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       );

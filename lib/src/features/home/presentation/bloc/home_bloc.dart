@@ -58,7 +58,20 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       final data = await _homeRepository.getHomeData();
       emit(HomeLoaded(data));
     } catch (e) {
-      emit(HomeError(e.toString()));
+      final String userFriendlyMessage;
+      final errStr = e.toString().toLowerCase();
+      if (errStr.contains('socketexception') ||
+          errStr.contains('failed host lookup') ||
+          errStr.contains('connection') ||
+          errStr.contains('network') ||
+          errStr.contains('dioexception')) {
+        userFriendlyMessage =
+            'Failed to load home data. Please check your network connection.';
+      } else {
+        userFriendlyMessage =
+            'Failed to load home data. Please try again.';
+      }
+      emit(HomeError(userFriendlyMessage));
     }
   }
 }

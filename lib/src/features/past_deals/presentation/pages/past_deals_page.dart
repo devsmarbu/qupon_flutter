@@ -193,30 +193,58 @@ class _PastDealsPageState extends State<PastDealsPage> {
     if (_error != null) {
       return Center(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 40),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.wifi_off_outlined, size: 48, color: Color(0xFFCBD5E1)),
-              const SizedBox(height: 16),
+              Container(
+                width: 72,
+                height: 72,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFFFF2EC),
+                  shape: BoxShape.circle,
+                ),
+                child: const Center(
+                  child: Icon(
+                    Icons.wifi_off_outlined,
+                    size: 36,
+                    color: AppColors.primary,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
               Text(
                 isArabic
                     ? 'فشل تحميل العروض السابقة. يرجى التحقق من اتصالك بالإنترنت.'
                     : 'Failed to load past deals. Please check your network connection.',
                 textAlign: TextAlign.center,
-                style: const TextStyle(color: Color(0xFF64748B)),
+                style: const TextStyle(
+                  color: Color(0xFF64748B),
+                  fontSize: 15,
+                  height: 1.4,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
-              const SizedBox(height: 20),
-              ElevatedButton(
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
                 onPressed: _fetchPastDeals,
+                icon: const Icon(Icons.refresh_rounded, size: 18),
+                label: Text(
+                  LocalizationService().getString('RETRY', l10n.retryLabel),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
+                  elevation: 0,
                 ),
-                child: Text(LocalizationService().getString('RETRY', l10n.retryLabel)),
               ),
             ],
           ),

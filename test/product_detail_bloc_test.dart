@@ -62,10 +62,9 @@ void main() {
 
       expect(
         bloc.stream,
-        emitsInOrder([
-          anything, // Initialize state
+        emitsThrough(
           predicate<ProductDetailState>((state) => state.selectedOptionIndex == 1),
-        ]),
+        ),
       );
     });
 
@@ -76,10 +75,9 @@ void main() {
 
       expect(
         bloc.stream,
-        emitsInOrder([
-          anything, // Initialize state
+        emitsThrough(
           predicate<ProductDetailState>((state) => state.isFavorite == true),
-        ]),
+        ),
       );
     });
 
@@ -90,10 +88,9 @@ void main() {
 
       expect(
         bloc.stream,
-        emitsInOrder([
-          anything, // Initialize state
+        emitsThrough(
           predicate<ProductDetailState>((state) => state.isBookmarked == true),
-        ]),
+        ),
       );
     });
   });

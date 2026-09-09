@@ -2,8 +2,10 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../../../core/constants/app_colors.dart';
 import '../../../../../core/constants/app_strings.dart';
+import '../../../../../core/network/api_endpoints.dart';
 import '../../../../../core/widgets/neubrutalist_button.dart';
 import '../../../../main/presentation/pages/main_page.dart';
 import '../../account/bloc/account_bloc.dart';
@@ -52,86 +54,98 @@ class WelcomePage extends StatelessWidget {
               ),
             ),
             child: SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-                child: Column(
-                  children: [
-                    Align(
-                      alignment: AlignmentDirectional.centerStart,
-                      child: BackButton(
-                        color: AppColors.textDarkBlue,
-                        onPressed: () => _onBack(context),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return SingleChildScrollView(
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                      child: IntrinsicHeight(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+                          child: Column(
+                            children: [
+                              Align(
+                                alignment: AlignmentDirectional.centerStart,
+                                child: BackButton(
+                                  color: AppColors.textDarkBlue,
+                                  onPressed: () => _onBack(context),
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              
+                              // Centered App Logo
+                              SvgPicture.asset(
+                                'assets/appIcons/ic_splash_logo.svg',
+                                width: 160,
+                              ),
+                              const SizedBox(height: 15),
+                              
+                              // Welcome Title
+                              Text(
+                                AppStrings.welcomeTitle(context),
+                                style: const TextStyle(
+                                  fontSize: 36,
+                                  fontWeight: FontWeight.w800,
+                                  color: AppColors.textDarkBlue,
+                                  letterSpacing: -1.0,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              
+                              // Subtitle
+                              Text(
+                                AppStrings.welcomeSubtitle(context),
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  color: AppColors.textSubtitle,
+                                ),
+                              ),
+                              
+                              const Spacer(),
+                              const SizedBox(height: 24),
+                              
+                              // Create Account Button (Neubrutalism Style)
+                              NeubrutalistButton(
+                                text: AppStrings.createAccount(context),
+                                backgroundColor: AppColors.primary,
+                                onTap: () async {
+                                  await Navigator.of(context).push(
+                                    MaterialPageRoute(builder: (context) => const RegisterPage()),
+                                  );
+                                  if (context.mounted) {
+                                    _checkAuthAndNavigate(context);
+                                  }
+                                },
+                              ),
+                              const SizedBox(height: 16),
+                              
+                              // Login Button (Neubrutalism Style)
+                              NeubrutalistButton(
+                                text: AppStrings.login(context),
+                                backgroundColor: AppColors.white,
+                                onTap: () async {
+                                  await Navigator.of(context).push(
+                                    MaterialPageRoute(builder: (context) => const LoginPage()),
+                                  );
+                                  if (context.mounted) {
+                                    _checkAuthAndNavigate(context);
+                                  }
+                                },
+                              ),
+                              
+                              const SizedBox(height: 20),
+                              
+                              // Footer (Terms and Privacy Policy)
+                              _buildTermsAndPrivacyText(context),
+                              const SizedBox(height: 12),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 20),
-                    
-                    // Centered App Logo
-                    SvgPicture.asset(
-                      'assets/appIcons/ic_splash_logo.svg',
-                      width: 160,
-                    ),
-                    const SizedBox(height: 15),
-                    
-                    // Welcome Title
-                    Text(
-                      AppStrings.welcomeTitle(context),
-                      style: const TextStyle(
-                        fontSize: 40,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.textDarkBlue,
-                        letterSpacing: -1.0,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    
-                    // Subtitle
-                    Text(
-                      AppStrings.welcomeSubtitle(context),
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.textSubtitle,
-                      ),
-                    ),
-                    
-                    const Spacer(flex: 4),
-                    
-                    // Create Account Button (Neubrutalism Style)
-                    NeubrutalistButton(
-                      text: AppStrings.createAccount(context),
-                      backgroundColor: AppColors.primary,
-                      onTap: () async {
-                        await Navigator.of(context).push(
-                          MaterialPageRoute(builder: (context) => const RegisterPage()),
-                        );
-                        if (context.mounted) {
-                          _checkAuthAndNavigate(context);
-                        }
-                      },
-                    ),
-                    const SizedBox(height: 20),
-                    
-                    // Login Button (Neubrutalism Style)
-                    NeubrutalistButton(
-                      text: AppStrings.login(context),
-                      backgroundColor: AppColors.white,
-                      onTap: () async {
-                        await Navigator.of(context).push(
-                          MaterialPageRoute(builder: (context) => const LoginPage()),
-                        );
-                        if (context.mounted) {
-                          _checkAuthAndNavigate(context);
-                        }
-                      },
-                    ),
-                    
-                    const SizedBox(height: 20),
-                    
-                    // Footer (Terms and Privacy Policy)
-                    _buildTermsAndPrivacyText(context),
-                    const SizedBox(height: 12),
-                  ],
-                ),
+                  );
+                },
               ),
             ),
           ),
@@ -177,9 +191,7 @@ class WelcomePage extends StatelessWidget {
                 decoration: TextDecoration.underline,
               ),
               recognizer: TapGestureRecognizer()
-                ..onTap = () {
-                  _showInfoDialog(context, AppStrings.termsOfService(context), 'Terms of Service content goes here.');
-                },
+                ..onTap = () => _openUrl(context, ApiEndpoints.termsUrl),
             ),
             TextSpan(text: AppStrings.and(context)),
             TextSpan(
@@ -190,15 +202,24 @@ class WelcomePage extends StatelessWidget {
                 decoration: TextDecoration.underline,
               ),
               recognizer: TapGestureRecognizer()
-                ..onTap = () {
-                  _showInfoDialog(context, AppStrings.privacyPolicy(context), 'Privacy Policy content goes here.');
-                },
+                ..onTap = () => _openUrl(context, ApiEndpoints.privacyPolicyUrl),
             ),
           ],
         ),
         textAlign: TextAlign.center,
       ),
     );
+  }
+
+  Future<void> _openUrl(BuildContext context, String url) async {
+    final uri = Uri.parse(url);
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not launch $url')),
+        );
+      }
+    }
   }
 
   void _showInfoDialog(BuildContext context, String title, String content) {

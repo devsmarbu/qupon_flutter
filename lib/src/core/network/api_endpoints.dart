@@ -22,5 +22,11 @@ class ApiEndpoints {
   static const String deleteAccount = '/api/me/delete-account';
   static const String search = '/api/storefront/search';
   static const String storefrontLabels = '/api/storefront/labels/';
+
+  // Web pages / Policy URLs
+  static const String privacyPolicyUrl = '$baseUrl/privacy-policy';
+  static const String termsUrl = '$baseUrl/terms-and-conditions';
+  static const String refundPolicyUrl = '$baseUrl/refund-policy';
+  static const String contactUsUrl = '$baseUrl/contact-us';
 }
 

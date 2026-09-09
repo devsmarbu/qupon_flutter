@@ -55,32 +55,93 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildError(BuildContext context, String message) {
     final l10n = AppLocalizations.of(context)!;
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.wifi_off_outlined, size: 48, color: Color(0xFFCBD5E1)),
-            const SizedBox(height: 16),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: const TextStyle(color: Color(0xFF64748B)),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () =>
-                  context.read<HomeBloc>().add(const FetchHomeData()),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFF6B35),
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
+    final localeCubit = context.watch<LocaleCubit>();
+    final isArabic = localeCubit.state.languageCode == 'ar';
+
+    String displayMessage = message;
+    final lower = message.toLowerCase();
+    if (lower.contains('exception') ||
+        lower.contains('failed host lookup') ||
+        lower.contains('socketexception') ||
+        lower.contains('dioexception')) {
+      displayMessage = isArabic
+          ? 'فشل تحميل البيانات. يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى.'
+          : 'Failed to load home data. Please check your network connection.';
+    }
+
+    return RefreshIndicator(
+      color: const Color(0xFFFF6B35),
+      backgroundColor: Colors.white,
+      onRefresh: () async {
+        context.read<HomeBloc>().add(const FetchHomeData());
+        await context
+            .read<HomeBloc>()
+            .stream
+            .firstWhere((state) => state is HomeLoaded || state is HomeError);
+      },
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: Container(
+          constraints: BoxConstraints(
+            minHeight: MediaQuery.of(context).size.height * 0.7,
+          ),
+          alignment: Alignment.center,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 72,
+                height: 72,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFF2EC),
+                  shape: BoxShape.circle,
+                ),
+                child: const Center(
+                  child: Icon(
+                    Icons.wifi_off_outlined,
+                    size: 36,
+                    color: Color(0xFFFF6B35),
+                  ),
+                ),
               ),
-              child: Text(l10n.retryLabel),
-            ),
-          ],
+              const SizedBox(height: 20),
+              Text(
+                displayMessage,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Color(0xFF64748B),
+                  fontSize: 15,
+                  height: 1.4,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
+                onPressed: () {
+                  context.read<HomeBloc>().add(const FetchHomeData());
+                },
+                icon: const Icon(Icons.refresh_rounded, size: 18),
+                label: Text(
+                  l10n.retryLabel,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFFF6B35),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 0,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

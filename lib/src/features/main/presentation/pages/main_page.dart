@@ -15,8 +15,8 @@ import '../../../cart/presentation/pages/cart_page.dart';
 import '../../../past_deals/presentation/pages/past_deals_page.dart';
 import 'categories_page.dart';
 
+import '../../../home/presentation/bloc/home_bloc.dart';
 import '../../../cart/presentation/bloc/cart_bloc.dart';
-import '../../../cart/presentation/bloc/cart_state.dart';
 import '../../../cart/presentation/bloc/cart_event.dart';
 import '../../../../../l10n/app_localizations.dart';
 
@@ -43,7 +43,12 @@ class MainPageState extends State<MainPage> {
   }
 
   void setSelectedIndex(int index) {
-    if (index == 3) {
+    if (index == 0) {
+      final homeBloc = context.read<HomeBloc>();
+      if (homeBloc.state is HomeError || homeBloc.state is HomeInitial) {
+        homeBloc.add(const FetchHomeData());
+      }
+    } else if (index == 3) {
       context.read<CartBloc>().add(const LoadCart());
     }
     setState(() {
@@ -203,7 +208,6 @@ class MainPageState extends State<MainPage> {
             IconButton(
               icon: const Icon(Icons.shopping_cart_outlined, color: Color(0xFF0F172A)),
               onPressed: () {
-                context.read<CartBloc>().add(const LoadCart());
                 setSelectedIndex(3);
               },
             ),
@@ -216,13 +220,17 @@ class MainPageState extends State<MainPage> {
                     MaterialPageRoute(builder: (context) => const WelcomePage()),
                   );
                   if (loggedIn == true) {
-                    context.read<AccountBloc>().add(const LoadDashboard());
-                    setSelectedIndex(4);
+                    if (context.mounted) {
+                      context.read<AccountBloc>().add(const LoadDashboard());
+                      setSelectedIndex(4);
+                    }
                   }
                   return;
                 }
-                context.read<AccountBloc>().add(const LoadDashboard());
-                setSelectedIndex(4);
+                if (context.mounted) {
+                  context.read<AccountBloc>().add(const LoadDashboard());
+                  setSelectedIndex(4);
+                }
               },
             ),
             const SizedBox(width: 8),
@@ -243,68 +251,76 @@ class MainPageState extends State<MainPage> {
     return Container(
       color: Colors.transparent,
       padding: EdgeInsets.only(
-        left: 16,
-        right: 16,
+        left: 12,
+        right: 12,
         bottom: MediaQuery.of(context).padding.bottom > 0
             ? MediaQuery.of(context).padding.bottom
-            : 0,
-        top: 8,
+            : 4,
+        top: 6,
       ),
-      child:
-      Container(
+      child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(35),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.2),
-              blurRadius: 20,
+              color: Colors.black.withValues(alpha: 0.15),
+              blurRadius: 16,
               offset: const Offset(0, 4),
             ),
           ],
         ),
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
         child: SafeArea(
           top: false,
           bottom: false,
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildTabItem(
-                context: context,
-                index: 0,
-                icon: Icons.home_outlined,
-                activeIcon: Icons.home,
-                label: LocalizationService().getString('NAV_HOME', l10n.drawerHome),
+              Expanded(
+                child: _buildTabItem(
+                  context: context,
+                  index: 0,
+                  icon: Icons.home_outlined,
+                  activeIcon: Icons.home,
+                  label: LocalizationService().getString('NAV_HOME', l10n.drawerHome),
+                ),
               ),
-              _buildTabItem(
-                context: context,
-                index: 1,
-                icon: Icons.grid_view_outlined,
-                activeIcon: Icons.grid_view_rounded,
-                label: LocalizationService().getString('NAV_CATEGORIES', l10n.navCategories),
+              Expanded(
+                child: _buildTabItem(
+                  context: context,
+                  index: 1,
+                  icon: Icons.grid_view_outlined,
+                  activeIcon: Icons.grid_view_rounded,
+                  label: LocalizationService().getString('NAV_CATEGORIES', l10n.navCategories),
+                ),
               ),
-              _buildTabItem(
-                context: context,
-                index: 2,
-                icon: Icons.local_offer_outlined,
-                activeIcon: Icons.local_offer,
-                label: LocalizationService().getString('NAV_PAST_DEALS', l10n.pastDealsTitle),
+              Expanded(
+                child: _buildTabItem(
+                  context: context,
+                  index: 2,
+                  icon: Icons.local_offer_outlined,
+                  activeIcon: Icons.local_offer,
+                  label: LocalizationService().getString('NAV_PAST_DEALS', l10n.pastDealsTitle),
+                ),
               ),
-              _buildTabItem(
-                context: context,
-                index: 3,
-                icon: Icons.shopping_cart_outlined,
-                activeIcon: Icons.shopping_cart,
-                label: LocalizationService().getString('COUPON_DETAILS_CART', l10n.drawerCart),
-                badgeCount: context.watch<CartBloc>().state.totalQuantity,
+              Expanded(
+                child: _buildTabItem(
+                  context: context,
+                  index: 3,
+                  icon: Icons.shopping_cart_outlined,
+                  activeIcon: Icons.shopping_cart,
+                  label: LocalizationService().getString('COUPON_DETAILS_CART', l10n.drawerCart),
+                  badgeCount: context.watch<CartBloc>().state.totalQuantity,
+                ),
               ),
-              _buildTabItem(
-                context: context,
-                index: 4,
-                icon: Icons.person_outline,
-                activeIcon: Icons.person,
-                label: LocalizationService().getString('FOOTER_MY_ACCOUNT', l10n.navAccount),
+              Expanded(
+                child: _buildTabItem(
+                  context: context,
+                  index: 4,
+                  icon: Icons.person_outline,
+                  activeIcon: Icons.person,
+                  label: LocalizationService().getString('FOOTER_MY_ACCOUNT', l10n.navAccount),
+                ),
               ),
             ],
           ),
@@ -324,7 +340,7 @@ class MainPageState extends State<MainPage> {
     final isSelected = _selectedIndex == index;
     final color = isSelected ? const Color(0xFFFF6B35) : const Color(0xFF94A3B8);
 
-    return GestureDetector(
+    return InkWell(
       onTap: () async {
         if (index == 4) { // Account
           final accountState = context.read<AccountBloc>().state;
@@ -332,28 +348,20 @@ class MainPageState extends State<MainPage> {
             final loggedIn = await Navigator.of(context).push<bool>(
               MaterialPageRoute(builder: (context) => const WelcomePage()),
             );
-            if (loggedIn == true) {
+            if (loggedIn == true && context.mounted) {
               context.read<AccountBloc>().add(const LoadDashboard());
-              setState(() {
-                _selectedIndex = 4;
-              });
+              setSelectedIndex(4);
             }
             return;
           } else {
             context.read<AccountBloc>().add(const LoadDashboard());
           }
         }
-        if (index == 3) {
-          context.read<CartBloc>().add(const LoadCart());
-        }
-        setState(() {
-          _selectedIndex = index;
-        });
+        setSelectedIndex(index);
       },
-      behavior: HitTestBehavior.opaque,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      borderRadius: BorderRadius.circular(28),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
         decoration: BoxDecoration(
           color: isSelected ? const Color(0xFFFFF2EC) : const Color(0x00FFF2EC),
           borderRadius: BorderRadius.circular(28),
@@ -376,21 +384,25 @@ class MainPageState extends State<MainPage> {
                     child: Icon(
                       isSelected ? activeIcon : icon,
                       color: color,
-                      size: 24,
+                      size: 22,
                     ),
                   )
                 : Icon(
                     isSelected ? activeIcon : icon,
                     color: color,
-                    size: 24,
+                    size: 22,
                   ),
-            // const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-                color: color,
+            const SizedBox(height: 2),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                label,
+                maxLines: 1,
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                  color: color,
+                ),
               ),
             ),
           ],
@@ -405,19 +417,19 @@ class MainPageState extends State<MainPage> {
         return const HomePage();
       case 1:
         return CategoriesPage(
-          onNavigateHome: () => setState(() => _selectedIndex = 0),
+          onNavigateHome: () => setSelectedIndex(0),
         );
       case 2:
         return PastDealsPage(
-          onNavigateHome: () => setState(() => _selectedIndex = 0),
+          onNavigateHome: () => setSelectedIndex(0),
         );
       case 3:
         return CartPage(
-          onNavigateHome: () => setState(() => _selectedIndex = 0),
+          onNavigateHome: () => setSelectedIndex(0),
         );
       case 4:
         return AccountPage(
-          onNavigateHome: () => setState(() => _selectedIndex = 0),
+          onNavigateHome: () => setSelectedIndex(0),
         );
       default:
         return const HomePage();

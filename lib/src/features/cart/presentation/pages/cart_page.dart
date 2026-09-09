@@ -367,7 +367,10 @@ class _CartPageState extends State<CartPage> {
                 const SizedBox(height: 8),
 
                 // Price and Savings Row
-                Row(
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 4,
+                  crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
                     Text(
                       'QAR ${item.payable.toStringAsFixed(0)}',
@@ -377,7 +380,6 @@ class _CartPageState extends State<CartPage> {
                         color: Color(0xFFFF6B35), // Signature Orange
                       ),
                     ),
-                    const SizedBox(width: 8),
                     Text(
                       'QAR ${item.listPrice.toStringAsFixed(0)}',
                       style: const TextStyle(
@@ -386,7 +388,6 @@ class _CartPageState extends State<CartPage> {
                         decoration: TextDecoration.lineThrough,
                       ),
                     ),
-                    const SizedBox(width: 8),
                     Text(
                       isArabic
                           ? '${LocalizationService().getString('COUPON_DETAILS_YOU_SAVE', 'أنت وفرت')} ${(item.listPrice - item.payable).toStringAsFixed(0)} ر.ق'
